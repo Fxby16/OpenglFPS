@@ -1,0 +1,8 @@
+Model Information:
+* title:	RK-62 M2
+* source:	https://sketchfab.com/3d-models/rk-62-m2-53120de9648d4828915927ed35abadf5
+* author:	Tuuttipingu (https://sketchfab.com/Tuuttipingu)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

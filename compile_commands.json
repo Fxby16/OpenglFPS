@@ -1,0 +1,5 @@
+ [{"directory": "/home/fabio/RaylibFPS",
+
+"command": "clang -I vendor/raylib/src -I src",
+
+"file": "**.cpp"}]
