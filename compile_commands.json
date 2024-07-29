@@ -1,5 +1,5 @@
  [{"directory": "/home/fabio/RaylibFPS",
 
-"command": "clang -I vendor/raylib/src -I src",
+"command": "clang -I vendor/raylib/src -I src -I vendor/raylib/src/external/glfw/include -I vendor/raylib/src/external",
 
 "file": "**.cpp"}]

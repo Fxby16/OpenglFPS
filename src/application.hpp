@@ -25,10 +25,10 @@ private:
     Camera m_Camera;
     Model m_Model;
     Model m_Cube;
+    Model m_rk62;
     Shader m_GBufferShader;
     Shader m_DeferredShader;
     GBuffer m_GBuffer;
-    Light m_Lights[MAX_LIGHTS];
     DeferredMode m_DeferredMode = DEFERRED_SHADING;
     const float m_CubeScale = 0.25;
     Vector3 m_CubePositions[MAX_CUBES];
