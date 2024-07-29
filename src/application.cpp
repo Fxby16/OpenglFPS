@@ -1,8 +1,20 @@
-#include "raylib.h"
+#include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
 
 #include <application.hpp>
+#include <pbr.hpp>
+
+#include <stdio.h>
+
+#include <glad.h>
+
+void OpenGLErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    if(type == GL_DEBUG_TYPE_ERROR){
+        TraceLog(LOG_ERROR, "OpenGL error: %s (source: %d, type: %d, id: %d, severity: %d)", message, source, type, id, severity);
+    }
+}
 
 Application::Application()
 {
@@ -16,7 +28,11 @@ Application::~Application()
 
 void Application::Init()
 {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
     InitWindow(g_ScreenWidth, g_ScreenHeight, g_WindowTitle);
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(OpenGLErrorCallback, 0);
 
     DisableCursor();
 
@@ -28,12 +44,13 @@ void Application::Init()
 
     m_Model = LoadModelFromMesh(GenMeshPlane(10.0f, 10.0f, 3, 3));
     m_Cube = LoadModelFromMesh(GenMeshCube(2.0f, 2.0f, 2.0f));
+    m_rk62 = LoadModel("resources/models/rk62/scene.gltf");
 
-    m_GBufferShader = LoadShader("resources/shaders/glsl330/gbuffer.vs",
-                               "resources/shaders/glsl330/gbuffer.fs");
+    m_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
+                               "resources/shaders/gbuffer.fs");
 
-    m_DeferredShader = LoadShader("resources/shaders/glsl330/deferred_shading.vs",
-                               "resources/shaders/glsl330/deferred_shading.fs");
+    m_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
+                               "resources/shaders/deferred_shading.fs");
     m_DeferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(m_DeferredShader, "viewPosition");
 
     m_GBuffer.framebuffer = rlLoadFramebuffer();
@@ -44,13 +61,13 @@ void Application::Init()
 
     rlEnableFramebuffer(m_GBuffer.framebuffer);
 
-    // Since we are storing position and normal data in these textures,
-    // we need to use a floating point format.
-    m_GBuffer.positionTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-
-    m_GBuffer.normalTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-    // color in RGB, specular strength in A.
-    m_GBuffer.albedoSpecTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+    // floating point textures to store g-buffer data
+    // albedo.rgb = albedo map, albedo.a = ambient occlusion map
+    // normal.rgb = normal map, normal.a = metallic map
+    // position.rgb = position, position.a = roughness
+    m_GBuffer.positionTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16, 1);
+    m_GBuffer.normalTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16, 1);
+    m_GBuffer.albedoSpecTexture = rlLoadTexture(nullptr, g_ScreenWidth, g_ScreenHeight, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16, 1);
 
     rlActiveDrawBuffers(3);
 
@@ -65,21 +82,11 @@ void Application::Init()
         TraceLog(LOG_WARNING, "Framebuffer is not complete");
     }
 
-    rlEnableShader(m_DeferredShader.id);
-        rlSetUniformSampler(rlGetLocationUniform(m_DeferredShader.id, "gPosition"), 0);
-        rlSetUniformSampler(rlGetLocationUniform(m_DeferredShader.id, "gNormal"), 1);
-        rlSetUniformSampler(rlGetLocationUniform(m_DeferredShader.id, "gAlbedoSpec"), 2);
-    rlDisableShader();
+    for(int i = 0; i < m_rk62.materialCount; i++){
+        m_rk62.materials[i].shader = m_GBufferShader;
+    }
 
-    m_Model.materials[0].shader = m_GBufferShader;
-    m_Cube.materials[0].shader = m_GBufferShader;
-
-    m_Lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, -2 }, Vector3Zero(), YELLOW, m_DeferredShader);
-    m_Lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, m_DeferredShader);
-    m_Lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, m_DeferredShader);
-    m_Lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, m_DeferredShader);
-
-    for (int i = 0; i < MAX_CUBES; i++){
+    /*for (int i = 0; i < MAX_CUBES; i++){
         m_CubePositions[i] = (Vector3){
             .x = (float)(rand()%10) - 5,
             .y = (float)(rand()%5),
@@ -87,7 +94,11 @@ void Application::Init()
         };
 
         m_CubeRotations[i] = (float)(rand()%360);
-    }
+    }*/
+
+    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Positions"), (int[1]){0}, SHADER_UNIFORM_INT);
+    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Normals"), (int[1]){1}, SHADER_UNIFORM_INT);
+    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Albedo"), (int[1]){2}, SHADER_UNIFORM_INT);
 
     rlEnableDepthTest();
 
@@ -97,6 +108,7 @@ void Application::Init()
 void Application::Deinit()
 {
     UnloadModel(m_Model);
+    UnloadModel(m_rk62);
     UnloadModel(m_Cube);
 
     UnloadShader(m_DeferredShader);
@@ -113,23 +125,23 @@ void Application::Deinit()
 
 void Application::Run()
 {
+    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "numLights"), (int[1]){1}, SHADER_UNIFORM_INT);
+    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "lightColor[0]"), (float[3]){10.0f, 10.0f, 10.0f}, SHADER_UNIFORM_VEC3);
+
     while (!WindowShouldClose())
     {
-        // Update the shader with the m_Camera view vector (points towards { 0.0f, 0.0f, 0.0f })
-        float m_CameraPos[3] = { m_Camera.position.x, m_Camera.position.y, m_Camera.position.z };
-        SetShaderValue(m_DeferredShader, m_DeferredShader.locs[SHADER_LOC_VECTOR_VIEW], m_CameraPos, SHADER_UNIFORM_VEC3);
+        rlEnableShader(m_DeferredShader.id);
+            SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "camPos"), &m_Camera.position, SHADER_UNIFORM_VEC3);
+            SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "lightPos[0]"), &m_Camera.position, SHADER_UNIFORM_VEC3);
+        rlDisableShader();
 
         HandleInputs();
-
-        // Update light values (actually, only enable/disable them)
-        for (int i = 0; i < MAX_LIGHTS; i++){
-            UpdateLightValues(m_DeferredShader, m_Lights[i]);
-        }
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
 
             rlEnableFramebuffer(m_GBuffer.framebuffer);
+            rlClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             rlClearScreenBuffers();
 
             rlDisableColorBlend();
@@ -137,14 +149,16 @@ void Application::Run()
 
                 rlEnableShader(m_GBufferShader.id);
 
-                    DrawModel(m_Model, Vector3Zero(), 1.0f, WHITE);
-                    DrawModel(m_Cube, (Vector3) { 0.0, 1.0f, 0.0 }, 1.0f, WHITE);
+                    SetShaderValue(m_GBufferShader, GetShaderLocation(m_GBufferShader, "usePBR"), (int[1]){1}, SHADER_UNIFORM_INT);
+                    DrawModelPBR(m_rk62, Vector3Zero(), 0.05f, WHITE);
 
-                    for (int i = 0; i < MAX_CUBES; i++){
-                        Vector3 position = m_CubePositions[i];
-                        DrawModelEx(m_Cube, position, (Vector3) { 1, 1, 1 }, m_CubeRotations[i],
-                            (Vector3) { m_CubeScale, m_CubeScale, m_CubeScale }, WHITE);
-                    }
+                    //usePBR = 0;
+                    //rlSetUniform(GetShaderLocation(m_GBufferShader, "usePBR"), &usePBR, SHADER_UNIFORM_INT, 1);
+                    //for (int i = 0; i < MAX_CUBES; i++){
+                    //    Vector3 position = m_CubePositions[i];
+                    //    DrawModelEx(m_Cube, position, (Vector3) { 1, 1, 1 }, m_CubeRotations[i],
+                    //        (Vector3) { m_CubeScale, m_CubeScale, m_CubeScale }, WHITE);
+                    //}
 
                 rlDisableShader();
             EndMode3D();
@@ -159,6 +173,7 @@ void Application::Run()
                 {
                     BeginMode3D(m_Camera);
                         rlDisableColorBlend();
+                        rlDisableDepthTest();
                         rlEnableShader(m_DeferredShader.id);
 
                             rlActiveTextureSlot(0);
@@ -170,6 +185,7 @@ void Application::Run()
 
                             rlLoadDrawQuad();
                         rlDisableShader();
+                        rlEnableDepthTest();
                         rlEnableColorBlend();
                     EndMode3D();
 
@@ -181,15 +197,11 @@ void Application::Run()
 
                     // Since our shader is now done and disabled, we can draw our m_Lights in default
                     // forward rendering
-                    BeginMode3D(m_Camera);
+                    /*BeginMode3D(m_Camera);
                         rlEnableShader(rlGetShaderIdDefault());
-                            for(int i = 0; i < MAX_LIGHTS; i++)
-                            {
-                                if (m_Lights[i].enabled) DrawSphereEx(m_Lights[i].position, 0.2f, 8, 8, m_Lights[i].color);
-                                else DrawSphereWires(m_Lights[i].position, 0.2f, 8, 8, ColorAlpha(m_Lights[i].color, 0.3f));
-                            }
+                            DrawSphereEx({0.5f, 0.0f, 0.5f}, 0.2f, 8, 8, RED);
                         rlDisableShader();
-                    EndMode3D();
+                    EndMode3D();*/
 
                     DrawText("FINAL RESULT", 10, g_ScreenHeight - 30, 20, DARKGREEN);
                 } break;
@@ -226,7 +238,6 @@ void Application::Run()
                 default: break;
             }
 
-            DrawText("Toggle m_Lights keys: [Y][R][G][B]", 10, 40, 20, DARKGRAY);
             DrawText("Switch G-buffer textures: [1][2][3][4]", 10, 70, 20, DARKGRAY);
 
             DrawFPS(10, 10);
@@ -237,11 +248,6 @@ void Application::Run()
 
 void Application::HandleInputs()
 {
-    // Check key inputs to enable/disable m_Lights
-    if (IsKeyPressed(KEY_Y)) { m_Lights[0].enabled = !m_Lights[0].enabled; }
-    if (IsKeyPressed(KEY_R)) { m_Lights[1].enabled = !m_Lights[1].enabled; }
-    if (IsKeyPressed(KEY_G)) { m_Lights[2].enabled = !m_Lights[2].enabled; }
-    if (IsKeyPressed(KEY_B)) { m_Lights[3].enabled = !m_Lights[3].enabled; }
 
     // Check key inputs to switch between G-buffer textures
     if (IsKeyPressed(KEY_ONE)) m_DeferredMode = DEFERRED_POSITION;

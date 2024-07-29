@@ -1,3 +1,5 @@
+#pragma once
+
 struct GBuffer{
     unsigned int framebuffer;
 

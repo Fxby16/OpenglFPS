@@ -10,7 +10,7 @@ project "RaylibFPS"
 
     files { "src/**" }
 
-    includedirs { "src", "vendor/raylib/src" }
+    includedirs { "src", "vendor/raylib/src", "vendor/raylib/src/external/glfw/include", "vendor/raylib/src/external" }
 
     libdirs { "vendor/raylib/src" }
 
