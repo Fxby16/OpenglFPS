@@ -1,5 +1,7 @@
 #pragma once
 
+#include <raylib.h>
+
 struct GBuffer{
     unsigned int framebuffer;
 
@@ -10,10 +12,11 @@ struct GBuffer{
     unsigned int depthRenderbuffer;
 };
 
-// Deferred mode passes
 enum DeferredMode{
    DEFERRED_POSITION,
    DEFERRED_NORMAL,
    DEFERRED_ALBEDO,
    DEFERRED_SHADING
 };
+
+extern void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, DeferredMode deferredMode);
