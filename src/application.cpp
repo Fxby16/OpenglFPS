@@ -11,6 +11,7 @@
 #include <opengl.hpp>
 #include <utils.hpp>
 #include <globals.hpp>
+#include <frustum.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -44,8 +45,10 @@ void Application::Init()
     m_Camera.fovy = 60.0f;                                // Camera field-of-view Y
     m_Camera.projection = CAMERA_PERSPECTIVE;
 
+    m_ProjectionMatrix = MatrixPerspective(m_Camera.fovy * DEG2RAD, (float) g_ScreenWidth / (float) g_ScreenHeight, 0.1, 1000.0);
+
     // Load resources
-    m_rk62 = LoadModel("resources/models/rk62/scene.gltf");
+    m_rk62.Load("resources/models/rk62/scene.gltf");
 
     m_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
                                "resources/shaders/gbuffer.fs");
@@ -85,8 +88,8 @@ void Application::Init()
     }
 
     // Set model materials to use G-Buffer shader
-    for(int i = 0; i < m_rk62.materialCount; i++){
-        m_rk62.materials[i].shader = m_GBufferShader;
+    for(int i = 0; i < m_rk62.GetModel().materialCount; i++){
+        m_rk62.GetModel().materials[i].shader = m_GBufferShader;
     }
 
     // Set samplers for deferred rendering shader
@@ -99,7 +102,7 @@ void Application::Init()
 
 void Application::Deinit()
 {
-    UnloadModel(m_rk62);
+    m_rk62.Unload();
 
     UnloadShader(m_DeferredShader);
     UnloadShader(m_GBufferShader);
@@ -126,6 +129,12 @@ void Application::Run()
         double currentFrameTime = GetTime();
         deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
+
+        ExtractFrustum(g_Frustum, m_ProjectionMatrix, GetCameraMatrix(m_Camera));
+        #ifdef DEBUG
+            drawn = 0;
+            culled = 0; 
+        #endif
 
         rlEnableShader(m_DeferredShader.id);
             SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "camPos"), &m_Camera.position, SHADER_UNIFORM_VEC3);
@@ -162,6 +171,10 @@ void Application::Run()
             DrawFPS(10, 10);
             DrawFrameTime(deltaTime, 10, 30);
             DrawText(TextFormat("Camera pos: %f %f %f", m_Camera.position.x, m_Camera.position.y, m_Camera.position.z), 10, 50, 20, WHITE);
+            
+            #ifdef DEBUG
+                DrawText(TextFormat("Drawn: %u Culled: %u", drawn, culled), 10, 70, 20, WHITE);
+            #endif
 
         EndDrawing();
     }
