@@ -10,11 +10,12 @@ project "RaylibFPS"
 
     files { "src/**" }
 
-    includedirs { "src", "vendor/raylib/src", "vendor/raylib/src/external/glfw/include", "vendor/raylib/src/external" }
+    includedirs { "src", "vendor/raylib/src", "vendor/raylib/src/external/glfw/include", 
+                  "vendor/raylib/src/external", "vendor/assimp/include" }
 
-    libdirs { "vendor/raylib/src" }
+    libdirs { "vendor/raylib/src", "vendor/assimp/build/lib" }
 
-    links { "raylib" }
+    links { "raylib", "assimp", "z", "minizip" }
 
 filter "configurations:Debug"
     optimize "Debug"

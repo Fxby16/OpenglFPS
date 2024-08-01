@@ -1,4 +1,5 @@
 #include <frustum.hpp>
+#include <math.hpp>
 
 #include <rlgl.h>
 #include <raymath.h>
@@ -7,10 +8,58 @@
 
 Frustum g_Frustum = {0};
 
-#ifdef DEBUG
-    unsigned int drawn = 0;
-    unsigned int culled = 0;
-#endif
+Vector3 PlaneIntersection(const Vector4& p1, const Vector4& p2, const Vector4& p3) {
+    Matrix mat = {
+        p1.x, p1.y, p1.z, 0,
+        p2.x, p2.y, p2.z, 0,
+        p3.x, p3.y, p3.z, 0,
+        0, 0, 0, 1
+    };
+    Vector4 point = {
+        -p1.w,
+        -p2.w,
+        -p3.w,
+        1
+    };
+    Matrix invMat = MatrixInvert(mat);
+    Vector3 result = MatVecMul(invMat, (Vector3){ point.x, point.y, point.z });
+    return result;
+}
+
+void ExtractFrustumCorners(const Frustum& frustum, Vector3 corners[8]) {
+    corners[0] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[FRONT]);
+    corners[1] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[FRONT]);
+    corners[2] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[FRONT]);
+    corners[3] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[FRONT]);
+    corners[4] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[BACK]);
+    corners[5] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[BACK]);
+    corners[6] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[BACK]);
+    corners[7] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[BACK]);
+}
+
+void DrawFrustum(Frustum& frustum)
+{
+    Vector3 corners[8];
+    ExtractFrustumCorners(frustum, corners);
+
+    // Draw the front face
+    DrawLine3D(corners[0], corners[1], RED);
+    DrawLine3D(corners[1], corners[2], RED);
+    DrawLine3D(corners[2], corners[3], RED);
+    DrawLine3D(corners[3], corners[0], RED);
+
+    // Draw the back face
+    DrawLine3D(corners[4], corners[5], RED);
+    DrawLine3D(corners[5], corners[6], RED);
+    DrawLine3D(corners[6], corners[7], RED);
+    DrawLine3D(corners[7], corners[4], RED);
+
+    // Draw the edges connecting front and back faces
+    DrawLine3D(corners[0], corners[4], RED);
+    DrawLine3D(corners[1], corners[5], RED);
+    DrawLine3D(corners[2], corners[6], RED);
+    DrawLine3D(corners[3], corners[7], RED);
+}
 
 //https://github.com/JeffM2501/raylibExtras/tree/index/rlExtrasC
 void NormalizePlane(Vector4& plane)

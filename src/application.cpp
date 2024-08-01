@@ -50,13 +50,14 @@ void Application::Init()
     // Load resources
     m_rk62.Load("resources/models/rk62/scene.gltf");
 
-    m_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
+    m_Map.Load("/home/fabio/the_bathroom/scene.gltf");
+
+    m_GBufferShader.Load("resources/shaders/gbuffer.vs",
                                "resources/shaders/gbuffer.fs");
 
-    m_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
+    m_DeferredShader.Load("resources/shaders/deferred_shading.vs",
                                "resources/shaders/deferred_shading.fs");
-    m_DeferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(m_DeferredShader, "viewPosition");
-
+    
     // Initialize G-Buffer
     m_GBuffer.framebuffer = rlLoadFramebuffer();
 
@@ -87,15 +88,14 @@ void Application::Init()
         TraceLog(LOG_WARNING, "Framebuffer is not complete");
     }
 
-    // Set model materials to use G-Buffer shader
-    for(int i = 0; i < m_rk62.GetModel().materialCount; i++){
-        m_rk62.GetModel().materials[i].shader = m_GBufferShader;
-    }
-
     // Set samplers for deferred rendering shader
-    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Positions"), (int[1]){0}, SHADER_UNIFORM_INT);
-    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Normals"), (int[1]){1}, SHADER_UNIFORM_INT);
-    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "Albedo"), (int[1]){2}, SHADER_UNIFORM_INT);
+    m_DeferredShader.Bind();
+    m_DeferredShader.SetUniform1i("Positions", 0);
+    m_DeferredShader.SetUniform1i("Normals", 1);
+    m_DeferredShader.SetUniform1i("Albedo", 2);
+
+    m_GBufferShader.Bind();
+    m_GBufferShader.SetUniformMat4fv("projection", m_ProjectionMatrix, 1);
 
     rlEnableDepthTest();
 }
@@ -103,9 +103,10 @@ void Application::Init()
 void Application::Deinit()
 {
     m_rk62.Unload();
+    m_Map.Unload();
 
-    UnloadShader(m_DeferredShader);
-    UnloadShader(m_GBufferShader);
+    m_DeferredShader.Unload();
+    m_GBufferShader.Unload();
 
     rlUnloadFramebuffer(m_GBuffer.framebuffer);
     rlUnloadTexture(m_GBuffer.positionTexture);
@@ -118,8 +119,9 @@ void Application::Deinit()
 
 void Application::Run()
 {
-    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "numLights"), (int[1]){1}, SHADER_UNIFORM_INT);
-    SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "lightColor[0]"), (float[3]){5.0f, 5.0f, 5.0f}, SHADER_UNIFORM_VEC3);
+    m_DeferredShader.Bind();
+    m_DeferredShader.SetUniform1i("numLights", 1);
+    m_DeferredShader.SetUniform3fv("lightColor[0]", (Vector3){5.0f, 5.0f, 5.0f});
 
     double lastFrameTime = GetTime();
     double deltaTime = 0.0;
@@ -136,10 +138,9 @@ void Application::Run()
             culled = 0; 
         #endif
 
-        rlEnableShader(m_DeferredShader.id);
-            SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "camPos"), &m_Camera.position, SHADER_UNIFORM_VEC3);
-            SetShaderValue(m_DeferredShader, GetShaderLocation(m_DeferredShader, "lightPos[0]"), &m_Camera.position, SHADER_UNIFORM_VEC3);
-        rlDisableShader();
+        m_DeferredShader.Bind();
+        m_DeferredShader.SetUniform3fv("camPos", m_Camera.position);
+        m_DeferredShader.SetUniform3fv("lightPos[0]", m_Camera.position);
 
         HandleInputs(deltaTime);
 
@@ -153,12 +154,13 @@ void Application::Run()
             rlDisableColorBlend();
             BeginMode3D(m_Camera);
 
-                rlEnableShader(m_GBufferShader.id);
-
-                    SetShaderValue(m_GBufferShader, GetShaderLocation(m_GBufferShader, "usePBR"), (int[1]){1}, SHADER_UNIFORM_INT);
-                    DrawModelPBR(m_rk62, Vector3Zero(), 0.05f, WHITE);
-
-                rlDisableShader();
+                m_GBufferShader.Bind();
+                Matrix model = MatrixIdentity();
+                model = MatrixMultiply(MatrixTranslate(0.0f, 0.0f, 0.0f), MatrixScale(0.05f, 0.05f, 0.05f));
+                m_rk62.Draw(m_GBufferShader, GetCameraMatrix(m_Camera), model);
+                
+                model = MatrixMultiply(MatrixTranslate(1.0f, 0.0f, 0.0f), MatrixScale(0.5f, 0.5f, 0.5f));
+                m_Map.Draw(m_GBufferShader, GetCameraMatrix(m_Camera), model);    
             EndMode3D();
 
             rlEnableColorBlend();
@@ -166,7 +168,7 @@ void Application::Run()
             rlDisableFramebuffer();
             rlClearScreenBuffers();
 
-            DeferredPass(m_GBuffer, m_DeferredShader, m_Camera, m_DeferredMode);
+            DeferredPass(m_GBuffer, m_DeferredShader.GetShader(), m_Camera, m_DeferredMode);
 
             DrawFPS(10, 10);
             DrawFrameTime(deltaTime, 10, 30);
@@ -204,4 +206,6 @@ void Application::HandleInputs(double deltaTime)
             0.0f                                                            // Rotation: roll
         },
         GetMouseWheelMove() * 2.0f);                                        // Move to target (zoom)
+
+    if (IsKeyPressed(KEY_F10)) ToggleVSync();
 }
