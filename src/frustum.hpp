@@ -23,6 +23,8 @@ struct Frustum{
 
 extern Frustum g_Frustum;
 
+extern void DrawFrustum(Frustum& frustum);
+
 extern void ExtractFrustum(Frustum& frustrum, Matrix projection, Matrix modelview);
 extern bool PointInFrustumV(Frustum& frustrum, Vector3 position);
 extern bool SphereInFrustumV(Frustum& frustrum, Vector3 position, float radius);

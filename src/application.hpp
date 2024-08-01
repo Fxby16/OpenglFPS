@@ -19,8 +19,9 @@ private:
 
     Camera m_Camera;
     ModelEx m_rk62;
-    Shader m_GBufferShader;
-    Shader m_DeferredShader;
+    ModelEx m_Map;
+    ShaderEx m_GBufferShader;
+    ShaderEx m_DeferredShader;
     GBuffer m_GBuffer;
     DeferredMode m_DeferredMode = DEFERRED_SHADING;
     Matrix m_ProjectionMatrix;

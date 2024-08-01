@@ -32,6 +32,10 @@ extern void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camer
             rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
             rlBlitFramebuffer(0, 0, g_ScreenWidth, g_ScreenHeight, 0, 0, g_ScreenWidth, g_ScreenHeight, 0x00000100);    // GL_DEPTH_BUFFER_BIT
             rlDisableFramebuffer();
+
+            //BeginMode3D(camera);
+            //EndMode3D();
+
         } break;
         case DEFERRED_POSITION:
         {
