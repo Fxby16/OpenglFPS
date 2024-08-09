@@ -152,7 +152,7 @@ void Application::Run()
             DrawText(FormatText("Drawn: %u Culled: %u", drawn, culled), 10, 100, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
         #endif
 
-        /*auto meshes = m_Map.GetMeshes();
+        auto meshes = m_Map.GetMeshes();
 
         DisableDepthTest();
 
@@ -174,7 +174,7 @@ void Application::Run()
 
         DrawFrustum(g_Frustum);
 
-        EnableDepthTest();*/
+        EnableDepthTest();
 
         SwapBuffers();
 

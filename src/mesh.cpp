@@ -38,7 +38,7 @@ void Mesh::Free()
 void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr) const
 {
     //skip if the mesh is not visible
-    /*BoundingBox transformed = m_AABB;
+    BoundingBox transformed = m_AABB;
     //transform the bounding box to model space
     transformed.min = model * glm::vec4(m_AABB.min, 1.0f);
     transformed.max = model * glm::vec4(m_AABB.max, 1.0f);
@@ -48,7 +48,7 @@ void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr) const
             culled++;
         #endif
         return;
-    }  */  
+    } 
 
     #ifdef DEBUG
         drawn++;

@@ -112,8 +112,12 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
             vector.z = mesh->mVertices[i].z;
         
             vertex.Position = parent_transform * glm::vec4(vector, 1.0f);
-            aabb_min = glm::min(aabb_min, vertex.Position);
-            aabb_max = glm::max(aabb_max, vertex.Position);
+            aabb_min.x = glm::min(aabb_min.x, vertex.Position.x);
+            aabb_min.y = glm::min(aabb_min.y, vertex.Position.y);
+            aabb_min.z = glm::min(aabb_min.z, vertex.Position.z);
+            aabb_max.x = glm::max(aabb_max.x, vertex.Position.x);
+            aabb_max.y = glm::max(aabb_max.y, vertex.Position.y);
+            aabb_max.z = glm::max(aabb_max.z, vertex.Position.z);
         }
 
         if(mesh->HasNormals()){

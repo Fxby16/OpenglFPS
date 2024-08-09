@@ -1,8 +1,8 @@
-workspace "RaylibFPS"
+workspace "OpenglFPS"
     configurations { "Debug", "Release" }
 
 
-project "RaylibFPS"
+project "OpenglFPS"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
