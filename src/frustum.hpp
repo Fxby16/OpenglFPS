@@ -1,6 +1,7 @@
 #pragma once
 
-#include <raylib.h>
+#include <glm.hpp>
+#include <camera.hpp>
 
 #ifdef DEBUG
     extern unsigned int drawn;
@@ -8,8 +9,8 @@
 #endif
 
 enum FrustumPlanes{
-    BACK = 0,
-    FRONT = 1,
+    NEAR = 0,
+    FAR = 1,
     BOTTOM = 2,
     TOP = 3,
     RIGHT = 4,
@@ -18,15 +19,15 @@ enum FrustumPlanes{
 };
 
 struct Frustum{
-    Vector4 Planes[NUM_PLANES];
+    glm::vec4 Planes[NUM_PLANES];
 };
 
 extern Frustum g_Frustum;
 
 extern void DrawFrustum(Frustum& frustum);
 
-extern void ExtractFrustum(Frustum& frustrum, Matrix projection, Matrix modelview);
-extern bool PointInFrustumV(Frustum& frustrum, Vector3 position);
-extern bool SphereInFrustumV(Frustum& frustrum, Vector3 position, float radius);
+extern void ExtractFrustum(Frustum& frustrum, const Camera& camera);
+extern bool PointInFrustum(Frustum& frustrum, glm::vec3 position);
+extern bool SphereInFrustum(Frustum& frustrum, glm::vec3 position, float radius);
 
-extern bool AABBInFrustum(Frustum& frustrum, Vector3 min, Vector3 max);
+extern bool AABBInFrustum(Frustum& frustrum, glm::vec3 min, glm::vec3 max);

@@ -8,21 +8,23 @@ project "RaylibFPS"
     cppdialect "C++20"
     targetdir "bin/%{cfg.buildcfg}"
 
-    files { "src/**" }
+    files { "src/**", "vendor/glad/src/glad.c" }
 
-    includedirs { "src", "vendor/raylib/src", "vendor/raylib/src/external/glfw/include", 
-                  "vendor/raylib/src/external", "vendor/assimp/include" }
+    includedirs { "src", "vendor/assimp/include", "vendor/glfw/include", "vendor/stb",
+                  "vendor/glad/include", "vendor/glm/glm", "vendor/freetype/include" }
 
-    libdirs { "vendor/raylib/src", "vendor/assimp/build/lib" }
+    libdirs { "vendor/assimp/build/lib", "vendor/glfw/build/src", "vendor/freetype/objs" }
 
-    links { "raylib", "assimp", "z", "minizip" }
+    links { "glfw3", "assimp", "z", "minizip", "freetype" }
 
 filter "configurations:Debug"
     optimize "Debug"
     symbols "On"
-    defines { "DEBUG" }
+    buildoptions { "-Wall" }
+    defines { "DEBUG", "GLFW_INCLUDE_NONE" }
 
 filter "configurations:Release"
     optimize "Full"
     symbols "Off"
-    defines { "NDEBUG" }
+    buildoptions { "-Wall" }
+    defines { "NDEBUG", "GLFW_INCLUDE_NONE" }

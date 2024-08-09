@@ -1,27 +1,27 @@
 #include <texture.hpp>
 
 #include <stb_image.h>
-#include <glad.h>
+#include <glad/glad.h>
 
-TextureEx::TextureEx(const std::string& path, bool flip)
+Texture::Texture(const std::string& path, bool flip)
     : m_Path(path)
 {
     Init(path, flip);
 }
 
-TextureEx::TextureEx(const std::string& path, const std::string& type, bool flip)
+Texture::Texture(const std::string& path, const std::string& type, bool flip)
     : m_Path(path), m_Type(type)
 {
     Init(path, flip);
 }
 
-TextureEx::TextureEx(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip)
+Texture::Texture(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip)
     : m_Width(width), m_Height(height), m_Path(path), m_Type(type)
 {
     Init(path, flip, data);
 }
 
-void TextureEx::Init(const std::string& path, bool flip, unsigned char* data)
+void Texture::Init(const std::string& path, bool flip, unsigned char* data)
 {
     printf("Loading texture %s\n", path.c_str());
 
@@ -63,26 +63,26 @@ void TextureEx::Init(const std::string& path, bool flip, unsigned char* data)
     stbi_image_free(local_buffer);
 
     #ifdef DEBUG
-        printf("TextureEx::Init %u\n", m_ID);
+        printf("Texture::Init %u\n", m_ID);
     #endif
 }
 
-void TextureEx::Free()
+void Texture::Free()
 {
     #ifdef DEBUG
-        printf("TextureEx::Free %u\n", m_ID);
+        printf("Texture::Free %u\n", m_ID);
     #endif
 
     glDeleteTextures(1, &m_ID);
 }
 
-void TextureEx::Bind(unsigned int slot) const
+void Texture::Bind(unsigned int slot) const
 {
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, m_ID);
 }
 
-void TextureEx::Unbind() const
+void Texture::Unbind() const
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }

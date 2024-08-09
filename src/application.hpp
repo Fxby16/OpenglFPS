@@ -1,9 +1,8 @@
 #pragma once
 
-#include <raylib.h>
-#include <rlights.h>
 #include <renderer.hpp>
 #include <model.hpp>
+#include <gbuffer.hpp>
 
 class Application{
 public:
@@ -18,11 +17,12 @@ private:
     void HandleInputs(double deltaTime);
 
     Camera m_Camera;
-    ModelEx m_rk62;
-    ModelEx m_Map;
-    ShaderEx m_GBufferShader;
-    ShaderEx m_DeferredShader;
+    //Model m_rk62;
+    Model m_Map;
+    Shader m_GBufferShader;
+    Shader m_DeferredShader;
     GBuffer m_GBuffer;
     DeferredMode m_DeferredMode = DEFERRED_SHADING;
-    Matrix m_ProjectionMatrix;
+
+    bool m_ShouldTakeScreenshot = false;
 };
