@@ -1,131 +1,189 @@
 #include <frustum.hpp>
-#include <math.hpp>
-
-#include <rlgl.h>
-#include <raymath.h>
+#include <renderer.hpp>
+#include <globals.hpp>
+#include <log.hpp>
 
 #include <cmath>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtc/matrix_access.hpp>
 
-Frustum g_Frustum = {0};
+Frustum g_Frustum;
+glm::vec3 g_FrustumCorners[8];
 
-Vector3 PlaneIntersection(const Vector4& p1, const Vector4& p2, const Vector4& p3) {
-    Matrix mat = {
+glm::vec3 PlaneIntersection(const glm::vec4& p1, const glm::vec4& p2, const glm::vec4& p3)
+{
+    glm::mat4 mat = {
         p1.x, p1.y, p1.z, 0,
         p2.x, p2.y, p2.z, 0,
         p3.x, p3.y, p3.z, 0,
         0, 0, 0, 1
     };
-    Vector4 point = {
+    glm::vec4 point = {
         -p1.w,
         -p2.w,
         -p3.w,
         1
     };
-    Matrix invMat = MatrixInvert(mat);
-    Vector3 result = MatVecMul(invMat, (Vector3){ point.x, point.y, point.z });
+    glm::mat4 invMat = glm::inverse(mat);
+    glm::vec3 result = invMat * point;
     return result;
 }
 
-void ExtractFrustumCorners(const Frustum& frustum, Vector3 corners[8]) {
-    corners[0] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[FRONT]);
-    corners[1] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[FRONT]);
-    corners[2] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[FRONT]);
-    corners[3] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[FRONT]);
-    corners[4] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[BACK]);
-    corners[5] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[BACK]);
-    corners[6] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[BACK]);
-    corners[7] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[BACK]);
+void ExtractFrustumCorners(const Frustum& frustum, glm::vec3 corners[8])
+{
+    corners[0] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[FAR]);
+    corners[1] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[FAR]);
+    corners[2] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[FAR]);
+    corners[3] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[FAR]);
+    corners[4] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[NEAR]);
+    corners[5] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[NEAR]);
+    corners[6] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[NEAR]);
+    corners[7] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[NEAR]);
 }
 
 void DrawFrustum(Frustum& frustum)
 {
-    Vector3 corners[8];
-    ExtractFrustumCorners(frustum, corners);
+    // Draw the far face
+    DrawLine3D(g_FrustumCorners[0], g_FrustumCorners[1], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[1], g_FrustumCorners[2], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[2], g_FrustumCorners[3], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[3], g_FrustumCorners[0], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-    // Draw the front face
-    DrawLine3D(corners[0], corners[1], RED);
-    DrawLine3D(corners[1], corners[2], RED);
-    DrawLine3D(corners[2], corners[3], RED);
-    DrawLine3D(corners[3], corners[0], RED);
+    // Draw the near face
+    DrawLine3D(g_FrustumCorners[4], g_FrustumCorners[5], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[5], g_FrustumCorners[6], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[6], g_FrustumCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[7], g_FrustumCorners[4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-    // Draw the back face
-    DrawLine3D(corners[4], corners[5], RED);
-    DrawLine3D(corners[5], corners[6], RED);
-    DrawLine3D(corners[6], corners[7], RED);
-    DrawLine3D(corners[7], corners[4], RED);
-
-    // Draw the edges connecting front and back faces
-    DrawLine3D(corners[0], corners[4], RED);
-    DrawLine3D(corners[1], corners[5], RED);
-    DrawLine3D(corners[2], corners[6], RED);
-    DrawLine3D(corners[3], corners[7], RED);
+    // Draw the edges connecting far and near faces
+    DrawLine3D(g_FrustumCorners[0], g_FrustumCorners[4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[1], g_FrustumCorners[5], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[2], g_FrustumCorners[6], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[3], g_FrustumCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 }
 
-//https://github.com/JeffM2501/raylibExtras/tree/index/rlExtrasC
-void NormalizePlane(Vector4& plane)
+void NormalizePlane(glm::vec4& plane)
 {
     float magnitude = sqrtf(plane.x * plane.x + plane.y * plane.y + plane.z * plane.z);
-
     plane.x /= magnitude;
     plane.y /= magnitude;
     plane.z /= magnitude;
     plane.w /= magnitude;
 }
 
-void ExtractFrustum(Frustum& frustum, Matrix projection, Matrix modelview)
+void SetPlane(glm::vec4& plane, glm::vec3 point, glm::vec3 normal)
 {
-    Matrix planes = {0};
+    normal = glm::normalize(normal);
 
-    planes.m0 = modelview.m0 * projection.m0 + modelview.m1 * projection.m4 + modelview.m2 * projection.m8 + modelview.m3 * projection.m12;
-    planes.m1 = modelview.m0 * projection.m1 + modelview.m1 * projection.m5 + modelview.m2 * projection.m9 + modelview.m3 * projection.m13;
-    planes.m2 = modelview.m0 * projection.m2 + modelview.m1 * projection.m6 + modelview.m2 * projection.m10 + modelview.m3 * projection.m14;
-    planes.m3 = modelview.m0 * projection.m3 + modelview.m1 * projection.m7 + modelview.m2 * projection.m11 + modelview.m3 * projection.m15;
-    planes.m4 = modelview.m4 * projection.m0 + modelview.m5 * projection.m4 + modelview.m6 * projection.m8 + modelview.m7 * projection.m12;
-    planes.m5 = modelview.m4 * projection.m1 + modelview.m5 * projection.m5 + modelview.m6 * projection.m9 + modelview.m7 * projection.m13;
-    planes.m6 = modelview.m4 * projection.m2 + modelview.m5 * projection.m6 + modelview.m6 * projection.m10 + modelview.m7 * projection.m14;
-    planes.m7 = modelview.m4 * projection.m3 + modelview.m5 * projection.m7 + modelview.m6 * projection.m11 + modelview.m7 * projection.m15;
-    planes.m8 = modelview.m8 * projection.m0 + modelview.m9 * projection.m4 + modelview.m10 * projection.m8 + modelview.m11 * projection.m12;
-    planes.m9 = modelview.m8 * projection.m1 + modelview.m9 * projection.m5 + modelview.m10 * projection.m9 + modelview.m11 * projection.m13;
-    planes.m10 = modelview.m8 * projection.m2 + modelview.m9 * projection.m6 + modelview.m10 * projection.m10 + modelview.m11 * projection.m14;
-    planes.m11 = modelview.m8 * projection.m3 + modelview.m9 * projection.m7 + modelview.m10 * projection.m11 + modelview.m11 * projection.m15;
-    planes.m12 = modelview.m12 * projection.m0 + modelview.m13 * projection.m4 + modelview.m14 * projection.m8 + modelview.m15 * projection.m12;
-    planes.m13 = modelview.m12 * projection.m1 + modelview.m13 * projection.m5 + modelview.m14 * projection.m9 + modelview.m15 * projection.m13;
-    planes.m14 = modelview.m12 * projection.m2 + modelview.m13 * projection.m6 + modelview.m14 * projection.m10 + modelview.m15 * projection.m14;
-    planes.m15 = modelview.m12 * projection.m3 + modelview.m13 * projection.m7 + modelview.m14 * projection.m11 + modelview.m15 * projection.m15;
+    plane.x = normal.x;
+    plane.y = normal.y;
+    plane.z = normal.z;
+    plane.w = -glm::dot(normal, point);
 
-    frustum.Planes[RIGHT] = (Vector4){ planes.m3 - planes.m0, planes.m7 - planes.m4, planes.m11 - planes.m8, planes.m15 - planes.m12 };
-    NormalizePlane(frustum.Planes[RIGHT]);
+    #ifdef DEBUG
+    if(normal.x * point.x + normal.y * point.y + normal.z * point.z + plane.w != 0){
+        printf("Plane not set correctly\n");
+    }
 
-    frustum.Planes[LEFT] = (Vector4){ planes.m3 + planes.m0, planes.m7 + planes.m4, planes.m11 + planes.m8, planes.m15 + planes.m12 };
-    NormalizePlane(frustum.Planes[LEFT]);
-
-    frustum.Planes[TOP] = (Vector4){ planes.m3 - planes.m1, planes.m7 - planes.m5, planes.m11 - planes.m9, planes.m15 - planes.m13 };
-    NormalizePlane(frustum.Planes[TOP]);
-
-    frustum.Planes[BOTTOM] = (Vector4){ planes.m3 + planes.m1, planes.m7 + planes.m5, planes.m11 + planes.m9, planes.m15 + planes.m13 };
-    NormalizePlane(frustum.Planes[BOTTOM]);
-
-    frustum.Planes[BACK] = (Vector4){ planes.m3 - planes.m2, planes.m7 - planes.m6, planes.m11 - planes.m10, planes.m15 - planes.m14 };
-    NormalizePlane(frustum.Planes[BACK]);
-
-    frustum.Planes[FRONT] = (Vector4){ planes.m3 + planes.m2, planes.m7 + planes.m6, planes.m11 + planes.m10, planes.m15 + planes.m14 };
-    NormalizePlane(frustum.Planes[FRONT]);
+    LogMessage("Normal: (%f, %f, %f)", plane.x, plane.y, plane.z);
+    LogMessage("Distance: %f", plane.w);
+    #endif
 }
 
-float DistanceToPlane(const Vector4& plane, const Vector3& position)
+glm::vec4 PlaneFromCorners(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 {
-    return (plane.x * position.x + plane.y * position.y + plane.z * position.z + plane.w);
+    glm::vec3 normal = glm::cross(p2 - p1, p3 - p1);
+    glm::vec4 plane;
+    SetPlane(plane, p1, normal);
+    return plane;
 }
 
-float DistanceToPlane(const Vector4& plane, float x, float y, float z)
+void ExtractFrustum(Frustum& frustum, const Camera& camera)
 {
-    return (plane.x * x + plane.y * y + plane.z * z + plane.w);
+    glm::mat4 viewMatrix = camera.GetViewMatrix();
+    glm::mat4 projectionMatrix = camera.GetProjectionMatrix();
+
+    glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
+    glm::vec3 viewPos = glm::vec3(inverseViewMatrix[3][0], inverseViewMatrix[3][1], inverseViewMatrix[3][2]);
+    glm::vec3 camForward = -glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+    glm::vec3 camRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+    glm::vec3 camUp = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+    float fov = 2.0f * atan(1.0f / projectionMatrix[1][1]);
+    float aspectRatio = projectionMatrix[1][1] / projectionMatrix[0][0];
+    float nearPlane = projectionMatrix[3][2] / (projectionMatrix[2][2] - 1.0f);
+    float farPlane = projectionMatrix[3][2] / (projectionMatrix[2][2] + 1.0f);
+    glm::vec3 fc = viewPos + camForward * farPlane;
+    glm::vec3 nc = viewPos + camForward * nearPlane;
+    float Hfar = 2.0f * tan(fov / 2) * farPlane;
+    float Wfar = Hfar * aspectRatio;
+    float Hnear = 2.0f * tan(fov / 2) * nearPlane;
+    float Wnear = Hnear * aspectRatio;
+    glm::vec3 up = camUp;
+    glm::vec3 right = camRight;
+    glm::vec3 ftl = fc + (up * Hfar / 2.0f) - (right * Wfar / 2.0f);
+    glm::vec3 ftr = fc + (up * Hfar / 2.0f) + (right * Wfar / 2.0f);
+    glm::vec3 fbl = fc - (up * Hfar / 2.0f) - (right * Wfar / 2.0f);
+    glm::vec3 fbr = fc - (up * Hfar / 2.0f) + (right * Wfar / 2.0f);
+    glm::vec3 ntl = nc + (up * Hnear / 2.0f) - (right * Wnear / 2.0f);
+    glm::vec3 ntr = nc + (up * Hnear / 2.0f) + (right * Wnear / 2.0f);
+    glm::vec3 nbl = nc - (up * Hnear / 2.0f) - (right * Wnear / 2.0f);
+    glm::vec3 nbr = nc - (up * Hnear / 2.0f) + (right * Wnear / 2.0f);  
+
+    g_FrustumCorners[0] = ftl;
+    g_FrustumCorners[1] = ftr;
+    g_FrustumCorners[2] = fbr;
+    g_FrustumCorners[3] = fbl;
+    g_FrustumCorners[4] = ntl;
+    g_FrustumCorners[5] = ntr;
+    g_FrustumCorners[6] = nbr;
+    g_FrustumCorners[7] = nbl; 
+
+    #ifdef DEBUG
+    LogMessage("Corner positions:");
+    LogMessage("ftl: (%f, %f, %f)", ftl.x, ftl.y, ftl.z);
+    LogMessage("ftr: (%f, %f, %f)", ftr.x, ftr.y, ftr.z);
+    LogMessage("fbl: (%f, %f, %f)", fbl.x, fbl.y, fbl.z);
+    LogMessage("fbr: (%f, %f, %f)", fbr.x, fbr.y, fbr.z);
+    LogMessage("ntl: (%f, %f, %f)", ntl.x, ntl.y, ntl.z);
+    LogMessage("ntr: (%f, %f, %f)", ntr.x, ntr.y, ntr.z);
+    LogMessage("nbl: (%f, %f, %f)", nbl.x, nbl.y, nbl.z);
+    LogMessage("nbr: (%f, %f, %f)", nbr.x, nbr.y, nbr.z);
+    LogMessage("Near plane: %f Far plane: %f", nearPlane, farPlane);
+    LogMessage("Fov: %f Aspect ratio: %f", glm::degrees(fov), aspectRatio);
+    LogMessage("Cam Pos: (%f, %f, %f)", viewPos.x, viewPos.y, viewPos.z);
+    printf("\n");
+    #endif
+
+    frustum.Planes[NEAR] = PlaneFromCorners(ntr, ntl, nbl);
+    frustum.Planes[FAR] = PlaneFromCorners(ftr, ftl, fbl);
+    frustum.Planes[BOTTOM] = PlaneFromCorners(nbl, nbr, fbr);
+    frustum.Planes[TOP] = PlaneFromCorners(ntl, ntr, ftr);
+    frustum.Planes[RIGHT] = PlaneFromCorners(ntr, nbr, fbr);
+    frustum.Planes[LEFT] = PlaneFromCorners(ntl, nbl, fbl); 
 }
 
-bool PointInFrustumV(Frustum& frustum, Vector3 position)
+float SignedDistanceToPlane(const glm::vec4& plane, const glm::vec3& position)
+{
+    #ifdef DEBUG
+    LogMessage("Distance to plane: %f", glm::dot(glm::vec3(plane.x, plane.y, plane.z), position) - plane.w);
+    #endif
+    return glm::dot(glm::vec3(plane.x, plane.y, plane.z), position) - plane.w;
+}
+
+float SignedDistanceToPlane(const glm::vec4& plane, float x, float y, float z)
+{
+    #ifdef DEBUG
+    LogMessage("Distance to plane: %f", glm::dot(glm::vec3(plane.x, plane.y, plane.z), glm::vec3(x, y, z)) - plane.w);
+    #endif
+    return glm::dot(glm::vec3(plane.x, plane.y, plane.z), glm::vec3(x, y, z)) - plane.w;
+}
+
+bool PointInFrustum(Frustum& frustum, glm::vec3 position)
 {
     for(int i = 0; i < NUM_PLANES; i++){
-        if(DistanceToPlane(frustum.Planes[i], position) <= 0){ // point is behind plane
+        if(SignedDistanceToPlane(frustum.Planes[i], position) <= 0){ // point is behind plane
             return false;
         }
     }
@@ -136,7 +194,7 @@ bool PointInFrustumV(Frustum& frustum, Vector3 position)
 bool PointInFrustum(Frustum& frustum, float x, float y, float z)
 {
     for(int i = 0; i < NUM_PLANES; i++){
-        if(DistanceToPlane(frustum.Planes[i], x, y, z) <= 0){ // point is behind plane
+        if(SignedDistanceToPlane(frustum.Planes[i], x, y, z) <= 0){ // point is behind plane
             return false;
         }
     }
@@ -144,75 +202,56 @@ bool PointInFrustum(Frustum& frustum, float x, float y, float z)
     return true;
 }
 
-bool SphereInFrustum(Frustum& frustum, Vector3 position, float radius)
+bool SphereInFrustum(Frustum& frustum, glm::vec3 position, float radius)
 {
     for(int i = 0; i < NUM_PLANES; i++){
-        if(DistanceToPlane(frustum.Planes[i], position) < -radius){ // center is behind plane by more than the radius
+        if(SignedDistanceToPlane(frustum.Planes[i], position) < -radius){ // center is behind plane by more than the radius
             return false;
         }
     }
 
     return true;
 }
-bool AABBInFrustum(Frustum& frustum, Vector3 min, Vector3 max)
+
+glm::vec3 GetPlaneNormal(const glm::vec4& plane)
 {
-    // if any point is in and we are good
-    if(PointInFrustum(frustum, min.x, min.y, min.z))
-        return true;
+    return glm::vec3(plane.x, plane.y, plane.z);
+}
 
-    if(PointInFrustum(frustum, min.x, max.y, min.z))
-        return true;
+glm::vec3 GetPlanePoint(const glm::vec4& plane)
+{
+    return -GetPlaneNormal(plane) * plane.w;
+}
 
-    if(PointInFrustum(frustum, max.x, max.y, min.z))
-        return true;
+bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
+{
+    for (int i = 0; i < NUM_PLANES; i++) {
+        glm::vec3 normal = GetPlaneNormal(frustum.Planes[i]);
 
-    if(PointInFrustum(frustum, max.x, min.y, min.z))
-        return true;
+        glm::vec3 positiveVertex = min;
+        glm::vec3 negativeVertex = max;
 
-    if(PointInFrustum(frustum, min.x, min.y, max.z))
-        return true;
+        if (normal.x >= 0) {
+            positiveVertex.x = max.x;
+            negativeVertex.x = min.x;
+        }
+        if (normal.y >= 0) {
+            positiveVertex.y = max.y;
+            negativeVertex.y = min.y;
+        }
+        if (normal.z >= 0) {
+            positiveVertex.z = max.z;
+            negativeVertex.z = min.z;
+        }
 
-    if(PointInFrustum(frustum, min.x, max.y, max.z))
-        return true;
-
-    if(PointInFrustum(frustum, max.x, max.y, max.z))
-        return true;
-
-    if(PointInFrustum(frustum, max.x, min.y, max.z))
-        return true;
-
-    // check to see if all points are outside of any one plane, if so the entire box is outside
-    for(int i = 0; i < NUM_PLANES; i++){
-        bool oneInside = false;
-
-        if(DistanceToPlane(frustum.Planes[i], min.x, min.y, min.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], max.x, min.y, min.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], max.x, max.y, min.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], min.x, max.y, min.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], min.x, min.y, max.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], max.x, min.y, max.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], max.x, max.y, max.z) >= 0)
-            oneInside = true;
-
-        if(DistanceToPlane(frustum.Planes[i], min.x, max.y, max.z) >= 0)
-            oneInside = true;
-
-        if(!oneInside)
+        if (glm::dot(normal, positiveVertex) + frustum.Planes[i].w < 0) {
             return false;
+        }
+        if (glm::dot(normal, negativeVertex) + frustum.Planes[i].w <= 0) {
+            // AABB is completely outside of the frustum plane
+            return false;
+        }
     }
 
-    // the box extends outside the frustum but crosses it
     return true;
 }

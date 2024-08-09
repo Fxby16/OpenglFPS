@@ -4,43 +4,45 @@
 #include <gpubuffer.hpp>
 #include <texture.hpp>
 #include <shader.hpp>
+#include <bounding_box.hpp>
 
 #include <vector>
-#include <raylib.h>
+#include <glm.hpp>
 
 inline constexpr unsigned int MAX_BONE_INFLUENCE = 4;
 
 struct Vertex{
-    Vector3 Position;
-    Vector3 Normal;
-    Vector2 TexCoords;
-    Vector3 Tangent;
-    Vector3 Bitangent;
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+    glm::vec3 Tangent;
+    glm::vec3 Bitangent;
 
     int BoneIDs[MAX_BONE_INFLUENCE];
     float Weights[MAX_BONE_INFLUENCE];
 };
 
-class MeshEx{
+class Mesh{
 public:
-    MeshEx() = default;
-    MeshEx(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<TextureEx>& textures, const BoundingBox& aabb);
-    ~MeshEx() = default;
+    Mesh() = default;
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, const BoundingBox& aabb);
+    ~Mesh() = default;
 
-    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<TextureEx>& textures, const BoundingBox& aabb);
+    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, const BoundingBox& aabb);
     void Free();
 
-    void Draw(ShaderEx& shader, Matrix view, Matrix model, bool pbr) const;
+    void Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr) const;
 
     inline const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
     inline const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
-    inline const std::vector<TextureEx>& GetTextures() const { return m_Textures; }
+    inline const std::vector<Texture>& GetTextures() const { return m_Textures; }
+    inline const BoundingBox& GetAABB() const { return m_AABB; }
 
 private:
 
     std::vector<Vertex> m_Vertices;
     std::vector<unsigned int> m_Indices;
-    std::vector<TextureEx> m_Textures;
+    std::vector<Texture> m_Textures;
     GPUBuffer m_GPUBuffer;
 
     BoundingBox m_AABB;

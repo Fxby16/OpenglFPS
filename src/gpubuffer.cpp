@@ -1,6 +1,6 @@
 #include <gpubuffer.hpp>
 
-#include <glad.h>
+#include <glad/glad.h>
 #include <cstdio>
 
 unsigned int GetGlTypeSize(unsigned int type)

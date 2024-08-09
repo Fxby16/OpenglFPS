@@ -2,14 +2,15 @@
 
 #include <string>
 
-class TextureEx{
+class Texture{
 public:
-    TextureEx(const std::string& path, bool flip = true);
-    TextureEx(const std::string& path, const std::string& type, bool flip = true);
-    TextureEx(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip = true);
-    TextureEx() = default;
-    ~TextureEx() = default;
+    Texture(const std::string& path, bool flip = true);
+    Texture(const std::string& path, const std::string& type, bool flip = true);
+    Texture(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip = true);
+    Texture() = default;
+    ~Texture() = default;
 
+    void Init(const std::string& path, bool flip, unsigned char* data = nullptr);
     void Free();
 
     void Bind(unsigned int slot = 0) const;
@@ -27,7 +28,6 @@ public:
     void SetType(const std::string& type) { m_Type = type; }
 
 private:
-    void Init(const std::string& path, bool flip, unsigned char* data = nullptr);
 
     unsigned int m_ID;
     int m_Width, m_Height, m_BPP;

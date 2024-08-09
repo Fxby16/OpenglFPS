@@ -1,17 +1,15 @@
 #include <mesh.hpp>
 #include <globals.hpp>
 
-#include <glad.h>
-#include <rlgl.h>
-#include <raymath.h>
+#include <glad/glad.h>
 #include <string>
 
-MeshEx::MeshEx(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<TextureEx>& textures, const BoundingBox& aabb)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, const BoundingBox& aabb)
 {
     InitMesh(vertices, indices, textures, aabb);
 }
 
-void MeshEx::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<TextureEx>& textures, const BoundingBox& aabb)
+void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, const BoundingBox& aabb)
 {
     m_Vertices = vertices;
     m_Indices = indices;
@@ -32,31 +30,31 @@ void MeshEx::InitMesh(const std::vector<Vertex>& vertices, const std::vector<uns
     m_GPUBuffer.AddAttribute(4, GL_FLOAT, sizeof(Vertex));
 }
 
-void MeshEx::Free()
+void Mesh::Free()
 {
     m_GPUBuffer.Free();
 }
 
-void MeshEx::Draw(ShaderEx& shader, Matrix view, Matrix model, bool pbr) const
+void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr) const
 {
     //skip if the mesh is not visible
-    BoundingBox transformed = m_AABB;
+    /*BoundingBox transformed = m_AABB;
     //transform the bounding box to model space
-    transformed.min = Vector3Transform(m_AABB.min, model);
-    transformed.max = Vector3Transform(m_AABB.max, model);
+    transformed.min = model * glm::vec4(m_AABB.min, 1.0f);
+    transformed.max = model * glm::vec4(m_AABB.max, 1.0f);
 
     if(!AABBInFrustum(g_Frustum, transformed.min, transformed.max)){
         #ifdef DEBUG
             culled++;
         #endif
         return;
-    }    
+    }  */  
 
     #ifdef DEBUG
         drawn++;
     #endif
     
-    rlEnableShader(shader.GetID());
+    shader.Bind();
 
     for(int i = 0; i < m_Textures.size(); i++){
         std::string number;

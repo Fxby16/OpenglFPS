@@ -11,9 +11,31 @@ uniform sampler2D Albedo;
 uniform vec3 camPos;
 
 const int MAX_LIGHTS = 16;
-uniform vec3 lightPos[MAX_LIGHTS];
-uniform vec3 lightColor[MAX_LIGHTS];
-uniform int numLights;
+
+struct PointLight {
+    vec3 position;
+    vec3 color;
+};
+
+struct DirectionalLight {
+    vec3 direction;
+    vec3 color;
+};
+
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    float cutOff;
+    float outerCutOff;
+};
+
+uniform PointLight pointLights[MAX_LIGHTS];
+uniform DirectionalLight directionalLights[MAX_LIGHTS];
+uniform SpotLight spotLights[MAX_LIGHTS];
+uniform int numPointLights;
+uniform int numDirectionalLights;
+uniform int numSpotLights;
 
 const float PI = 3.14159265359;
 
@@ -85,44 +107,89 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < numLights; i++) 
-    {
-        // calculate per-light radiance
-        vec3 L = normalize(lightPos[i] - position);
-        vec3 H = normalize(V + L);
-        float distance = length(lightPos[i] - position);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = lightColor[i] * attenuation;
 
-        // Cook-Torrance BRDF
+    // Point Lights
+    for(int i = 0; i < numPointLights; i++) 
+    {
+        vec3 L = normalize(pointLights[i].position - position);
+        vec3 H = normalize(V + L);
+        float distance = length(pointLights[i].position - position);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance = pointLights[i].color * attenuation;
+
         float NDF = DistributionGGX(normal, H, roughness);   
         float G   = GeometrySmith(normal, V, L, roughness);      
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
-        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         vec3 specular = numerator / denominator;
         
-        // kS is equal to Fresnel
         vec3 kS = F;
-        // for energy conservation, the diffuse and specular light can't
-        // be above 1.0 (unless the surface emits light); to preserve this
-        // relationship the diffuse component (kD) should equal 1.0 - kS.
         vec3 kD = vec3(1.0) - kS;
-        // multiply kD by the inverse metalness such that only non-metals 
-        // have diffuse lighting, or a linear blend if partly metal (pure metals
-        // have no diffuse light).
         kD *= 1.0 - metallic;	  
 
-        // scale light by NdotL
         float NdotL = max(dot(normal, L), 0.0);        
 
-        // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }   
+
+    // Directional Lights
+    for(int i = 0; i < numDirectionalLights; i++) 
+    {
+        vec3 L = normalize(-directionalLights[i].direction);
+        vec3 H = normalize(V + L);
+        vec3 radiance = directionalLights[i].color;
+
+        float NDF = DistributionGGX(normal, H, roughness);   
+        float G   = GeometrySmith(normal, V, L, roughness);      
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+           
+        vec3 numerator    = NDF * G * F; 
+        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
+        vec3 specular = numerator / denominator;
+        
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;	  
+
+        float NdotL = max(dot(normal, L), 0.0);        
+
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }   
+
+    // Spot Lights
+    for(int i = 0; i < numSpotLights; i++) 
+    {
+        vec3 L = normalize(spotLights[i].position - position);
+        vec3 H = normalize(V + L);
+        float distance = length(spotLights[i].position - position);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance = spotLights[i].color * attenuation;
+
+        float theta = dot(L, normalize(-spotLights[i].direction));
+        float epsilon = spotLights[i].cutOff - spotLights[i].outerCutOff;
+        float intensity = clamp((theta - spotLights[i].outerCutOff) / epsilon, 0.0, 1.0);
+        radiance *= intensity;
+
+        float NDF = DistributionGGX(normal, H, roughness);   
+        float G   = GeometrySmith(normal, V, L, roughness);      
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+           
+        vec3 numerator    = NDF * G * F; 
+        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
+        vec3 specular = numerator / denominator;
+        
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;	  
+
+        float NdotL = max(dot(normal, L), 0.0);        
+
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }   
     
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
+    // ambient lighting
     vec3 ambient = vec3(0.03) * albedo * ao;
     
     vec3 color = ambient + Lo;
