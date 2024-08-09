@@ -18,8 +18,13 @@ enum FrustumPlanes{
     NUM_PLANES = 6
 };
 
+struct Plane{
+    glm::vec3 normal;
+    float distance;
+};
+
 struct Frustum{
-    glm::vec4 Planes[NUM_PLANES];
+    Plane Planes[NUM_PLANES];
 };
 
 extern Frustum g_Frustum;

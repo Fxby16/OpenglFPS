@@ -12,37 +12,6 @@
 Frustum g_Frustum;
 glm::vec3 g_FrustumCorners[8];
 
-glm::vec3 PlaneIntersection(const glm::vec4& p1, const glm::vec4& p2, const glm::vec4& p3)
-{
-    glm::mat4 mat = {
-        p1.x, p1.y, p1.z, 0,
-        p2.x, p2.y, p2.z, 0,
-        p3.x, p3.y, p3.z, 0,
-        0, 0, 0, 1
-    };
-    glm::vec4 point = {
-        -p1.w,
-        -p2.w,
-        -p3.w,
-        1
-    };
-    glm::mat4 invMat = glm::inverse(mat);
-    glm::vec3 result = invMat * point;
-    return result;
-}
-
-void ExtractFrustumCorners(const Frustum& frustum, glm::vec3 corners[8])
-{
-    corners[0] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[FAR]);
-    corners[1] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[FAR]);
-    corners[2] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[FAR]);
-    corners[3] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[FAR]);
-    corners[4] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[TOP], frustum.Planes[NEAR]);
-    corners[5] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[TOP], frustum.Planes[NEAR]);
-    corners[6] = PlaneIntersection(frustum.Planes[RIGHT], frustum.Planes[BOTTOM], frustum.Planes[NEAR]);
-    corners[7] = PlaneIntersection(frustum.Planes[LEFT], frustum.Planes[BOTTOM], frustum.Planes[NEAR]);
-}
-
 void DrawFrustum(Frustum& frustum)
 {
     // Draw the far face
@@ -59,8 +28,8 @@ void DrawFrustum(Frustum& frustum)
 
     // Draw the edges connecting far and near faces
     DrawLine3D(g_FrustumCorners[0], g_FrustumCorners[4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    DrawLine3D(g_FrustumCorners[1], g_FrustumCorners[5], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    DrawLine3D(g_FrustumCorners[2], g_FrustumCorners[6], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[1], g_FrustumCorners[5], glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+    DrawLine3D(g_FrustumCorners[2], g_FrustumCorners[6], glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
     DrawLine3D(g_FrustumCorners[3], g_FrustumCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 }
 
@@ -73,30 +42,14 @@ void NormalizePlane(glm::vec4& plane)
     plane.w /= magnitude;
 }
 
-void SetPlane(glm::vec4& plane, glm::vec3 point, glm::vec3 normal)
-{
-    normal = glm::normalize(normal);
-
-    plane.x = normal.x;
-    plane.y = normal.y;
-    plane.z = normal.z;
-    plane.w = -glm::dot(normal, point);
-
-    #ifdef DEBUG
-    if(normal.x * point.x + normal.y * point.y + normal.z * point.z + plane.w != 0){
-        printf("Plane not set correctly\n");
-    }
-
-    LogMessage("Normal: (%f, %f, %f)", plane.x, plane.y, plane.z);
-    LogMessage("Distance: %f", plane.w);
-    #endif
-}
-
-glm::vec4 PlaneFromCorners(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+Plane PlaneFromCorners(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 {
     glm::vec3 normal = glm::cross(p2 - p1, p3 - p1);
-    glm::vec4 plane;
-    SetPlane(plane, p1, normal);
+    normal = glm::normalize(normal);
+
+    Plane plane;
+    plane.normal = normal;
+    plane.distance = glm::dot(normal, p1);
     return plane;
 }
 
@@ -105,6 +58,7 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     glm::mat4 viewMatrix = camera.GetViewMatrix();
     glm::mat4 projectionMatrix = camera.GetProjectionMatrix();
 
+    // thanks to https://github.com/livinamuk for the corners extraction code
     glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     glm::vec3 viewPos = glm::vec3(inverseViewMatrix[3][0], inverseViewMatrix[3][1], inverseViewMatrix[3][2]);
     glm::vec3 camForward = -glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
@@ -156,28 +110,21 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     printf("\n");
     #endif
 
-    frustum.Planes[NEAR] = PlaneFromCorners(ntr, ntl, nbl);
+    frustum.Planes[NEAR] = PlaneFromCorners(ntl, ntr, nbr);
     frustum.Planes[FAR] = PlaneFromCorners(ftr, ftl, fbl);
     frustum.Planes[BOTTOM] = PlaneFromCorners(nbl, nbr, fbr);
-    frustum.Planes[TOP] = PlaneFromCorners(ntl, ntr, ftr);
-    frustum.Planes[RIGHT] = PlaneFromCorners(ntr, nbr, fbr);
+    frustum.Planes[TOP] = PlaneFromCorners(ntr, ntl, ftl);
+    frustum.Planes[RIGHT] = PlaneFromCorners(nbr, ntr, fbr);
     frustum.Planes[LEFT] = PlaneFromCorners(ntl, nbl, fbl); 
+
+    for(int i = 0; i < NUM_PLANES; i++){
+        LogMessage("Plane %d: (%f, %f, %f) %f", i, frustum.Planes[i].normal.x, frustum.Planes[i].normal.y, frustum.Planes[i].normal.z, frustum.Planes[i].distance);
+    }
 }
 
-float SignedDistanceToPlane(const glm::vec4& plane, const glm::vec3& position)
+float SignedDistanceToPlane(const Plane& plane, glm::vec3 position)
 {
-    #ifdef DEBUG
-    LogMessage("Distance to plane: %f", glm::dot(glm::vec3(plane.x, plane.y, plane.z), position) - plane.w);
-    #endif
-    return glm::dot(glm::vec3(plane.x, plane.y, plane.z), position) - plane.w;
-}
-
-float SignedDistanceToPlane(const glm::vec4& plane, float x, float y, float z)
-{
-    #ifdef DEBUG
-    LogMessage("Distance to plane: %f", glm::dot(glm::vec3(plane.x, plane.y, plane.z), glm::vec3(x, y, z)) - plane.w);
-    #endif
-    return glm::dot(glm::vec3(plane.x, plane.y, plane.z), glm::vec3(x, y, z)) - plane.w;
+    return glm::dot(plane.normal, position) - plane.distance;
 }
 
 bool PointInFrustum(Frustum& frustum, glm::vec3 position)
@@ -194,7 +141,7 @@ bool PointInFrustum(Frustum& frustum, glm::vec3 position)
 bool PointInFrustum(Frustum& frustum, float x, float y, float z)
 {
     for(int i = 0; i < NUM_PLANES; i++){
-        if(SignedDistanceToPlane(frustum.Planes[i], x, y, z) <= 0){ // point is behind plane
+        if(SignedDistanceToPlane(frustum.Planes[i], {x, y, z}) <= 0){ // point is behind plane
             return false;
         }
     }
@@ -213,45 +160,26 @@ bool SphereInFrustum(Frustum& frustum, glm::vec3 position, float radius)
     return true;
 }
 
-glm::vec3 GetPlaneNormal(const glm::vec4& plane)
+bool isOnOrForwardPlane(const Plane& plane, glm::vec3 extents, glm::vec3 center) 
 {
-    return glm::vec3(plane.x, plane.y, plane.z);
-}
+    // Compute the projection interval radius of b onto L(t) = b.c + t * p.n
+    const float r = extents.x * std::abs(plane.normal.x) + extents.y * std::abs(plane.normal.y) +
+        extents.z * std::abs(plane.normal.z);
 
-glm::vec3 GetPlanePoint(const glm::vec4& plane)
-{
-    return -GetPlaneNormal(plane) * plane.w;
+    return -r <= SignedDistanceToPlane(plane, center);
 }
 
 bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 {
-    for (int i = 0; i < NUM_PLANES; i++) {
-        glm::vec3 normal = GetPlaneNormal(frustum.Planes[i]);
+    glm::vec3 center = (min + max) * 0.5f;
+    glm::vec3 extents = {max.x - center.x, max.y - center.y, max.z - center.z};
 
-        glm::vec3 positiveVertex = min;
-        glm::vec3 negativeVertex = max;
-
-        if (normal.x >= 0) {
-            positiveVertex.x = max.x;
-            negativeVertex.x = min.x;
-        }
-        if (normal.y >= 0) {
-            positiveVertex.y = max.y;
-            negativeVertex.y = min.y;
-        }
-        if (normal.z >= 0) {
-            positiveVertex.z = max.z;
-            negativeVertex.z = min.z;
-        }
-
-        if (glm::dot(normal, positiveVertex) + frustum.Planes[i].w < 0) {
-            return false;
-        }
-        if (glm::dot(normal, negativeVertex) + frustum.Planes[i].w <= 0) {
-            // AABB is completely outside of the frustum plane
-            return false;
-        }
-    }
-
-    return true;
+    return (
+        isOnOrForwardPlane(frustum.Planes[LEFT], extents, center) &&
+        isOnOrForwardPlane(frustum.Planes[RIGHT], extents, center) &&
+        isOnOrForwardPlane(frustum.Planes[BOTTOM], extents, center) &&
+        isOnOrForwardPlane(frustum.Planes[TOP], extents, center) &&
+        isOnOrForwardPlane(frustum.Planes[NEAR], extents, center) &&
+        isOnOrForwardPlane(frustum.Planes[FAR], extents, center)
+    );
 }

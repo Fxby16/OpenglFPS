@@ -103,6 +103,8 @@ void Camera::ProcessMouseScroll(float y_offset)
     m_Zoom -= y_offset * 0.1f;
     m_Zoom = glm::clamp(m_Zoom, 1.0f, 90.0f);
 
+    y_offset = 0.0f;
+
     m_ProjectionMatrix = glm::perspective(glm::radians(m_Zoom), (float)g_ScreenWidth / (float)g_ScreenHeight, 0.1f, 100.0f);
 }
 
