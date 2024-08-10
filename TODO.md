@@ -1,0 +1,10 @@
+- Map editor
+- Small map
+- Shadows
+- indirect lighting
+- Ssao
+- Bloom
+- Skeletal animations
+- More generic model drawing
+- resource manager
+- loading screen
