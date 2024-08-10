@@ -11,6 +11,7 @@
 #include <text.hpp>
 #include <log.hpp>
 #include <lights.hpp>
+#include <resource_manager.hpp>
 
 #include <gtc/matrix_transform.hpp>
 
@@ -35,7 +36,7 @@ void Application::Init()
     // Load resources
     //m_rk62.Load("resources/models/rk62/scene.gltf");
 
-    m_Map.Load("/home/fabio/the_bathroom/scene.gltf");
+    m_Map = LoadModel("/home/fabio/the_bathroom/scene.gltf");
     //m_Map.Load("/home/fabio/sponza/Main.1_Sponza/NewSponza_Main_glTF_003.gltf");
 
     m_GBufferShader.Load("resources/shaders/gbuffer.vs",
@@ -61,9 +62,6 @@ void Application::Init()
 
 void Application::Deinit()
 {
-    //m_rk62.Unload();
-    m_Map.Unload();
-
     m_DeferredShader.Unload();
     m_GBufferShader.Unload();
 
@@ -120,7 +118,7 @@ void Application::Run()
         model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         
-        m_Map.Draw(m_GBufferShader, m_Camera.GetViewMatrix(), model);    
+        GetModel(m_Map).Draw(m_GBufferShader, m_Camera.GetViewMatrix(), model);    
         //m_Map.Draw(m_GBufferShader, externalCamera, model);    
 
         EnableColorBlend();
@@ -151,8 +149,8 @@ void Application::Run()
         #ifdef DEBUG
             DrawText(FormatText("Drawn: %u Culled: %u", drawn, culled), 10, 100, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
         #endif
-
-        auto meshes = m_Map.GetMeshes();
+        /*
+        auto meshes = GetModel(m_Map).GetMeshes();
 
         DisableDepthTest();
 
@@ -174,7 +172,7 @@ void Application::Run()
 
         DrawFrustum(g_Frustum);
 
-        EnableDepthTest();
+        EnableDepthTest();*/
 
         SwapBuffers();
 

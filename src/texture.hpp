@@ -10,7 +10,10 @@ public:
     Texture() = default;
     ~Texture() = default;
 
-    void Init(const std::string& path, bool flip, unsigned char* data = nullptr);
+    void Init(const std::string& path, bool flip = true);
+    void Init(const std::string& path, const std::string& type, bool flip = true);
+    void Init(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip = true);
+
     void Free();
 
     void Bind(unsigned int slot = 0) const;
@@ -28,6 +31,7 @@ public:
     void SetType(const std::string& type) { m_Type = type; }
 
 private:
+    void _Init(const std::string& path, bool flip, unsigned char* data);
 
     unsigned int m_ID;
     int m_Width, m_Height, m_BPP;

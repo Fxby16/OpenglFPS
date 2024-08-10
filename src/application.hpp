@@ -18,7 +18,7 @@ private:
 
     Camera m_Camera;
     //Model m_rk62;
-    Model m_Map;
+    uint32_t m_Map;
     Shader m_GBufferShader;
     Shader m_DeferredShader;
     GBuffer m_GBuffer;
