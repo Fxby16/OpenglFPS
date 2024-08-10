@@ -4,6 +4,7 @@
 #include <input.hpp>
 #include <renderer.hpp>
 #include <text.hpp>
+#include <resource_manager.hpp>
 
 #include <glad/glad.h>
 #include <cstdio>
@@ -62,6 +63,7 @@ void CloseWindow()
 {
     DeinitRenderer();
     DeinitTextRenderer();
+    DeinitResourceManager();
     glfwTerminate();
 }
 

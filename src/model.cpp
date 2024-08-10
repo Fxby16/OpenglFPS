@@ -1,5 +1,6 @@
 #include <model.hpp>
 #include <frustum.hpp>
+#include <log.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -26,7 +27,7 @@ void Model::Load(const std::string& path, bool pbr, bool gamma)
     m_PBREnabled = pbr;
     m_GammaCorrection = gamma;
 
-    printf("Loading model %s\n", path.c_str());
+    LogMessage("Loading model %s\n", path.c_str());
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | 
@@ -34,7 +35,7 @@ void Model::Load(const std::string& path, bool pbr, bool gamma)
         aiProcess_PreTransformVertices);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
-        fprintf(stderr, "ERROR::ASSIMP::%s\n", importer.GetErrorString());
+        LogError("ASSIMP::%s\n", importer.GetErrorString());
         return;
     }
 
@@ -46,6 +47,8 @@ void Model::Load(const std::string& path, bool pbr, bool gamma)
 
 void Model::Unload()
 {
+    LogMessage("Unloading model");
+
     for(auto &[tex_name, tex] : m_TexturesLoaded){
         tex.Free();
     }
@@ -218,7 +221,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene*
         aiString str;
         mat->GetTexture(type, i, &str);
 
-        printf("Texture type: %s\n", typeName.c_str());
+        LogMessage("Texture type: %s\n", typeName.c_str());
 
         for(int i = 0; i < strlen(str.C_Str()); i++){
             if(str.data[i] == '\\'){
@@ -230,7 +233,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene*
         if(m_TexturesLoaded.find(str.C_Str()) != m_TexturesLoaded.end()){
             textures.push_back(m_TexturesLoaded[str.C_Str()]);
             skip = true;
-            printf("Reusing texture %s\n", str.C_Str());
+            LogMessage("Reusing texture %s\n", str.C_Str());
         }
 
         if(!skip){
@@ -248,7 +251,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene*
                 //    m_TexturesLoaded.push_back(texture);
                 //}
 
-                printf("Embedded textures not supported\n");
+                LogMessage("Embedded textures not supported\n");
             }
         }
     }

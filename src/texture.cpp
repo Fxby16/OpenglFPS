@@ -4,24 +4,43 @@
 #include <glad/glad.h>
 
 Texture::Texture(const std::string& path, bool flip)
-    : m_Path(path)
 {
     Init(path, flip);
 }
 
 Texture::Texture(const std::string& path, const std::string& type, bool flip)
-    : m_Path(path), m_Type(type)
 {
-    Init(path, flip);
+    Init(path, type, flip);
 }
 
 Texture::Texture(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip)
-    : m_Width(width), m_Height(height), m_Path(path), m_Type(type)
 {
-    Init(path, flip, data);
+    Init(path, data, type, width, height, flip);
 }
 
-void Texture::Init(const std::string& path, bool flip, unsigned char* data)
+void Texture::Init(const std::string& path, bool flip)
+{
+    m_Path = path;
+    _Init(path, flip, nullptr);
+}
+
+void Texture::Init(const std::string& path, const std::string& type, bool flip)
+{
+    m_Path = path;
+    m_Type = type;
+    _Init(path, flip, nullptr);
+}
+
+void Texture::Init(const std::string& path, unsigned char* data, const std::string& type, unsigned int width, unsigned int height, bool flip)
+{
+    m_Path = path;
+    m_Type = type;
+    m_Width = width;
+    m_Height = height;
+    _Init(path, flip, data);
+}
+
+void Texture::_Init(const std::string& path, bool flip, unsigned char* data)
 {
     printf("Loading texture %s\n", path.c_str());
 
