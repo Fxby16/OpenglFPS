@@ -10,6 +10,7 @@ static GPUBuffer g_TextureBuffer;
 static GPUBuffer g_LineBuffer;
 
 static Shader g_LineShader;
+static Shader g_TextureShader;
 
 static glm::mat4 g_Proj = glm::mat4(1.0f);
 static glm::mat4 g_View = glm::mat4(1.0f);    
@@ -32,6 +33,7 @@ void InitRenderer()
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
 
+    g_TextureShader.Load("resources/shaders/texture.vs", "resources/shaders/texture.fs");
     g_TextureBuffer.Init(6, 4 * sizeof(float), 0);
     g_TextureBuffer.BindVBO();
     g_TextureBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
@@ -48,6 +50,7 @@ void DeinitRenderer()
     g_FullscreenQuadBuffer.Free();
     g_TextureBuffer.Free();
     g_LineBuffer.Free();
+    g_TextureShader.Unload();
     g_LineShader.Unload();
 }
 
@@ -89,15 +92,30 @@ void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, Defe
         } break;
         case DEFERRED_POSITION:
         {
+            UnbindFramebuffer();
+            DisableColorBlend();
+            DisableDepthTest();
             DrawTexture(gBuffer.GetPositionTexture(), -1.0f, -1.0f, 2.0f, 2.0f);
+            EnableColorBlend();
+            EnableDepthTest();
         } break;
         case DEFERRED_NORMAL:
         {
+            UnbindFramebuffer();
+            DisableColorBlend();
+            DisableDepthTest();
             DrawTexture(gBuffer.GetNormalTexture(), -1.0f, -1.0f, 2.0f, 2.0f);    
+            EnableColorBlend();
+            EnableDepthTest();
         } break;
         case DEFERRED_ALBEDO:
         {
+            UnbindFramebuffer();
+            DisableColorBlend();
+            DisableDepthTest();
             DrawTexture(gBuffer.GetAlbedoTexture(), -1.0f, -1.0f, 2.0f, 2.0f);    
+            EnableColorBlend();
+            EnableDepthTest();
         } break;
         default: break;
     }
@@ -168,6 +186,7 @@ void DrawTexture(unsigned int texture, float x, float y, float width, float heig
 {
     g_TextureBuffer.BindVAO();
     g_TextureBuffer.BindVBO();
+    g_TextureShader.Bind();    
 
     BindTexture(texture, 0);
 

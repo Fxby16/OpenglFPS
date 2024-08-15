@@ -1,5 +1,8 @@
 #include <cstdio>
 #include <string>
+#include <thread>
+#include <deque>
+#include <mutex>
 
 #include <application.hpp>
 #include <opengl.hpp>
@@ -12,6 +15,7 @@
 #include <log.hpp>
 #include <lights.hpp>
 #include <resource_manager.hpp>
+#include <predefined_meshes.hpp>
 
 #include <gtc/matrix_transform.hpp>
 
@@ -31,40 +35,31 @@ void Application::Init()
 
     DisableCursor();
 
-    m_Camera.Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
+    GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
 
-    // Load resources
-    //m_rk62.Load("resources/models/rk62/scene.gltf");
+    m_TexturedCube = LoadModel({CUBE_MESH}, false);
+    m_TexturedSphere = LoadModel({SPHERE_MESH}, false);
 
-    m_Map = LoadModel("/home/fabio/the_bathroom/scene.gltf");
-    //m_Map.Load("/home/fabio/sponza/Main.1_Sponza/NewSponza_Main_glTF_003.gltf");
+    Material mat;
+    mat.Load("resources/materials/lined_cement/lined_cement.mat");
+    std::vector<Mesh>& cube_meshes = GetModel(m_TexturedCube).GetMeshes();
 
-    m_GBufferShader.Load("resources/shaders/gbuffer.vs",
-                               "resources/shaders/gbuffer.fs");
+    for(auto& mesh : cube_meshes){
+        mesh.ApplyMaterial(mat);
+    }
 
-    m_DeferredShader.Load("resources/shaders/deferred_shading.vs",
-                               "resources/shaders/deferred_shading.fs");
+    std::vector<Mesh>& sphere_meshes = GetModel(m_TexturedSphere).GetMeshes();
+
+    for(auto& mesh : sphere_meshes){
+        mesh.ApplyMaterial(mat);
+    }
     
     // Initialize G-Buffer
     m_GBuffer.Init(g_ScreenWidth, g_ScreenHeight);
-
-    // Set samplers for deferred rendering shader
-    m_DeferredShader.Bind();
-    m_DeferredShader.SetUniform1i("Positions", 0);
-    m_DeferredShader.SetUniform1i("Normals", 1);
-    m_DeferredShader.SetUniform1i("Albedo", 2);
-
-    m_GBufferShader.Bind();
-    m_GBufferShader.SetUniformMat4fv("projection", m_Camera.GetProjectionMatrix(), 1);
-
-    SetLightShader(&m_DeferredShader);
 }
 
 void Application::Deinit()
 {
-    m_DeferredShader.Unload();
-    m_GBufferShader.Unload();
-
     m_GBuffer.Deinit();
 
     CloseWindow();
@@ -72,8 +67,6 @@ void Application::Deinit()
 
 void Application::Run()
 {
-    m_DeferredShader.Bind();
-
     double lastFrameTime = GetTime();
     double deltaTime = 0.0;
 
@@ -86,7 +79,7 @@ void Application::Run()
         PollEvents();
         HandleInputs(deltaTime);
         
-        ExtractFrustum(g_Frustum, m_Camera);
+        ExtractFrustum(g_Frustum, GetCamera());
 
         //glm::mat4 externalCamera = glm::lookAt(glm::vec3(-3.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         //UpdateView(externalCamera);
@@ -96,8 +89,8 @@ void Application::Run()
             culled = 0; 
         #endif
 
-        m_DeferredShader.Bind();
-        m_DeferredShader.SetUniform3fv("camPos", m_Camera.GetPosition(), 1);
+        GetDeferredShader().Bind();
+        GetDeferredShader().SetUniform3fv("camPos", GetCamera().GetPosition(), 1);
 
         ClearColor(0, 0, 0, 1);
         ClearScreen();
@@ -107,32 +100,32 @@ void Application::Run()
 
         DisableColorBlend();
 
-        m_GBufferShader.Bind();
-        glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
+        GetGBufferShader().Bind();
 
-        //m_rk62.Draw(m_GBufferShader, m_Camera.GetViewMatrix(), model);
+        GetModel(m_TexturedCube).Draw(GetGBufferShader(), GetCamera().GetViewMatrix(), glm::mat4(1.0f));
 
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-        
-        GetModel(m_Map).Draw(m_GBufferShader, m_Camera.GetViewMatrix(), model);    
-        //m_Map.Draw(m_GBufferShader, externalCamera, model);    
+        glm::mat4 model = glm::translate(model, glm::vec3(0.0f, 0.0f, 3.0f));
+
+        GetModel(m_TexturedSphere).Draw(GetGBufferShader(), GetCamera().GetViewMatrix(), model);
 
         EnableColorBlend();
 
         ResetCounters();
 
-        SpotLight sl;
-        sl.pos = m_Camera.GetPosition();
-        sl.dir = m_Camera.GetFront();
+        PointLight pl;
+        pl.pos = GetCamera().GetPosition();
+        pl.color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        SetPointLight(pl);
+
+        /*SpotLight sl;
+        sl.pos = GetCamera().GetPosition();
+        sl.dir = GetCamera().GetFront();
         sl.color = glm::vec3(1.0f, 1.0f, 1.0f);
         sl.cutOff = glm::cos(glm::radians(12.5f));
         sl.outerCutOff = glm::cos(glm::radians(17.5f));
 
-        SetSpotLight(sl);
+        SetSpotLight(sl);*/
 
         /*DirectionalLight dl;
         dl.dir = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -140,39 +133,17 @@ void Application::Run()
 
         SetDirectionalLight(dl);*/
 
-        DeferredPass(m_GBuffer, m_DeferredShader, m_Camera, m_DeferredMode);
+        DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
 
         DrawFPS(1.0f / deltaTime, 10, 10);
         DrawFrameTime(deltaTime, 10, 40);
-        DrawText(FormatText("Camera pos: %f %f %f", m_Camera.GetPosition().x, m_Camera.GetPosition().y, m_Camera.GetPosition().z), 10, 70, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        DrawText(FormatText("Camera pos: %f %f %f", GetCamera().GetPosition().x, GetCamera().GetPosition().y, GetCamera().GetPosition().z), 10, 70, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
         
         #ifdef DEBUG
             DrawText(FormatText("Drawn: %u Culled: %u", drawn, culled), 10, 100, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
         #endif
-        /*
-        auto meshes = GetModel(m_Map).GetMeshes();
-
-        DisableDepthTest();
-
-        for(auto &mesh : meshes){
-            BoundingBox bb = mesh.GetAABB();
-            bb.max = model * glm::vec4(bb.max, 1.0f);
-            bb.min = model * glm::vec4(bb.min, 1.0f);
-
-            glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-
-            if(!AABBInFrustum(g_Frustum, bb.min, bb.max)){
-                color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-            }
-
-            LogMessage("Min: %f %f %f Max: %f %f %f Visible: %s", bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, AABBInFrustum(g_Frustum, bb.min, bb.max) ? "true" : "false");
-
-            DrawBoundingBox(bb, color);
-        }
-
-        DrawFrustum(g_Frustum);
-
-        EnableDepthTest();*/
+        
+        if(g_DrawBoundingBoxes) DrawBoundingBoxes();
 
         SwapBuffers();
 
@@ -193,20 +164,99 @@ void Application::HandleInputs(double deltaTime)
     if(IsKeyPressed(KEY_3)) m_DeferredMode = DEFERRED_ALBEDO;
     if(IsKeyPressed(KEY_4)) m_DeferredMode = DEFERRED_SHADING;
 
-    if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   m_Camera.ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
-    if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) m_Camera.ProcessKeyboard(Camera::Movement::BACKWARD, deltaTime);
-    if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) m_Camera.ProcessKeyboard(Camera::Movement::LEFT, deltaTime);
-    if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))m_Camera.ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
-    if(IsKeyDown(KEY_SPACE))                    m_Camera.ProcessKeyboard(Camera::Movement::UP, deltaTime);
-    if(IsKeyDown(KEY_LEFT_SHIFT))               m_Camera.ProcessKeyboard(Camera::Movement::DOWN, deltaTime);
+    if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   GetCamera().ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
+    if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) GetCamera().ProcessKeyboard(Camera::Movement::BACKWARD, deltaTime);
+    if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) GetCamera().ProcessKeyboard(Camera::Movement::LEFT, deltaTime);
+    if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))GetCamera().ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
+    if(IsKeyDown(KEY_SPACE))                    GetCamera().ProcessKeyboard(Camera::Movement::UP, deltaTime);
+    if(IsKeyDown(KEY_LEFT_SHIFT))               GetCamera().ProcessKeyboard(Camera::Movement::DOWN, deltaTime);
 
-    m_Camera.ProcessMouseMovement(GetMouseXDelta(), GetMouseYDelta());
-    m_Camera.ProcessMouseScroll(GetScrollYDelta());
+    GetCamera().ProcessMouseMovement(GetMouseXDelta(), GetMouseYDelta());
+    GetCamera().ProcessMouseScroll(GetScrollYDelta());
 
+    if(IsKeyPressed(KEY_F9)) g_DrawBoundingBoxes = !g_DrawBoundingBoxes;
     if(IsKeyPressed(KEY_F10)) ToggleVSync();
-    if(IsKeyPressed(KEY_ESCAPE)) SetWindowShouldClose();
     if(IsKeyPressed(KEY_F12)) m_ShouldTakeScreenshot = true;
+    if(IsKeyPressed(KEY_ESCAPE)) SetWindowShouldClose();
 
-    UpdateProj(m_Camera.GetProjectionMatrix());
-    UpdateView(m_Camera.GetViewMatrix());
+    UpdateProj(GetCamera().GetProjectionMatrix());
+    UpdateView(GetCamera().GetViewMatrix());
 }
+
+void Application::DrawBoundingBoxes()
+{
+    /*DisableDepthTest();
+
+    auto& models = GetModels();
+
+    for(auto& [id, model] : models){
+        auto& meshes = model.GetMeshes();
+
+        for(auto &mesh : meshes){
+            BoundingBox bb = mesh.GetAABB();
+            bb.max = model * glm::vec4(bb.max, 1.0f);
+            bb.min = model * glm::vec4(bb.min, 1.0f);
+
+            glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+            if(!AABBInFrustum(g_Frustum, bb.min, bb.max)){
+                color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            }
+
+            //LogMessage("Min: %f %f %f Max: %f %f %f Visible: %s", bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z, AABBInFrustum(g_Frustum, bb.min, bb.max) ? "true" : "false");
+
+            DrawBoundingBox(bb, color);
+        }
+    }
+
+    EnableDepthTest();*/
+}
+
+// Cannot be used because i currently don't have something to call opengl functions from another thread
+/*
+void Application::LoadResources()
+{
+    std::deque<std::string> logs;
+    std::mutex m;
+    bool loaded = false;
+
+    SetLogsOutput(&logs, &m);
+
+    std::thread t1([&loaded, this](){
+        m_Map = LoadModel("/home/fabio/the_bathroom/scene.gltf");
+        //m_Map.Load("/home/fabio/sponza/Main.1_Sponza/NewSponza_Main_glTF_003.gltf");
+    
+        loaded = true;
+    });
+
+    t1.detach();
+
+    unsigned int max_lines = g_ScreenHeight / 30;
+
+    while(!loaded){
+        PollEvents();
+
+        ClearColor(0, 0, 0, 1);
+        ClearScreen();
+
+        m.lock();
+        unsigned int num_logs = logs.size();
+
+        if(num_logs > max_lines){
+            while(num_logs > max_lines){
+                logs.pop_front();
+                num_logs--;
+            }
+        }
+
+        for(int i = 0; i < num_logs; i++){
+            DrawText(logs[i], 10, 10 + i * 30, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        }
+
+        m.unlock();
+
+        SwapBuffers();
+    }
+
+    UnsetLogsOutput();
+}*/

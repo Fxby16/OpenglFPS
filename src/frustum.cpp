@@ -93,7 +93,7 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     g_FrustumCorners[5] = ntr;
     g_FrustumCorners[6] = nbr;
     g_FrustumCorners[7] = nbl; 
-
+/*
     #ifdef DEBUG
     LogMessage("Corner positions:");
     LogMessage("ftl: (%f, %f, %f)", ftl.x, ftl.y, ftl.z);
@@ -108,7 +108,7 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     LogMessage("Fov: %f Aspect ratio: %f", glm::degrees(fov), aspectRatio);
     LogMessage("Cam Pos: (%f, %f, %f)", viewPos.x, viewPos.y, viewPos.z);
     printf("\n");
-    #endif
+    #endif*/
 
     frustum.Planes[NEAR] = PlaneFromCorners(ntl, ntr, nbr);
     frustum.Planes[FAR] = PlaneFromCorners(ftr, ftl, fbl);
@@ -117,9 +117,9 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     frustum.Planes[RIGHT] = PlaneFromCorners(nbr, ntr, fbr);
     frustum.Planes[LEFT] = PlaneFromCorners(ntl, nbl, fbl); 
 
-    for(int i = 0; i < NUM_PLANES; i++){
-        LogMessage("Plane %d: (%f, %f, %f) %f", i, frustum.Planes[i].normal.x, frustum.Planes[i].normal.y, frustum.Planes[i].normal.z, frustum.Planes[i].distance);
-    }
+    //for(int i = 0; i < NUM_PLANES; i++){
+    //    LogMessage("Plane %d: (%f, %f, %f) %f", i, frustum.Planes[i].normal.x, frustum.Planes[i].normal.y, frustum.Planes[i].normal.z, frustum.Planes[i].distance);
+    //}
 }
 
 float SignedDistanceToPlane(const Plane& plane, glm::vec3 position)
@@ -169,9 +169,14 @@ bool isOnOrForwardPlane(const Plane& plane, glm::vec3 extents, glm::vec3 center)
     return -r <= SignedDistanceToPlane(plane, center);
 }
 
+float GetSignedDistanceToPlane(const Plane& p, glm::vec3 point)
+{
+    return glm::dot(p.normal, point) - p.distance;
+}
+
 bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 {
-    glm::vec3 center = (min + max) * 0.5f;
+    /*glm::vec3 center = (min + max) * 0.5f;
     glm::vec3 extents = {max.x - center.x, max.y - center.y, max.z - center.z};
 
     return (
@@ -181,5 +186,22 @@ bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
         isOnOrForwardPlane(frustum.Planes[TOP], extents, center) &&
         isOnOrForwardPlane(frustum.Planes[NEAR], extents, center) &&
         isOnOrForwardPlane(frustum.Planes[FAR], extents, center)
-    );
+    );*/
+
+    for (const Plane& plane : frustum.Planes) {
+        glm::vec3 positiveVertex = min;
+        if (plane.normal.x >= 0) {
+            positiveVertex.x = max.x;
+        }
+        if (plane.normal.y >= 0) {
+            positiveVertex.y = max.y;
+        }
+        if (plane.normal.z >= 0) {
+            positiveVertex.z = max.z;
+        }
+        if (GetSignedDistanceToPlane(plane, positiveVertex) < 0) {
+            return false;
+        }
+    }
+    return true;
 }

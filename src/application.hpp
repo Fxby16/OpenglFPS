@@ -14,13 +14,13 @@ private:
     void Init();
     void Deinit();
 
-    void HandleInputs(double deltaTime);
+    //void LoadResources();
 
-    Camera m_Camera;
-    //Model m_rk62;
-    uint32_t m_Map;
-    Shader m_GBufferShader;
-    Shader m_DeferredShader;
+    void HandleInputs(double deltaTime);
+    void DrawBoundingBoxes();
+
+    uint32_t m_TexturedCube;
+    uint32_t m_TexturedSphere;
     GBuffer m_GBuffer;
     DeferredMode m_DeferredMode = DEFERRED_SHADING;
 

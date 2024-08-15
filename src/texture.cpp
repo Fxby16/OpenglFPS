@@ -1,4 +1,5 @@
 #include <texture.hpp>
+#include <log.hpp>
 
 #include <stb_image.h>
 #include <glad/glad.h>
@@ -21,6 +22,9 @@ Texture::Texture(const std::string& path, unsigned char* data, const std::string
 void Texture::Init(const std::string& path, bool flip)
 {
     m_Path = path;
+
+    printf("Texture without type %s\n", path.c_str());
+
     _Init(path, flip, nullptr);
 }
 
@@ -28,6 +32,9 @@ void Texture::Init(const std::string& path, const std::string& type, bool flip)
 {
     m_Path = path;
     m_Type = type;
+
+    printf("Texture with type %s %s\n", path.c_str(), type.c_str());
+
     _Init(path, flip, nullptr);
 }
 
@@ -37,12 +44,15 @@ void Texture::Init(const std::string& path, unsigned char* data, const std::stri
     m_Type = type;
     m_Width = width;
     m_Height = height;
+
+    printf("Raw texture with type %s %s\n", path.c_str(), type.c_str());
+
     _Init(path, flip, data);
 }
 
 void Texture::_Init(const std::string& path, bool flip, unsigned char* data)
 {
-    printf("Loading texture %s\n", path.c_str());
+    LogMessage("Loading texture %s\n", path.c_str());
 
     glGenTextures(1, &m_ID);
     glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -80,18 +90,10 @@ void Texture::_Init(const std::string& path, bool flip, unsigned char* data)
     }
 
     stbi_image_free(local_buffer);
-
-    #ifdef DEBUG
-        printf("Texture::Init %u\n", m_ID);
-    #endif
 }
 
 void Texture::Free()
 {
-    #ifdef DEBUG
-        printf("Texture::Free %u\n", m_ID);
-    #endif
-
     glDeleteTextures(1, &m_ID);
 }
 

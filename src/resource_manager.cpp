@@ -3,21 +3,19 @@
 #include <stb_image.h>
 
 static ResourceManager g_ResourceManager;
+uint32_t g_GBufferShader, g_DeferredShader;
 
-Model& ResourceManager::GetModel(uint32_t id)
-{
-    return m_Models[id];
-}
-
-Texture& ResourceManager::GetTexture(uint32_t id)
-{
-    return m_Textures[id];
-}
-
-uint32_t ResourceManager::LoadModel(const std::string& path, bool pbr, bool gamma)
+uint32_t ResourceManager::LoadModel(const std::string& path, bool is_compressed, bool pbr, bool gamma)
 {
     uint32_t id = RandUint32();
-    m_Models[id].Load(path, pbr, gamma);
+    m_Models[id].Load(path, is_compressed, pbr, gamma);
+    return id;
+}
+
+uint32_t ResourceManager::LoadModel(const std::vector<Mesh>& meshes, bool is_compressed, bool pbr, bool gamma)
+{
+    uint32_t id = RandUint32();
+    m_Models[id].Load(meshes, is_compressed, pbr, gamma);
     return id;
 }
 
@@ -35,6 +33,13 @@ uint32_t ResourceManager::LoadTexture(const std::string& path, const std::string
     return id;
 }
 
+uint32_t ResourceManager::LoadShader(const std::string& vertex_path, const std::string& fragment_path)
+{
+    uint32_t id = RandUint32();
+    m_Shaders[id].Load(vertex_path.c_str(), fragment_path.c_str());
+    return id;
+}
+
 void ResourceManager::UnloadModel(uint32_t id)
 {
     m_Models[id].Unload();
@@ -47,6 +52,12 @@ void ResourceManager::UnloadTexture(uint32_t id)
     m_Textures.erase(id);
 }
 
+void ResourceManager::UnloadShader(uint32_t id)
+{
+    m_Shaders[id].Unload();
+    m_Shaders.erase(id);
+}
+
 void ResourceManager::Deinit()
 {
     for(auto& [id, model] : m_Models){
@@ -57,8 +68,13 @@ void ResourceManager::Deinit()
         texture.Free();
     }
 
+    for(auto& [id, shader] : m_Shaders){
+        shader.Unload();
+    }
+
     m_Models.clear();
     m_Textures.clear();
+    m_Shaders.clear();
 }
 
 void DeinitResourceManager()
@@ -66,19 +82,19 @@ void DeinitResourceManager()
     g_ResourceManager.Deinit();
 }
 
-Model& GetModel(uint32_t id)
+ResourceManager& GetResourceManager()
 {
-    return g_ResourceManager.GetModel(id);
+    return g_ResourceManager;
 }
 
-Texture& GetTexture(uint32_t id)
+uint32_t LoadModel(const std::string& path, bool is_compressed, bool pbr, bool gamma)
 {
-    return g_ResourceManager.GetTexture(id);
+    return g_ResourceManager.LoadModel(path, is_compressed, pbr, gamma);
 }
 
-uint32_t LoadModel(const std::string& path, bool pbr, bool gamma)
+uint32_t LoadModel(const std::vector<Mesh>& meshes, bool is_compressed, bool pbr, bool gamma)
 {
-    return g_ResourceManager.LoadModel(path, pbr, gamma);
+    return g_ResourceManager.LoadModel(meshes, is_compressed, pbr, gamma);
 }
 
 uint32_t LoadTexture(const std::string& path, bool flip)
@@ -99,4 +115,14 @@ void UnloadModel(uint32_t id)
 void UnloadTexture(uint32_t id)
 {
     g_ResourceManager.UnloadTexture(id);
+}
+
+uint32_t LoadShader(const std::string& vertex_path, const std::string& fragment_path)
+{
+    return g_ResourceManager.LoadShader(vertex_path, fragment_path);
+}
+
+void UnloadShader(uint32_t id)
+{
+    g_ResourceManager.UnloadShader(id);
 }
