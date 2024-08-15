@@ -5,6 +5,8 @@
 #include <renderer.hpp>
 #include <text.hpp>
 #include <resource_manager.hpp>
+#include <camera.hpp>
+#include <predefined_meshes.hpp>
 
 #include <glad/glad.h>
 #include <cstdio>
@@ -53,8 +55,28 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     EnableVSync();
     EnableDepthTest();
 
+    // modules initialization
     InitRenderer();
     InitTextRenderer("resources/fonts/tektur/Tektur-Regular.ttf", 30);
+    InitPredefinedMeshes();
+
+    GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
+
+    g_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
+                               "resources/shaders/gbuffer.fs");
+
+    g_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
+                               "resources/shaders/deferred_shading.fs");
+
+    Shader& gbuffer_s = GetGBufferShader();
+    gbuffer_s.Bind();
+    gbuffer_s.SetUniformMat4fv("projection", GetCamera().GetProjectionMatrix(), 1);
+
+    Shader& deferred_s = GetDeferredShader();
+    deferred_s.Bind();
+    deferred_s.SetUniform1i("Positions", 0);
+    deferred_s.SetUniform1i("Normals", 1);
+    deferred_s.SetUniform1i("Albedo", 2);
 
     return 0;
 }
@@ -63,6 +85,7 @@ void CloseWindow()
 {
     DeinitRenderer();
     DeinitTextRenderer();
+    DeinitPredefinedMeshes();
     DeinitResourceManager();
     glfwTerminate();
 }

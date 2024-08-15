@@ -1,6 +1,7 @@
 #include <model.hpp>
 #include <frustum.hpp>
 #include <log.hpp>
+#include <resource_manager.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -9,6 +10,9 @@
 #include <cstdio>
 #include <limits>
 #include <stack>
+
+static std::deque<std::string>* g_Logs = nullptr;
+static std::mutex* g_LogsMutex = nullptr;
 
 glm::mat4 AiToGlm(const aiMatrix4x4& from)
 {
@@ -22,17 +26,26 @@ glm::mat4 AiToGlm(const aiMatrix4x4& from)
     return to;
 }
 
-void Model::Load(const std::string& path, bool pbr, bool gamma)
+void Model::Load(const std::string& path, bool is_compressed, bool pbr, bool gamma)
 {
     m_PBREnabled = pbr;
     m_GammaCorrection = gamma;
+    m_Compressed = is_compressed;
 
-    LogMessage("Loading model %s\n", path.c_str());
+    if(!g_Logs){
+        LogMessage("Loading model %s\n", path.c_str());
+    }else{
+        g_LogsMutex->lock();
+        g_Logs->push_back("Loading model " + path + "\n");
+        g_LogsMutex->unlock();
+    }
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | 
-        aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |
-        aiProcess_PreTransformVertices);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_CalcTangentSpace |
+                                                   aiProcess_Triangulate |
+                                                   aiProcess_JoinIdenticalVertices |
+                                                   aiProcess_FlipUVs |
+                                                   aiProcess_GenNormals);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         LogError("ASSIMP::%s\n", importer.GetErrorString());
@@ -45,23 +58,33 @@ void Model::Load(const std::string& path, bool pbr, bool gamma)
     ProcessNode(scene->mRootNode, scene);
 }
 
+void Model::Load(const std::vector<Mesh>& meshes, bool is_compressed, bool pbr, bool gamma)
+{
+    m_PBREnabled = pbr;
+    m_GammaCorrection = gamma;
+    m_Compressed = is_compressed;
+
+    m_Meshes = meshes;
+}
+
 void Model::Unload()
 {
     LogMessage("Unloading model");
-
-    for(auto &[tex_name, tex] : m_TexturesLoaded){
-        tex.Free();
-    }
 
     for(Mesh& mesh : m_Meshes){
         mesh.Free();
     }
 }
 
+void Model::SetMeshes(const std::vector<Mesh>& meshes)
+{
+    m_Meshes = meshes;
+}
+
 void Model::Draw(Shader& shader, glm::mat4 view, glm::mat4 model)
 {
     for(int i = 0; i < m_Meshes.size(); i++){
-        m_Meshes[i].Draw(shader, view, model, m_PBREnabled);
+        m_Meshes[i].Draw(shader, view, model, m_PBREnabled, m_Compressed);
     }
 }
 
@@ -75,23 +98,26 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene, glm::mat4 parent_tra
     }
 
     //simulate recursion
-    std::stack<aiNode*> stack;
+    std::stack<std::pair<aiNode*, glm::mat4>> stack;
 
     for(int i = 0; i < node->mNumChildren; i++){
-        stack.push(node->mChildren[i]);
+        stack.push({node->mChildren[i], transform});
     }
 
     while(!stack.empty()){
-        aiNode* current = stack.top();
+        aiNode* current_node = stack.top().first;
+        glm::mat4 current_transform = stack.top().second;
         stack.pop();
 
-        for(int i = 0; i < current->mNumMeshes; i++){
-            aiMesh* mesh = scene->mMeshes[current->mMeshes[i]];
-            m_Meshes.push_back(ProcessMesh(mesh, scene, transform));
+        current_transform = current_transform * AiToGlm(current_node->mTransformation);
+
+        for(int i = 0; i < current_node->mNumMeshes; i++){
+            aiMesh* mesh = scene->mMeshes[current_node->mMeshes[i]];
+            m_Meshes.push_back(ProcessMesh(mesh, scene, current_transform));
         }
 
-        for(int i = 0; i < current->mNumChildren; i++){
-            stack.push(current->mChildren[i]);
+        for(int i = 0; i < current_node->mNumChildren; i++){
+            stack.push({current_node->mChildren[i], current_transform});
         }
     }
 }
@@ -100,7 +126,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<uint32_t> textures;
 
     glm::vec3 aabb_min = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
     glm::vec3 aabb_max = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
@@ -169,53 +195,53 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
 
     if(m_PBREnabled){
         // Load PBR textures
-        std::vector<Texture> pbrTextures;
+        std::vector<uint32_t> pbrTextures;
 
         // Albedo (diffuse) map
-        std::vector<Texture> albedoMaps = LoadMaterialTextures(material, scene, aiTextureType_BASE_COLOR, "albedoMap");
+        std::vector<uint32_t> albedoMaps = LoadMaterialTextures(material, scene, aiTextureType_BASE_COLOR, "albedoMap");
         pbrTextures.insert(pbrTextures.end(), albedoMaps.begin(), albedoMaps.end());
 
         // Normal map
-        std::vector<Texture> normalMaps = LoadMaterialTextures(material, scene, aiTextureType_NORMALS, "normalMap");
+        std::vector<uint32_t> normalMaps = LoadMaterialTextures(material, scene, aiTextureType_NORMALS, "normalMap");
         pbrTextures.insert(pbrTextures.end(), normalMaps.begin(), normalMaps.end());
 
         // Roughness map
-        std::vector<Texture> roughnessMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE_ROUGHNESS, "roughnessMap");
+        std::vector<uint32_t> roughnessMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE_ROUGHNESS, "roughnessMap");
         pbrTextures.insert(pbrTextures.end(), roughnessMaps.begin(), roughnessMaps.end());
 
         // Metallic map
-        std::vector<Texture> metallicMaps = LoadMaterialTextures(material, scene, aiTextureType_METALNESS, "metallicMap");
+        std::vector<uint32_t> metallicMaps = LoadMaterialTextures(material, scene, aiTextureType_METALNESS, "metallicMap");
         pbrTextures.insert(pbrTextures.end(), metallicMaps.begin(), metallicMaps.end());
 
         // AO (ambient occlusion) map
-        std::vector<Texture> aoMaps = LoadMaterialTextures(material, scene, aiTextureType_AMBIENT_OCCLUSION, "aoMap");
+        std::vector<uint32_t> aoMaps = LoadMaterialTextures(material, scene, aiTextureType_AMBIENT_OCCLUSION, "aoMap");
         pbrTextures.insert(pbrTextures.end(), aoMaps.begin(), aoMaps.end());
 
         textures.insert(textures.end(), pbrTextures.begin(), pbrTextures.end());
     }else{
         //diffuse maps
-        std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<uint32_t> diffuseMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
         //specular maps
-        //std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        //std::vector<uint32_t> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         //textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
         //normal maps
-        //std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        //std::vector<uint32_t> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
         //textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
         //height maps
-        //std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+        //std::vector<uint32_t> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
     return Mesh(vertices, indices, textures, BoundingBox(aabb_min, aabb_max));
 }
 
-std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene* scene, aiTextureType type, const std::string& typeName)
+std::vector<uint32_t> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene* scene, aiTextureType type, const std::string& typeName)
 {
-    std::vector<Texture> textures;
+    std::vector<uint32_t> textures;
 
     for(int i = 0; i < mat->GetTextureCount(type); i++){
         aiString str;
@@ -229,32 +255,42 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene*
             }
         }
 
-        bool skip = false;
-        if(m_TexturesLoaded.find(str.C_Str()) != m_TexturesLoaded.end()){
-            textures.push_back(m_TexturesLoaded[str.C_Str()]);
-            skip = true;
-            LogMessage("Reusing texture %s\n", str.C_Str());
-        }
-
-        if(!skip){
-            if(str.data[0] != '*'){
-                Texture texture(m_Directory + "/" + str.C_Str(), typeName, false);
-                textures.push_back(texture);
-                m_TexturesLoaded[str.C_Str()] = texture;
+        if(str.data[0] != '*'){
+            if(!g_Logs){
+                LogMessage("Loading texture %s\n", str.C_Str());
             }else{
-                //int textureIndex = std::atoi(str.C_Str() + 1);
-                //if (textureIndex >= 0 && textureIndex < scene->mNumTextures) {
-                //    aiTexture* embeddedTexture = scene->mTextures[textureIndex];
-                //    // Create a Texture object from the embedded texture data
-                //    Texture texture(embeddedTexture->mFilename.C_Str(), (unsigned char*)embeddedTexture->pcData, typeName, embeddedTexture->mWidth, embeddedTexture->mHeight, false);
-                //    textures.push_back(texture);
-                //    m_TexturesLoaded.push_back(texture);
-                //}
-
-                LogMessage("Embedded textures not supported\n");
+                g_LogsMutex->lock();
+                g_Logs->push_back("Loading texture " + std::string(str.C_Str()) + "\n");
+                g_LogsMutex->unlock();
             }
+
+            uint32_t texture = LoadTexture(m_Directory + "/" + str.C_Str(), typeName, false);
+            textures.push_back(texture);
+        }else{
+            //int textureIndex = std::atoi(str.C_Str() + 1);
+            //if (textureIndex >= 0 && textureIndex < scene->mNumTextures) {
+            //    aiTexture* embeddedTexture = scene->mTextures[textureIndex];
+            //    // Create a Texture object from the embedded texture data
+            //    Texture texture(embeddedTexture->mFilename.C_Str(), (unsigned char*)embeddedTexture->pcData, typeName, embeddedTexture->mWidth, embeddedTexture->mHeight, false);
+            //    textures.push_back(texture);
+            //    m_TexturesLoaded.push_back(texture);
+            //}
+
+            LogMessage("Embedded textures not supported\n");
         }
     }
 
     return textures;
+}
+
+void SetLogsOutput(std::deque<std::string>* logs, std::mutex* logs_mutex)
+{
+    g_Logs = logs;
+    g_LogsMutex = logs_mutex;
+}
+
+void UnsetLogsOutput()
+{
+    g_Logs = nullptr;
+    g_LogsMutex = nullptr;
 }

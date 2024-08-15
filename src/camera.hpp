@@ -57,10 +57,6 @@ private:
     float m_Zoom;
 
     glm::mat4 m_ProjectionMatrix;
-
-public:
-    float m_nh = glm::tan(glm::radians(g_FOV * 0.5f)) * g_Near;
-    float m_nw = m_nh * g_AspectRatio;
-    float m_fh = glm::tan(glm::radians(g_FOV * 0.5f)) * g_Far;
-    float m_fw = m_fh * g_AspectRatio;
 };
+
+Camera& GetCamera();

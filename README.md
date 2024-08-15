@@ -1,4 +1,4 @@
-# RaylibFPS
+# OpenglFPS
 
 ## Build
 `./dependencies.bash`  

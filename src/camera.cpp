@@ -1,6 +1,13 @@
 #include <camera.hpp>
 #include <globals.hpp>
 
+static Camera g_Camera;
+
+Camera& GetCamera()
+{
+    return g_Camera;
+}
+
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 {
     Init(position, up, yaw, pitch);
