@@ -26,8 +26,8 @@ void Material::Load(const std::string& path)
             metallic = LoadTexture(dir + "/" + texture_path, std::string("metallicMap"));
         }else if(strcmp(texture_type, "Roughness") == 0){
             roughness = LoadTexture(dir + "/" + texture_path, std::string("roughnessMap"));
-        }else if(strcmp(texture_type, "AO") == 0){
-            ao = LoadTexture(dir + "/" + texture_path, std::string("aoMap"));
+        }else if(strcmp(texture_type, "AO") == 0){ //currently not used
+            //ao = LoadTexture(dir + "/" + texture_path, std::string("aoMap"));
         }
     }
 
@@ -47,5 +47,27 @@ void Material::Load(const std::string& albedo_path, const std::string& normal_pa
 
 std::vector<uint32_t> Material::GetTextures() const
 {
-    return {albedo, normal, metallic, roughness, ao};
+    std::vector<uint32_t> textures;
+    
+    if(albedo != std::numeric_limits<uint32_t>::max()){
+        textures.push_back(albedo);
+    }
+
+    if(normal != std::numeric_limits<uint32_t>::max()){
+        textures.push_back(normal);
+    }
+
+    if(metallic != std::numeric_limits<uint32_t>::max()){
+        textures.push_back(metallic);
+    }
+
+    if(roughness != std::numeric_limits<uint32_t>::max()){
+        textures.push_back(roughness);
+    }
+
+    if(ao != std::numeric_limits<uint32_t>::max()){
+        textures.push_back(ao);
+    }
+
+    return textures;
 }

@@ -139,6 +139,12 @@ void Shader::Unload()
     glDeleteProgram(m_ID);
 }
 
+void Shader::Reload()
+{
+    Unload();
+    Load(m_VertexPath.c_str(), m_FragmentPath.c_str());
+}
+
 void Shader::Bind() const
 {
     glUseProgram(m_ID);

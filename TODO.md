@@ -1,10 +1,15 @@
-- Map editor
 - Small map
 - Shadows
 - indirect lighting
 - Ssao
 - Bloom
 - Skeletal animations
-- More generic model drawing
-- resource manager
 - loading screen
+- multithreaded models loading
+- batch rendering
+- save models id to file
+- display info about the selected model
+- apply materials to meshes and save them (through the editor)
+- option to scale by the same amount on all the axis
+- option to manually edit model matrix values
+- add lights through the editor

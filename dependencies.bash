@@ -16,3 +16,10 @@ cd freetype
 make setup ansi
 make -j6
 cd ..
+
+premake5 gmake2 --file=imgui.lua
+make -j6 config=release
+
+cd nativefiledialog/build/gmake_linux
+make config=release_x64 -j6
+cd ../../../

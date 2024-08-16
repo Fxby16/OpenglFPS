@@ -7,11 +7,15 @@
 #include <random.hpp>
 #include <shader.hpp>
 
+extern uint32_t g_Cube;
+extern uint32_t g_Sphere;
+
 class ResourceManager{
 public:
     ResourceManager() = default;
     ~ResourceManager() = default;
 
+    void Init();
     void Deinit();
 
     ResourceManager(const ResourceManager&) = delete;
@@ -22,7 +26,7 @@ public:
     inline Shader& GetShader(uint32_t id) { return m_Shaders[id]; }
 
     uint32_t LoadModel(const std::string& path, bool is_compressed = true, bool pbr = true, bool gamma = false);
-    uint32_t LoadModel(const std::vector<Mesh>& meshes, bool is_compressed = true, bool pbr = true, bool gamma = false);
+    uint32_t LoadModel(const std::vector<Mesh>& meshes, const std::string& model_name, bool is_compressed = true, bool pbr = true, bool gamma = false);
     uint32_t LoadTexture(const std::string& path, bool flip = true);
     uint32_t LoadTexture(const std::string& path, const std::string& type, bool flip = true);
     uint32_t LoadShader(const std::string& vertex_path, const std::string& fragment_path);
@@ -31,10 +35,14 @@ public:
     void UnloadTexture(uint32_t id);
     void UnloadShader(uint32_t id);
 
-    inline const std::unordered_map<uint32_t, Model>& GetModels() const { return m_Models; }
-    inline const std::unordered_map<uint32_t, Texture>& GetTextures() const { return m_Textures; }
-    inline const std::unordered_map<uint32_t, Shader>& GetShaders() const { return m_Shaders; }
-    
+    void UnloadModelsWithoutTransforms();
+
+    inline std::unordered_map<uint32_t, Model>& GetModels() { return m_Models; }
+    inline std::unordered_map<uint32_t, Texture>& GetTextures() { return m_Textures; }
+    inline std::unordered_map<uint32_t, Shader>& GetShaders() { return m_Shaders; }
+
+    void HotReloadShaders();
+    void DrawModels(Shader& shader, glm::mat4 view);
 private:
 
     std::unordered_map<uint32_t, Model> m_Models;
@@ -42,6 +50,7 @@ private:
     std::unordered_map<uint32_t, Shader> m_Shaders;
 };
 
+extern void InitResourceManager();
 extern void DeinitResourceManager();
 extern ResourceManager& GetResourceManager();
 
@@ -54,7 +63,7 @@ inline Shader& GetGBufferShader() { return GetShader(g_GBufferShader); }
 inline Shader& GetDeferredShader() { return GetShader(g_DeferredShader); }
 
 extern uint32_t LoadModel(const std::string& path, bool is_compressed = true, bool pbr = true, bool gamma = false);
-extern uint32_t LoadModel(const std::vector<Mesh>& meshes, bool is_compressed = true, bool pbr = true, bool gamma = false);
+extern uint32_t LoadModel(const std::vector<Mesh>& meshes, const std::string& model_name, bool is_compressed = true, bool pbr = true, bool gamma = false);
 extern uint32_t LoadTexture(const std::string& path, bool flip = true);
 extern uint32_t LoadTexture(const std::string& path, const std::string& type, bool flip = true);
 extern uint32_t LoadShader(const std::string& vertex_path, const std::string& fragment_path);
@@ -63,6 +72,12 @@ extern void UnloadModel(uint32_t id);
 extern void UnloadTexture(uint32_t id);
 extern void UnloadShader(uint32_t id);
 
-inline const std::unordered_map<uint32_t, Model>& GetModels() { return GetResourceManager().GetModels(); }
-inline const std::unordered_map<uint32_t, Texture>& GetTextures() { return GetResourceManager().GetTextures(); }
-inline const std::unordered_map<uint32_t, Shader>& GetShaders() { return GetResourceManager().GetShaders(); }
+extern void UnloadModelsWithoutTransforms();
+
+inline std::unordered_map<uint32_t, Model>& GetModels() { return GetResourceManager().GetModels(); }
+inline std::unordered_map<uint32_t, Texture>& GetTextures() { return GetResourceManager().GetTextures(); }
+inline std::unordered_map<uint32_t, Shader>& GetShaders() { return GetResourceManager().GetShaders(); }
+
+extern void HotReloadShaders();
+extern void ClearModels();
+extern void DrawModels(Shader& shader, glm::mat4 view);

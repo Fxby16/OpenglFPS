@@ -13,3 +13,15 @@
 [submodule "vendor/freetype"]
 	path = vendor/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/nlohmann/json.git
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "vendor/imguizmo"]
+	path = vendor/imguizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "vendor/nativefiledialog"]
+	path = vendor/nativefiledialog
+	url = https://github.com/Fxby16/nativefiledialog.git

@@ -26,6 +26,8 @@ public:
     inline int GetMouseXDelta(){ return m_MousePosition.x - m_PreviousMousePosition.x; }
     inline int GetMouseYDelta(){ return m_MousePosition.y - m_PreviousMousePosition.y; }
 
+    inline void ResetLastMousePosition(){ m_PreviousMousePosition = m_MousePosition; }
+
 private:
     std::unordered_map<int, KeyState> m_KeyStates;
     std::unordered_map<int, KeyState> m_MouseStates;

@@ -15,6 +15,7 @@ extern bool IsVSyncEnabled();
 extern void EnableCursor();
 extern void DisableCursor();
 extern bool IsCursorEnabled();
+extern void ToggleCursor();
 extern double GetTime();
 extern bool WindowShouldClose();
 extern void SetWindowShouldClose();
@@ -39,3 +40,4 @@ extern int GetMouseXDelta();
 extern int GetMouseYDelta();
 
 extern void UpdateInputs();
+extern void ResetLastMousePosition();

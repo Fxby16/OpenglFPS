@@ -9,6 +9,10 @@
 #include <predefined_meshes.hpp>
 
 #include <glad/glad.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include <cstdio>
 
 static bool g_VSync = false;
@@ -52,6 +56,11 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);  
     #endif
 
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(g_Window, true);
+    ImGui_ImplOpenGL3_Init("#version 460");
+
     EnableVSync();
     EnableDepthTest();
 
@@ -59,6 +68,7 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     InitRenderer();
     InitTextRenderer("resources/fonts/tektur/Tektur-Regular.ttf", 30);
     InitPredefinedMeshes();
+    InitResourceManager();
 
     GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
 
@@ -87,6 +97,11 @@ void CloseWindow()
     DeinitTextRenderer();
     DeinitPredefinedMeshes();
     DeinitResourceManager();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
 }
 
@@ -133,6 +148,15 @@ void DisableCursor()
 bool IsCursorEnabled()
 {
     return glfwGetInputMode(g_Window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
+}
+
+void ToggleCursor()
+{
+    if(IsCursorEnabled()){
+        DisableCursor();
+    }else{ 
+        EnableCursor();
+    }
 }
 
 double GetTime()
@@ -232,4 +256,9 @@ int GetMouseYDelta()
 void UpdateInputs()
 {
     g_Input.UpdateStates();
+}
+
+void ResetLastMousePosition()
+{
+    g_Input.ResetLastMousePosition();
 }

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <limits>
 
 struct Material{
     uint32_t albedo;
@@ -10,6 +11,15 @@ struct Material{
     uint32_t metallic;
     uint32_t roughness;
     uint32_t ao;
+
+    Material()
+    {
+        albedo = std::numeric_limits<uint32_t>::max();
+        normal = std::numeric_limits<uint32_t>::max();
+        metallic = std::numeric_limits<uint32_t>::max();
+        roughness = std::numeric_limits<uint32_t>::max();
+        ao = std::numeric_limits<uint32_t>::max();
+    }
 
     /**
      * @brief Load the material textures. You must provide the path to a file that contains the paths to the textures.
