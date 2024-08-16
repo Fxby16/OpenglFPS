@@ -56,7 +56,7 @@ void Mesh::Free()
     m_GPUBuffer.Free();
 }
 
-void Mesh::ApplyMaterial(const Material& material)
+void Mesh::SetMaterial(const Material& material)
 {
     m_Textures = material.GetTextures();
 }

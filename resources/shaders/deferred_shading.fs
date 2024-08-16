@@ -117,21 +117,29 @@ void main()
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = pointLights[i].color * attenuation;
 
-        float NDF = DistributionGGX(normal, H, roughness);   
-        float G   = GeometrySmith(normal, V, L, roughness);      
+        float NDF = DistributionGGX(normal, H, roughness);  
+        float NDF2 = DistributionGGX(-normal, H, roughness); 
+        float G   = GeometrySmith(normal, V, L, roughness); 
+        float G2  = GeometrySmith(-normal, V, L, roughness);     
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
         float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         vec3 specular = numerator / denominator;
+
+        vec3 numerator2    = NDF2 * G2 * F;
+        float denominator2 = 4.0 * max(dot(-normal, V), 0.0) * max(dot(-normal, L), 0.0) + 0.0001;
+        vec3 specular2 = numerator2 / denominator2;
         
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;	  
 
-        float NdotL = max(dot(normal, L), 0.0);        
+        float NdotL = max(dot(normal, L), 0.0);     
+        float NdotL2 = max(dot(-normal, L), 0.0);   
 
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
     }   
 
     // Directional Lights
@@ -142,20 +150,28 @@ void main()
         vec3 radiance = directionalLights[i].color;
 
         float NDF = DistributionGGX(normal, H, roughness);   
-        float G   = GeometrySmith(normal, V, L, roughness);      
+        float NDF2 = DistributionGGX(-normal, H, roughness);
+        float G   = GeometrySmith(normal, V, L, roughness); 
+        float G2  = GeometrySmith(-normal, V, L, roughness);     
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
         float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         vec3 specular = numerator / denominator;
+
+        vec3 numerator2    = NDF2 * G2 * F;
+        float denominator2 = 4.0 * max(dot(-normal, V), 0.0) * max(dot(-normal, L), 0.0) + 0.0001;
+        vec3 specular2 = numerator2 / denominator2;
         
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;	  
 
-        float NdotL = max(dot(normal, L), 0.0);        
+        float NdotL = max(dot(normal, L), 0.0);   
+        float NdotL2 = max(dot(-normal, L), 0.0);     
 
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
     }   
 
     // Spot Lights
@@ -173,21 +189,29 @@ void main()
         radiance *= intensity;
 
         float NDF = DistributionGGX(normal, H, roughness);   
-        float G   = GeometrySmith(normal, V, L, roughness);      
+        float NDF2 = DistributionGGX(-normal, H, roughness);
+        float G   = GeometrySmith(normal, V, L, roughness); 
+        float G2  = GeometrySmith(-normal, V, L, roughness);     
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
         float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         vec3 specular = numerator / denominator;
+
+        vec3 numerator2    = NDF2 * G2 * F;
+        float denominator2 = 4.0 * max(dot(-normal, V), 0.0) * max(dot(-normal, L), 0.0) + 0.0001;
+        vec3 specular2 = numerator2 / denominator2;
         
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;	  
 
-        float NdotL = max(dot(normal, L), 0.0);        
+        float NdotL = max(dot(normal, L), 0.0);       
+        float NdotL2 = max(dot(-normal, L), 0.0); 
 
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-    }   
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
+    }
     
     // ambient lighting
     vec3 ambient = vec3(0.03) * ao * albedo;

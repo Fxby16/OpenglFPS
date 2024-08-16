@@ -4,6 +4,13 @@
 #include <model.hpp>
 #include <gbuffer.hpp>
 
+#include <limits>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <ImGuizmo.h>
+
 class Application{
 public:
     Application();
@@ -18,11 +25,21 @@ private:
 
     void HandleInputs(double deltaTime);
     void DrawBoundingBoxes();
+    void EditMode();
 
-    uint32_t m_TexturedCube;
-    uint32_t m_TexturedSphere;
+    struct SelectedData{
+        uint32_t model_id;
+        int mesh_index;
+        int transform_index;
+    };
+
+    SelectedData m_SelectedModel;
+    glm::vec2 m_EditModeLastMousePosition;
+    ImGuizmo::OPERATION m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
+
     GBuffer m_GBuffer;
     DeferredMode m_DeferredMode = DEFERRED_SHADING;
 
     bool m_ShouldTakeScreenshot = false;
+    bool m_MapEditMode = false;
 };

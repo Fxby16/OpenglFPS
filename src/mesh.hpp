@@ -33,7 +33,7 @@ public:
     void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const BoundingBox& aabb);
     void Free();
 
-    void ApplyMaterial(const Material& material);
+    void SetMaterial(const Material& material);
 
     void Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr, bool is_compressed) const;
 

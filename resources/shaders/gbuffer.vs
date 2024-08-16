@@ -34,6 +34,7 @@ void main()
     // Send vertex attributes to fragment shader
     fragTexCoord = vertexTexCoord;
     fragNormal = normalize(normalMatrix * vertexNormal);
+
     fragTangent = normalize(normalMatrix * vertexTangent);
     fragTangent = normalize(fragTangent - dot(fragTangent, fragNormal) * fragNormal);
     fragBinormal = normalize(normalMatrix * vertexBinormal);

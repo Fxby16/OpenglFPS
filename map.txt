@@ -1,0 +1,109 @@
+{
+    "models": [
+        {
+            "compressed": true,
+            "gamma_correction": false,
+            "name": "",
+            "path": "/home/fabio/OpenglFPS/resources/models/retro_tv/scene.gltf",
+            "pbr_enabled": true,
+            "transforms": [
+                [
+                    [
+                        0.20487265288829803,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2019544094800949,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.20214127004146576,
+                        0.0
+                    ],
+                    [
+                        -2.428971767425537,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            ]
+        },
+        {
+            "compressed": false,
+            "gamma_correction": false,
+            "name": "SPHERE",
+            "path": "",
+            "pbr_enabled": true,
+            "transforms": [
+                [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        4.865287780761719,
+                        0.0,
+                        -1.38937509059906,
+                        1.0
+                    ]
+                ]
+            ]
+        },
+        {
+            "compressed": false,
+            "gamma_correction": false,
+            "name": "CUBE",
+            "path": "",
+            "pbr_enabled": true,
+            "transforms": [
+                [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            ]
+        }
+    ]
+}

@@ -12,6 +12,8 @@ public:
     void Load(const char* vertexPath, const char* fragmentPath);
     void Unload();
 
+    void Reload();
+
     void Bind() const;
     void Unbind() const;
     
