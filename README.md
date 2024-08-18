@@ -9,6 +9,6 @@
 `bin/Debug/RaylibFPS` or `bin/Release/RaylibFPS`
 
 ## Images
-![1](imgs/screenshot000.png)  
-![2](imgs/screenshot001.png)  
-![3](imgs/screenshot002.png)  
+![1](imgs/screenshot0.png)  
+![2](imgs/screenshot1.png)  
+![3](imgs/screenshot2.png)  

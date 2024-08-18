@@ -78,6 +78,9 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     g_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
                                "resources/shaders/deferred_shading.fs");
 
+    g_ShadowMapShader = LoadShader("resources/shaders/shadowmap.vs",
+                               "resources/shaders/shadowmap.fs");
+
     Shader& gbuffer_s = GetGBufferShader();
     gbuffer_s.Bind();
     gbuffer_s.SetUniformMat4fv("projection", GetCamera().GetProjectionMatrix(), 1);

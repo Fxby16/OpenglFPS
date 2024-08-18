@@ -110,3 +110,17 @@ void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr, bool 
     
     glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
 }
+
+void Mesh::DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 model) const
+{
+    shader.Bind();
+
+    m_GPUBuffer.BindVAO();
+    m_GPUBuffer.BindEBO();
+    m_GPUBuffer.BindVBO();
+
+    shader.SetUniformMat4fv("lightSpaceMatrix", light_space_matrix, 1);
+    shader.SetUniformMat4fv("model", model, 1);
+
+    glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
+}

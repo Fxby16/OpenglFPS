@@ -123,6 +123,13 @@ void Model::Draw(Shader& shader, glm::mat4 view, glm::mat4 model)
     }
 }
 
+void Model::DrawShadows(glm::mat4 light_space_matrix, glm::mat4 model)
+{
+    for(int i = 0; i < m_Meshes.size(); i++){
+        m_Meshes[i].DrawShadows(GetShadowMapShader(), light_space_matrix, model);
+    }
+}
+
 void Model::ProcessNode(aiNode* node, const aiScene* scene, glm::mat4 parent_transform)
 {
     glm::mat4 transform = parent_transform * AiToGlm(node->mTransformation);
