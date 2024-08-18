@@ -20,6 +20,8 @@ struct PointLight {
 struct DirectionalLight {
     vec3 direction;
     vec3 color;
+    sampler2D shadowMap;
+    mat4 lightSpaceMatrix;
 };
 
 struct SpotLight {
@@ -38,6 +40,39 @@ uniform int numDirectionalLights;
 uniform int numSpotLights;
 
 const float PI = 3.14159265359;
+
+// return 0.0 if in shadow, 1.0 if not
+float CalcShadow(sampler2D shadowMap, vec4 fragPosLightSpace, vec3 lightDir)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    
+    //get bias based on the surface angle towards the light
+    //vec3 normal = texture(Normals, TexCoords).rgb;
+    //float bias = max(0.008 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    float bias = 0.008;
+
+    //PCF (Percentage-Closer Filtering) to soften shadows
+    for(int x = -1; x <= 1; x++){
+        for(int y = -1; y <= 1; y++){
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += ((currentDepth - bias > pcfDepth) ? 0.0 : 1.0);        
+        }    
+    }
+    shadow /= 9.0;
+    
+    //if outside of shadow map, consider not in shadow
+    if(projCoords.z > 1.0)
+        shadow = 1.0;
+
+    return shadow;
+}
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -145,6 +180,9 @@ void main()
     // Directional Lights
     for(int i = 0; i < numDirectionalLights; i++) 
     {
+        vec4 fragPosLightSpace = (directionalLights[i].lightSpaceMatrix * vec4(position, 1.0));
+        float shadow = CalcShadow(directionalLights[i].shadowMap, fragPosLightSpace, -directionalLights[i].direction);
+
         vec3 L = normalize(-directionalLights[i].direction);
         vec3 H = normalize(V + L);
         vec3 radiance = directionalLights[i].color;
@@ -170,8 +208,8 @@ void main()
         float NdotL = max(dot(normal, L), 0.0);   
         float NdotL2 = max(dot(-normal, L), 0.0);     
 
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2 * shadow;
     }   
 
     // Spot Lights

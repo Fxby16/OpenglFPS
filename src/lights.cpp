@@ -35,6 +35,8 @@ void SetDirectionalLight(const DirectionalLight& dl)
         GetDeferredShader().Bind();
         GetDeferredShader().SetUniform3fv("directionalLights[" + std::to_string(g_DirectionalLightsCount) + "].direction", dl.dir);
         GetDeferredShader().SetUniform3fv("directionalLights[" + std::to_string(g_DirectionalLightsCount) + "].color", dl.color);
+        GetDeferredShader().SetUniform1i("directionalLights[" + std::to_string(g_DirectionalLightsCount) + "].shadowMap", 5); // 5 is the texture unit, needs to be changed
+        GetDeferredShader().SetUniformMat4fv("directionalLights[" + std::to_string(g_DirectionalLightsCount) + "].lightSpaceMatrix", dl.lightSpaceMatrix);
         g_DirectionalLightsCount++;
         GetDeferredShader().SetUniform1i("numDirectionalLights", g_DirectionalLightsCount);
     }

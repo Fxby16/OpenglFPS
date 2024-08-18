@@ -22,6 +22,9 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f),
+                       glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, 10.0f, 35.0f) * glm::lookAt(-glm::vec3(1.0f, -1.0f, 1.0f) * 10.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
+
 Application::Application()
 {
     Init();
@@ -44,11 +47,14 @@ void Application::Init()
 
     // Initialize G-Buffer
     m_GBuffer.Init(g_ScreenWidth, g_ScreenHeight);
+
+    dl.shadowMap.Init();
 }
 
 void Application::Deinit()
 {
     m_GBuffer.Deinit();
+    dl.shadowMap.Deinit();
 
     CloseWindow();
 }
@@ -94,11 +100,11 @@ void Application::Run()
 
         ResetCounters();
 
-        PointLight pl;
-        pl.pos = GetCamera().GetPosition();
-        pl.color = glm::vec3(1.0f, 1.0f, 1.0f);
+        //PointLight pl;
+        //pl.pos = GetCamera().GetPosition();
+        //pl.color = glm::vec3(100.0f, 100.0f, 100.0f);
 
-        SetPointLight(pl);
+        //SetPointLight(pl);
 
         /*SpotLight sl;
         sl.pos = GetCamera().GetPosition();
@@ -109,12 +115,18 @@ void Application::Run()
 
         SetSpotLight(sl);*/
 
-        /*DirectionalLight dl;
-        dl.dir = glm::vec3(0.0f, -1.0f, 0.0f);
-        dl.color = glm::vec3(10.0f, 10.0f, 10.0f);
+        dl.shadowMap.Bind();
 
-        SetDirectionalLight(dl);*/
+        DrawModelsShadows(dl.lightSpaceMatrix);
 
+        dl.shadowMap.Unbind();
+
+        GetDeferredShader().Bind();
+        SetDirectionalLight(dl);
+
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, dl.shadowMap.GetShadowMap());
+        
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
 
         DrawFPS(1.0f / deltaTime, 10, 10);
@@ -126,6 +138,15 @@ void Application::Run()
         #endif
         
         if(g_DrawBoundingBoxes) DrawBoundingBoxes();
+
+        /*for(int i = 0; i < 10; i++){
+            for(int j = 0; j < 10; j++){
+                DrawLine3D(glm::vec3(i, 0, j), glm::vec3(i + 1, 0, j), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                DrawLine3D(glm::vec3(i, 0, j), glm::vec3(i, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                DrawLine3D(glm::vec3(i + 1, 0, j), glm::vec3(i + 1, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                DrawLine3D(glm::vec3(i, 0, j + 1), glm::vec3(i + 1, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            }
+        }*/
 
         if(m_MapEditMode){
             EditMode();
@@ -144,23 +165,25 @@ void Application::HandleInputs(double deltaTime)
 {
     UpdateInputs();
 
-    // Check key inputs to switch between G-buffer textures
-    if(IsKeyPressed(KEY_1)) m_DeferredMode = DEFERRED_POSITION;
-    if(IsKeyPressed(KEY_2)) m_DeferredMode = DEFERRED_NORMAL;
-    if(IsKeyPressed(KEY_3)) m_DeferredMode = DEFERRED_ALBEDO;
-    if(IsKeyPressed(KEY_4)) m_DeferredMode = DEFERRED_SHADING;
-
-    if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   GetCamera().ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
-    if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) GetCamera().ProcessKeyboard(Camera::Movement::BACKWARD, deltaTime);
-    if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) GetCamera().ProcessKeyboard(Camera::Movement::LEFT, deltaTime);
-    if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))GetCamera().ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
-    if(IsKeyDown(KEY_SPACE))                    GetCamera().ProcessKeyboard(Camera::Movement::UP, deltaTime);
-    if(IsKeyDown(KEY_LEFT_SHIFT))               GetCamera().ProcessKeyboard(Camera::Movement::DOWN, deltaTime);
-
     if(!IsCursorEnabled()){
         GetCamera().ProcessMouseMovement(GetMouseXDelta(), GetMouseYDelta());
     }else{
         ResetLastMousePosition();
+    }
+
+    // Check key inputs to switch between G-buffer textures
+    if(IsKeyPressed(KEY_1) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_POSITION;
+    if(IsKeyPressed(KEY_2) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_NORMAL;
+    if(IsKeyPressed(KEY_3) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_ALBEDO;
+    if(IsKeyPressed(KEY_4) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_SHADING;
+
+    if(!ImGui::GetIO().WantCaptureKeyboard || !m_MapEditMode){
+        if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   GetCamera().ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
+        if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) GetCamera().ProcessKeyboard(Camera::Movement::BACKWARD, deltaTime);
+        if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) GetCamera().ProcessKeyboard(Camera::Movement::LEFT, deltaTime);
+        if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))GetCamera().ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
+        if(IsKeyDown(KEY_SPACE))                    GetCamera().ProcessKeyboard(Camera::Movement::UP, deltaTime);
+        if(IsKeyDown(KEY_LEFT_SHIFT))               GetCamera().ProcessKeyboard(Camera::Movement::DOWN, deltaTime);
     }
 
     //GetCamera().ProcessMouseScroll(GetScrollYDelta());
@@ -231,7 +254,7 @@ void Application::EditMode()
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
 
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ImGui::GetIO().WantCaptureMouse){
         std::vector<SelectedData> hovered_meshes;
         auto& models = GetModels();
 
@@ -335,40 +358,6 @@ void Application::EditMode()
     ImGui::Begin("Menu");
     ImGui::SetWindowSize(ImVec2(0, 0));
 
-    int gizmo_mode;
-
-    switch(m_GizmoMode){
-        case ImGuizmo::OPERATION::TRANSLATE:
-            gizmo_mode = 0;
-            break;
-        case ImGuizmo::OPERATION::ROTATE:
-            gizmo_mode = 1;
-            break;
-        case ImGuizmo::OPERATION::SCALE:
-            gizmo_mode = 2;
-            break;
-        default:
-            gizmo_mode = 0;
-            break;
-    }
-
-    ImGui::Combo("Gizmo Mode", &gizmo_mode, "Translate\0Rotate\0Scale\0");
-
-    switch(gizmo_mode){
-        case 0:
-            m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
-            break;
-        case 1:
-            m_GizmoMode = ImGuizmo::OPERATION::ROTATE;
-            break;
-        case 2:
-            m_GizmoMode = ImGuizmo::OPERATION::SCALE;
-            break;
-        default:
-            m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
-            break;
-    }
-
     if(ImGui::Button("Delete Selected")){
         GetModel(m_SelectedModel.model_id).RemoveTransform(m_SelectedModel.transform_index);
         UnloadModelsWithoutTransforms();
@@ -421,12 +410,65 @@ void Application::EditMode()
         DeserializeMap("map.txt");
     }
 
-    ImGui::End();
+    int gizmo_mode;
 
+    switch(m_GizmoMode){
+        case ImGuizmo::OPERATION::TRANSLATE:
+            gizmo_mode = 0;
+            break;
+        case ImGuizmo::OPERATION::ROTATE:
+            gizmo_mode = 1;
+            break;
+        case ImGuizmo::OPERATION::SCALE:
+            gizmo_mode = 2;
+            break;
+        default:
+            gizmo_mode = 0;
+            break;
+    }
+
+    ImGui::Text("Gizmo Mode");
+    ImGui::SameLine();
+    ImGui::Combo("##gizmomode", &gizmo_mode, "Translate\0Rotate\0Scale\0");
+
+    switch(gizmo_mode){
+        case 0:
+            m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
+            break;
+        case 1:
+            m_GizmoMode = ImGuizmo::OPERATION::ROTATE;
+            break;
+        case 2:
+            m_GizmoMode = ImGuizmo::OPERATION::SCALE;
+            break;
+        default:
+            m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
+            break;
+    }
+
+    float translation[3], rotation[3], scale[3];
     if(m_SelectedModel.model_id != std::numeric_limits<uint32_t>::max()){
         ImGuizmo::SetRect(0, 0, g_ScreenWidth, g_ScreenHeight);
         ImGuizmo::Manipulate(glm::value_ptr(GetCamera().GetViewMatrix()), glm::value_ptr(GetCamera().GetProjectionMatrix()), m_GizmoMode, ImGuizmo::MODE::WORLD, glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)));
+        
+        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)), translation, rotation, scale);
+
+        ImGui::Text("Translation");
+        ImGui::SameLine();
+        ImGui::InputFloat3("##translation", translation);
+
+        ImGui::Text("Rotation");
+        ImGui::SameLine();
+        ImGui::InputFloat3("##rotation", rotation);
+
+        ImGui::Text("Scale");
+        ImGui::SameLine();
+        ImGui::InputFloat3("##scale", scale);
+
+        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)));
     }
+
+    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
