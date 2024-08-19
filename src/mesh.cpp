@@ -63,8 +63,7 @@ void Mesh::SetMaterial(const Material& material)
 
 void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr, bool is_compressed) const
 {
-    AABB bb = m_AABB;
-    OBB obb = OBBFromAABB(bb, model);
+    OBB obb = OBBFromAABB(m_AABB, model); // Get the OBB so the model can also be rotated
 
     if(!OBBInFrustum(g_Frustum, obb.center, obb.extents, obb.rotation)){
         #ifdef DEBUG
@@ -83,13 +82,7 @@ void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr, bool 
         std::string number;
         std::string name = GetTexture(m_Textures[i]).GetType();
 
-        if(name == "texture_diffuse"){
-            shader.SetUniform1i("albedoMap", i);
-        }else{
-            shader.SetUniform1i(name.c_str(), i);
-        }
-
-        //printf("Binding texture: %s\n", name.c_str());
+        shader.SetUniform1i(name.c_str(), i);
 
         GetTexture(m_Textures[i]).Bind(i);
     }

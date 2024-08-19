@@ -48,8 +48,7 @@ void Model::Load(const std::string& path, bool is_compressed, bool pbr, bool gam
                                                    aiProcess_Triangulate |
                                                    aiProcess_JoinIdenticalVertices |
                                                    aiProcess_FlipUVs |
-                                                   aiProcess_GenNormals |
-                                                   aiProcess_FixInfacingNormals);
+                                                   aiProcess_GenNormals);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         LogError("ASSIMP::%s\n", importer.GetErrorString());
@@ -261,21 +260,11 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
 
         textures.insert(textures.end(), pbrTextures.begin(), pbrTextures.end());
     }else{
-        //diffuse maps
-        std::vector<uint32_t> diffuseMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<uint32_t> diffuseMaps = LoadMaterialTextures(material, scene, aiTextureType_DIFFUSE, "albedoMap");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        //specular maps
-        //std::vector<uint32_t> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        //textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-        //normal maps
-        //std::vector<uint32_t> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-        //textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-        //height maps
-        //std::vector<uint32_t> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-        //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        std::vector<uint32_t> normalMaps = LoadMaterialTextures(material, scene, aiTextureType_NORMALS, "normalMap");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     }
 
     return Mesh(vertices, indices, textures, AABB(aabb_min, aabb_max));

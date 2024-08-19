@@ -27,7 +27,7 @@ struct DirectionalLight{
     DirectionalLight(const glm::vec3& dir, const glm::vec3& color)
         : dir(dir), color(color)
     {
-        lightSpaceMatrix = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, 10.0f, 35.0f) * glm::lookAt(-dir * 10.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        lightSpaceMatrix = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, 1.0f, 50.0f) * glm::lookAt(-dir * 20.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     }
 };
 

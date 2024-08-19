@@ -216,7 +216,7 @@ void Application::DrawBoundingBoxes()
 
             for(auto &mesh : meshes){
                 AABB bb = mesh.GetAABB();
-                OBB obb = OBBFromAABB(bb, transform);
+                OBB obb = OBBFromAABB(bb, transform); //use the OBB so you can rotate the model
 
                 glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -224,9 +224,37 @@ void Application::DrawBoundingBoxes()
                     color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
                 }
 
-                AABB to_draw = AABBFromOBB(obb);
+                //Get corners of the OBB. You could just draw transform * AABB but this ensures that the OBB is correct 
+                std::vector<glm::vec3> corners(8);
+    
+                glm::vec3 axisX = obb.rotation[0];
+                glm::vec3 axisY = obb.rotation[1];
+                glm::vec3 axisZ = obb.rotation[2];
+                glm::vec3 halfExtents = obb.extents;
 
-                DrawBoundingBox(to_draw, color);
+                corners[0] = obb.center + axisX * halfExtents.x + axisY * halfExtents.y + axisZ * halfExtents.z;
+                corners[1] = obb.center + axisX * halfExtents.x + axisY * halfExtents.y - axisZ * halfExtents.z;
+                corners[2] = obb.center + axisX * halfExtents.x - axisY * halfExtents.y + axisZ * halfExtents.z;
+                corners[3] = obb.center + axisX * halfExtents.x - axisY * halfExtents.y - axisZ * halfExtents.z;
+                corners[4] = obb.center - axisX * halfExtents.x + axisY * halfExtents.y + axisZ * halfExtents.z;
+                corners[5] = obb.center - axisX * halfExtents.x + axisY * halfExtents.y - axisZ * halfExtents.z;
+                corners[6] = obb.center - axisX * halfExtents.x - axisY * halfExtents.y + axisZ * halfExtents.z;
+                corners[7] = obb.center - axisX * halfExtents.x - axisY * halfExtents.y - axisZ * halfExtents.z;
+            
+                DrawLine3D(corners[0], corners[1], color);
+                DrawLine3D(corners[1], corners[3], color);
+                DrawLine3D(corners[3], corners[2], color);
+                DrawLine3D(corners[2], corners[0], color);
+
+                DrawLine3D(corners[4], corners[5], color);
+                DrawLine3D(corners[5], corners[7], color);
+                DrawLine3D(corners[7], corners[6], color);
+                DrawLine3D(corners[6], corners[4], color);
+
+                DrawLine3D(corners[0], corners[4], color);
+                DrawLine3D(corners[1], corners[5], color);
+                DrawLine3D(corners[2], corners[6], color);
+                DrawLine3D(corners[3], corners[7], color);
             }
         }
     }

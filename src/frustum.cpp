@@ -167,34 +167,28 @@ bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 
 bool OBBInFrustum(Frustum& frustum, glm::vec3 center, glm::vec3 extents, glm::mat3 rotation)
 {
-    return true; // obb culling is not working properly
+    for (const auto& plane : frustum.Planes) {
+        // Calculate the axes of the OBB
+        glm::vec3 axisX = rotation[0];
+        glm::vec3 axisY = rotation[1];
+        glm::vec3 axisZ = rotation[2];
 
-    for (const Plane& plane : frustum.Planes) {
-        glm::vec3 positiveVertex = center;
+        // Check intersection with each frustum plane
+        for (const auto& plane : frustum.Planes) {
+            // Project the OBB onto the plane normal
+            float projectedRadius = extents.x * std::abs(glm::dot(axisX, plane.normal)) +
+                                    extents.y * std::abs(glm::dot(axisY, plane.normal)) +
+                                    extents.z * std::abs(glm::dot(axisZ, plane.normal));
 
-        // Calculate the positive vertex based on the sign of the plane normal
-        if (plane.normal.x >= 0) {
-            positiveVertex += rotation[0] * extents.x;
-        } else {
-            positiveVertex -= rotation[0] * extents.x;
-        }
+            // Calculate the signed distance between the OBB center and the plane
+            float distance = SignedDistanceToPlane(plane, center);
 
-        if (plane.normal.y >= 0) {
-            positiveVertex += rotation[1] * extents.y;
-        } else {
-            positiveVertex -= rotation[1] * extents.y;
-        }
-
-        if (plane.normal.z >= 0) {
-            positiveVertex += rotation[2] * extents.z;
-        } else {
-            positiveVertex -= rotation[2] * extents.z;
-        }
-
-        // Check if the positive vertex is outside the plane
-        if (GetSignedDistanceToPlane(plane, positiveVertex) < 0) {
-            return false;
+            // Check if the OBB is completely outside the frustum plane
+            if (distance < -projectedRadius) {
+                return false;
+            }
         }
     }
+
     return true;
 }
