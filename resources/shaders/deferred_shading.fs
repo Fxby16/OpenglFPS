@@ -10,7 +10,7 @@ uniform sampler2D Albedo;
 
 uniform vec3 camPos;
 
-const int MAX_LIGHTS = 16;
+const int MAX_LIGHTS = 4;
 
 struct PointLight {
     vec3 position;
@@ -30,6 +30,8 @@ struct SpotLight {
     vec3 color;
     float cutOff;
     float outerCutOff;
+    sampler2D shadowMap;
+    mat4 lightSpaceMatrix;
 };
 
 uniform PointLight pointLights[MAX_LIGHTS];
@@ -215,6 +217,9 @@ void main()
     // Spot Lights
     for(int i = 0; i < numSpotLights; i++) 
     {
+        vec4 fragPosLightSpace = (spotLights[i].lightSpaceMatrix * vec4(position, 1.0));
+        float shadow = CalcShadow(spotLights[i].shadowMap, fragPosLightSpace, -spotLights[i].direction);
+
         vec3 L = normalize(spotLights[i].position - position);
         vec3 H = normalize(V + L);
         float distance = length(spotLights[i].position - position);
@@ -247,8 +252,8 @@ void main()
         float NdotL = max(dot(normal, L), 0.0);       
         float NdotL2 = max(dot(-normal, L), 0.0); 
 
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2 * shadow;
     }
     
     // ambient lighting

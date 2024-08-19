@@ -57,7 +57,7 @@ void InitPredefinedMeshes()
         20, 21, 22, 22, 23, 20
     };
 
-    CUBE_MESH.InitMesh(vertices, indices, BoundingBox(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f)));
+    CUBE_MESH.InitMesh(vertices, indices, AABB(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f)));
 
     vertices.clear();
     indices.clear();
@@ -99,7 +99,7 @@ void InitPredefinedMeshes()
         }
     }
 
-    SPHERE_MESH.InitMesh(vertices, indices, BoundingBox(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));     
+    SPHERE_MESH.InitMesh(vertices, indices, AABB(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));     
 }
 
 void DeinitPredefinedMeshes()

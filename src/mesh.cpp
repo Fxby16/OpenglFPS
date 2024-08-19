@@ -5,12 +5,12 @@
 #include <glad/glad.h>
 #include <string>
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const BoundingBox& aabb)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const AABB& aabb)
 {
     InitMesh(vertices, indices, textures, aabb);
 }
 
-void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const BoundingBox& aabb)
+void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const AABB& aabb)
 {
     m_Vertices = vertices;
     m_Indices = indices;
@@ -31,7 +31,7 @@ void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsig
     m_GPUBuffer.AddAttribute(4, GL_FLOAT, sizeof(Vertex));
 }
 
-void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const BoundingBox& aabb)
+void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const AABB& aabb)
 {
     m_Vertices = vertices;
     m_Indices = indices;
@@ -63,13 +63,10 @@ void Mesh::SetMaterial(const Material& material)
 
 void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model, bool pbr, bool is_compressed) const
 {
-    //skip if the mesh is not visible
-    BoundingBox transformed = m_AABB;
-    //transform the bounding box to model space
-    transformed.min = model * glm::vec4(m_AABB.min, 1.0f);
-    transformed.max = model * glm::vec4(m_AABB.max, 1.0f);
+    AABB bb = m_AABB;
+    OBB obb = OBBFromAABB(bb, model);
 
-    if(!AABBInFrustum(g_Frustum, transformed.min, transformed.max)){
+    if(!OBBInFrustum(g_Frustum, obb.center, obb.extents, obb.rotation)){
         #ifdef DEBUG
             culled++;
         #endif

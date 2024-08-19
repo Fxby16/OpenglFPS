@@ -22,8 +22,8 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f),
-                       glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, 10.0f, 35.0f) * glm::lookAt(-glm::vec3(1.0f, -1.0f, 1.0f) * 10.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
+DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
+SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(10.0f, 0.0f, 0.0f), glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(17.5f))};
 
 Application::Application()
 {
@@ -49,12 +49,14 @@ void Application::Init()
     m_GBuffer.Init(g_ScreenWidth, g_ScreenHeight);
 
     dl.shadowMap.Init();
+    sl.shadowMap.Init();
 }
 
 void Application::Deinit()
 {
     m_GBuffer.Deinit();
     dl.shadowMap.Deinit();
+    sl.shadowMap.Deinit();
 
     CloseWindow();
 }
@@ -100,32 +102,22 @@ void Application::Run()
 
         ResetCounters();
 
-        //PointLight pl;
-        //pl.pos = GetCamera().GetPosition();
-        //pl.color = glm::vec3(100.0f, 100.0f, 100.0f);
-
-        //SetPointLight(pl);
-
-        /*SpotLight sl;
-        sl.pos = GetCamera().GetPosition();
-        sl.dir = GetCamera().GetFront();
-        sl.color = glm::vec3(1.0f, 1.0f, 1.0f);
-        sl.cutOff = glm::cos(glm::radians(12.5f));
-        sl.outerCutOff = glm::cos(glm::radians(17.5f));
-
-        SetSpotLight(sl);*/
-
         dl.shadowMap.Bind();
-
         DrawModelsShadows(dl.lightSpaceMatrix);
-
         dl.shadowMap.Unbind();
+
+        sl.shadowMap.Bind();
+        DrawModelsShadows(sl.lightSpaceMatrix);
+        sl.shadowMap.Unbind();
 
         GetDeferredShader().Bind();
         SetDirectionalLight(dl);
+        SetSpotLight(sl);
 
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, dl.shadowMap.GetShadowMap());
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, sl.shadowMap.GetShadowMap());
         
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
 
@@ -220,19 +212,21 @@ void Application::DrawBoundingBoxes()
 
         for(uint32_t i = 0; i < transforms.size(); i++){
             auto& meshes = model.GetMeshes();
+            auto& transform = transforms[i];
 
             for(auto &mesh : meshes){
-                BoundingBox bb = mesh.GetAABB();
-                bb.max = transforms[i] * glm::vec4(bb.max, 1.0f);
-                bb.min = transforms[i] * glm::vec4(bb.min, 1.0f);
+                AABB bb = mesh.GetAABB();
+                OBB obb = OBBFromAABB(bb, transform);
 
                 glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
-                if(!AABBInFrustum(g_Frustum, bb.min, bb.max)){
+                if(!OBBInFrustum(g_Frustum, obb.center, obb.extents, obb.rotation)){
                     color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
                 }
 
-                DrawBoundingBox(bb, color);
+                AABB to_draw = AABBFromOBB(obb);
+
+                DrawBoundingBox(to_draw, color);
             }
         }
     }
@@ -240,7 +234,7 @@ void Application::DrawBoundingBoxes()
     EnableDepthTest();
 }
 
-bool MouseInBoundingBox(const glm::vec2& mouse, const glm::vec2& bb_min, const glm::vec2& bb_max)
+bool MouseInAABB(const glm::vec2& mouse, const glm::vec2& bb_min, const glm::vec2& bb_max)
 {
     return (mouse.x >= bb_min.x && mouse.x <= bb_max.x && mouse.y >= bb_min.y && mouse.y <= bb_max.y);
 }
@@ -298,7 +292,7 @@ void Application::EditMode()
                     mouse = glm::vec2((mouse.x / g_ScreenWidth) * 2.0f - 1.0f, (mouse.y / g_ScreenHeight) * 2.0f - 1.0f);
 
                     // check if mouse is inside the bounding box
-                    if(MouseInBoundingBox(mouse, min_screen, max_screen)){
+                    if(MouseInAABB(mouse, min_screen, max_screen)){
                         hovered_meshes.push_back({key, i, j});
                     }
                 }
@@ -314,8 +308,8 @@ void Application::EditMode()
                 auto& mesh_a = model_a.GetMeshes()[a.mesh_index];
                 auto& mesh_b = model_b.GetMeshes()[b.mesh_index];
 
-                BoundingBox bb_a = mesh_a.GetAABB();
-                BoundingBox bb_b = mesh_b.GetAABB();
+                AABB bb_a = mesh_a.GetAABB();
+                AABB bb_b = mesh_b.GetAABB();
 
                 bb_a.max = GetCamera().GetViewMatrix() * model_a.GetTransform(a.transform_index) * glm::vec4(bb_a.max, 1.0f);
                 bb_a.min = GetCamera().GetViewMatrix() * model_a.GetTransform(a.transform_index) * glm::vec4(bb_a.min, 1.0f);
@@ -334,12 +328,12 @@ void Application::EditMode()
 
         // select the closest mesh
         if(hovered_meshes.size() > 0){
-            /*BoundingBox aabb = GetModel(hovered_meshes[0].model_id).GetMeshes()[hovered_meshes[0].mesh_index].GetAABB();
+            /*AABB aabb = GetModel(hovered_meshes[0].model_id).GetMeshes()[hovered_meshes[0].mesh_index].GetAABB();
 
             aabb.max = GetModel(hovered_meshes[0].model_id).GetTransform(hovered_meshes[0].transform_index) * glm::vec4(aabb.max, 1.0f);
             aabb.min = GetModel(hovered_meshes[0].model_id).GetTransform(hovered_meshes[0].transform_index) * glm::vec4(aabb.min, 1.0f);
 
-            DrawBoundingBox(aabb, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));*/
+            DrawAABB(aabb, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));*/
 
             m_SelectedModel = hovered_meshes[0];
         }

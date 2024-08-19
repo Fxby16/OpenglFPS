@@ -177,7 +177,7 @@ void DrawBoundingBox(glm::vec3 min, glm::vec3 max, glm::vec4 color)
     DrawLine3D(vertices[3], vertices[7], color);
 }
 
-void DrawBoundingBox(const BoundingBox& box, glm::vec4 color)
+void DrawBoundingBox(const AABB& box, glm::vec4 color)
 {
     DrawBoundingBox(box.min, box.max, color);
 }

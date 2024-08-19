@@ -33,15 +33,6 @@ void DrawFrustum(Frustum& frustum)
     DrawLine3D(g_FrustumCorners[3], g_FrustumCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 }
 
-void NormalizePlane(glm::vec4& plane)
-{
-    float magnitude = sqrtf(plane.x * plane.x + plane.y * plane.y + plane.z * plane.z);
-    plane.x /= magnitude;
-    plane.y /= magnitude;
-    plane.z /= magnitude;
-    plane.w /= magnitude;
-}
-
 Plane PlaneFromCorners(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 {
     glm::vec3 normal = glm::cross(p2 - p1, p3 - p1);
@@ -93,22 +84,6 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     g_FrustumCorners[5] = ntr;
     g_FrustumCorners[6] = nbr;
     g_FrustumCorners[7] = nbl; 
-/*
-    #ifdef DEBUG
-    LogMessage("Corner positions:");
-    LogMessage("ftl: (%f, %f, %f)", ftl.x, ftl.y, ftl.z);
-    LogMessage("ftr: (%f, %f, %f)", ftr.x, ftr.y, ftr.z);
-    LogMessage("fbl: (%f, %f, %f)", fbl.x, fbl.y, fbl.z);
-    LogMessage("fbr: (%f, %f, %f)", fbr.x, fbr.y, fbr.z);
-    LogMessage("ntl: (%f, %f, %f)", ntl.x, ntl.y, ntl.z);
-    LogMessage("ntr: (%f, %f, %f)", ntr.x, ntr.y, ntr.z);
-    LogMessage("nbl: (%f, %f, %f)", nbl.x, nbl.y, nbl.z);
-    LogMessage("nbr: (%f, %f, %f)", nbr.x, nbr.y, nbr.z);
-    LogMessage("Near plane: %f Far plane: %f", nearPlane, farPlane);
-    LogMessage("Fov: %f Aspect ratio: %f", glm::degrees(fov), aspectRatio);
-    LogMessage("Cam Pos: (%f, %f, %f)", viewPos.x, viewPos.y, viewPos.z);
-    printf("\n");
-    #endif*/
 
     frustum.Planes[NEAR] = PlaneFromCorners(ntl, ntr, nbr);
     frustum.Planes[FAR] = PlaneFromCorners(ftr, ftl, fbl);
@@ -116,10 +91,6 @@ void ExtractFrustum(Frustum& frustum, const Camera& camera)
     frustum.Planes[TOP] = PlaneFromCorners(ntr, ntl, ftl);
     frustum.Planes[RIGHT] = PlaneFromCorners(nbr, ntr, fbr);
     frustum.Planes[LEFT] = PlaneFromCorners(ntl, nbl, fbl); 
-
-    //for(int i = 0; i < NUM_PLANES; i++){
-    //    LogMessage("Plane %d: (%f, %f, %f) %f", i, frustum.Planes[i].normal.x, frustum.Planes[i].normal.y, frustum.Planes[i].normal.z, frustum.Planes[i].distance);
-    //}
 }
 
 float SignedDistanceToPlane(const Plane& plane, glm::vec3 position)
@@ -176,18 +147,6 @@ float GetSignedDistanceToPlane(const Plane& p, glm::vec3 point)
 
 bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 {
-    /*glm::vec3 center = (min + max) * 0.5f;
-    glm::vec3 extents = {max.x - center.x, max.y - center.y, max.z - center.z};
-
-    return (
-        isOnOrForwardPlane(frustum.Planes[LEFT], extents, center) &&
-        isOnOrForwardPlane(frustum.Planes[RIGHT], extents, center) &&
-        isOnOrForwardPlane(frustum.Planes[BOTTOM], extents, center) &&
-        isOnOrForwardPlane(frustum.Planes[TOP], extents, center) &&
-        isOnOrForwardPlane(frustum.Planes[NEAR], extents, center) &&
-        isOnOrForwardPlane(frustum.Planes[FAR], extents, center)
-    );*/
-
     for (const Plane& plane : frustum.Planes) {
         glm::vec3 positiveVertex = min;
         if (plane.normal.x >= 0) {
@@ -199,6 +158,40 @@ bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
         if (plane.normal.z >= 0) {
             positiveVertex.z = max.z;
         }
+        if (GetSignedDistanceToPlane(plane, positiveVertex) < 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool OBBInFrustum(Frustum& frustum, glm::vec3 center, glm::vec3 extents, glm::mat3 rotation)
+{
+    return true; // obb culling is not working properly
+
+    for (const Plane& plane : frustum.Planes) {
+        glm::vec3 positiveVertex = center;
+
+        // Calculate the positive vertex based on the sign of the plane normal
+        if (plane.normal.x >= 0) {
+            positiveVertex += rotation[0] * extents.x;
+        } else {
+            positiveVertex -= rotation[0] * extents.x;
+        }
+
+        if (plane.normal.y >= 0) {
+            positiveVertex += rotation[1] * extents.y;
+        } else {
+            positiveVertex -= rotation[1] * extents.y;
+        }
+
+        if (plane.normal.z >= 0) {
+            positiveVertex += rotation[2] * extents.z;
+        } else {
+            positiveVertex -= rotation[2] * extents.z;
+        }
+
+        // Check if the positive vertex is outside the plane
         if (GetSignedDistanceToPlane(plane, positiveVertex) < 0) {
             return false;
         }

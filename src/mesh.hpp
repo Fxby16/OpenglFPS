@@ -26,11 +26,11 @@ struct Vertex{
 class Mesh{
 public:
     Mesh() = default;
-    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const BoundingBox& aabb);
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const AABB& aabb);
     ~Mesh() = default;
 
-    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const BoundingBox& aabb);
-    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const BoundingBox& aabb);
+    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<uint32_t>& textures, const AABB& aabb);
+    void InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const AABB& aabb);
     void Free();
 
     void SetMaterial(const Material& material);
@@ -41,7 +41,7 @@ public:
     inline const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
     inline const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
     inline const std::vector<uint32_t>& GetTextures() const { return m_Textures; }
-    inline const BoundingBox& GetAABB() const { return m_AABB; }
+    inline const AABB& GetAABB() const { return m_AABB; }
 
 private:
 
@@ -50,5 +50,5 @@ private:
     std::vector<uint32_t> m_Textures;
     GPUBuffer m_GPUBuffer;
 
-    BoundingBox m_AABB;
+    AABB m_AABB;
 };
