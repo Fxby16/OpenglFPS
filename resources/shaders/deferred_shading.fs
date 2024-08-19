@@ -58,7 +58,7 @@ float CalcShadow(sampler2D shadowMap, vec4 fragPosLightSpace, vec3 lightDir)
     //vec3 normal = texture(Normals, TexCoords).rgb;
     //float bias = max(0.008 * (1.0 - dot(normal, lightDir)), 0.005);
 
-    float bias = 0.008;
+    float bias = 0.005;
 
     //PCF (Percentage-Closer Filtering) to soften shadows
     for(int x = -1; x <= 1; x++){

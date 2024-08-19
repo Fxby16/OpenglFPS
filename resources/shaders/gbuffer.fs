@@ -45,8 +45,8 @@ void main(){
         NormalOut = vec4(normal, metallic);
         AlbedoOut = vec4(pow(texture(albedoMap, fragTexCoord).rgb, vec3(2.2)), texture(roughnessMap, fragTexCoord).r);
     }else{
-        PositionOut = vec4(fragPosition, 1.0);
-        NormalOut = vec4(normal, 1.0);
+        PositionOut = vec4(fragPosition, 0.5);
+        NormalOut = vec4(normal, 0.0);
         AlbedoOut = vec4(pow(texture(albedoMap, fragTexCoord).rgb, vec3(2.2)), 1.0);
     }
 }

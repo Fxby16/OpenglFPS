@@ -1,5 +1,3 @@
-- make frustum culling work with oriented bounding boxes
-
 - indirect lighting
 - Ssao
 - Bloom
