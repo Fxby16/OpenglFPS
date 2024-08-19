@@ -278,7 +278,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
         //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
-    return Mesh(vertices, indices, textures, BoundingBox(aabb_min, aabb_max));
+    return Mesh(vertices, indices, textures, AABB(aabb_min, aabb_max));
 }
 
 std::vector<uint32_t> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene* scene, aiTextureType type, const std::string& typeName)

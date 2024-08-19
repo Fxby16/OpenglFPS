@@ -51,6 +51,8 @@ void SetSpotLight(const SpotLight& dl)
         GetDeferredShader().SetUniform3fv("spotLights[" + std::to_string(g_SpotLightsCount) + "].color", dl.color);
         GetDeferredShader().SetUniform1f("spotLights[" + std::to_string(g_SpotLightsCount) + "].cutOff", dl.cutOff);
         GetDeferredShader().SetUniform1f("spotLights[" + std::to_string(g_SpotLightsCount) + "].outerCutOff", dl.outerCutOff);
+        GetDeferredShader().SetUniform1i("spotLights[" + std::to_string(g_SpotLightsCount) + "].shadowMap", 6); // 6 is the texture unit, needs to be changed
+        GetDeferredShader().SetUniformMat4fv("spotLights[" + std::to_string(g_SpotLightsCount) + "].lightSpaceMatrix", dl.lightSpaceMatrix);
         g_SpotLightsCount++;
         GetDeferredShader().SetUniform1i("numSpotLights", g_SpotLightsCount);
     }

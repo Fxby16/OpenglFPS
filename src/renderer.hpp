@@ -22,7 +22,7 @@ extern void DrawFullscreenQuad();
 
 extern void DrawLine3D(glm::vec3 start, glm::vec3 end, glm::vec4 color);
 extern void DrawBoundingBox(glm::vec3 min, glm::vec3 max, glm::vec4 color);
-extern void DrawBoundingBox(const BoundingBox& box, glm::vec4 color);
+extern void DrawBoundingBox(const AABB& box, glm::vec4 color);
 
 /**
  * @brief Parameters in OpenGL coordinates ([-1, 1] range)
