@@ -73,13 +73,16 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
 
     g_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
-                               "resources/shaders/gbuffer.fs");
+                                 "resources/shaders/gbuffer.fs");
 
     g_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
-                               "resources/shaders/deferred_shading.fs");
+                                  "resources/shaders/deferred_shading.fs");
 
     g_ShadowMapShader = LoadShader("resources/shaders/shadowmap.vs",
-                               "resources/shaders/shadowmap.fs");
+                                   "resources/shaders/shadowmap.fs");
+
+    g_PointLightShadowMapShader = LoadShader("resources/shaders/shadowmap.vs",
+                                             "resources/shaders/pointlight_shadowmap.fs");
 
     Shader& gbuffer_s = GetGBufferShader();
     gbuffer_s.Bind();

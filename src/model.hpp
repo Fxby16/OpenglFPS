@@ -30,7 +30,7 @@ public:
     void RemoveTransform(uint32_t index);
 
     void Draw(Shader& shader, glm::mat4 view, glm::mat4 model);
-    void DrawShadows(glm::mat4 light_space_matrix, glm::mat4 model);
+    void DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 model);
 
     inline std::vector<Mesh>& GetMeshes() { return m_Meshes; }
     inline std::vector<glm::mat4>& GetTransforms() { return m_Transforms; }

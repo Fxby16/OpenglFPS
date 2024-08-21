@@ -28,7 +28,7 @@ public:
     void Init();
     void Deinit();
 
-    void Bind() const;
+    void Bind(unsigned int face) const;
     void Unbind() const;
 
     inline unsigned int GetShadowMap() const { return m_ShadowMap; }

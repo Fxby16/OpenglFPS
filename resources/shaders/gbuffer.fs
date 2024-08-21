@@ -43,7 +43,7 @@ void main(){
     if(usePBR == 1){
         PositionOut = vec4(fragPosition, roughness);
         NormalOut = vec4(normal, metallic);
-        AlbedoOut = vec4(pow(texture(albedoMap, fragTexCoord).rgb, vec3(2.2)), texture(roughnessMap, fragTexCoord).r);
+        AlbedoOut = vec4(pow(texture(albedoMap, fragTexCoord).rgb, vec3(2.2)), ao);
     }else{
         PositionOut = vec4(fragPosition, 0.5);
         NormalOut = vec4(normal, 0.0);

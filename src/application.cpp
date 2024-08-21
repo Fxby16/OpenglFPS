@@ -23,7 +23,40 @@
 #include <gtc/type_ptr.hpp>
 
 DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
-SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(10.0f, 0.0f, 0.0f), glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(17.5f))};
+SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(50.0f, 0.0f, 0.0f), 30.0f, 34.0f};
+PointLight pl = {glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(0.0f, 0.0f, 100.0f)};
+
+void DrawCube(glm::vec3 cubePosition, glm::vec4 color)
+{
+    float cubeSize = 0.2f;
+
+    glm::vec3 minPoint = cubePosition - glm::vec3(cubeSize / 2.0f);
+    glm::vec3 maxPoint = cubePosition + glm::vec3(cubeSize / 2.0f);
+
+    glm::vec3 p1 = glm::vec3(minPoint.x, minPoint.y, minPoint.z);
+    glm::vec3 p2 = glm::vec3(maxPoint.x, minPoint.y, minPoint.z);
+    glm::vec3 p3 = glm::vec3(maxPoint.x, minPoint.y, maxPoint.z);
+    glm::vec3 p4 = glm::vec3(minPoint.x, minPoint.y, maxPoint.z);
+    glm::vec3 p5 = glm::vec3(minPoint.x, maxPoint.y, minPoint.z);
+    glm::vec3 p6 = glm::vec3(maxPoint.x, maxPoint.y, minPoint.z);
+    glm::vec3 p7 = glm::vec3(maxPoint.x, maxPoint.y, maxPoint.z);
+    glm::vec3 p8 = glm::vec3(minPoint.x, maxPoint.y, maxPoint.z);
+
+    DrawLine3D(p1, p2, color);
+    DrawLine3D(p2, p3, color);
+    DrawLine3D(p3, p4, color);
+    DrawLine3D(p4, p1, color);
+
+    DrawLine3D(p5, p6, color);
+    DrawLine3D(p6, p7, color);
+    DrawLine3D(p7, p8, color);
+    DrawLine3D(p8, p5, color);
+
+    DrawLine3D(p1, p5, color);
+    DrawLine3D(p2, p6, color);
+    DrawLine3D(p3, p7, color);
+    DrawLine3D(p4, p8, color);
+}
 
 Application::Application()
 {
@@ -50,6 +83,7 @@ void Application::Init()
 
     dl.shadowMap.Init();
     sl.shadowMap.Init();
+    pl.shadowMap.Init();
 }
 
 void Application::Deinit()
@@ -57,6 +91,7 @@ void Application::Deinit()
     m_GBuffer.Deinit();
     dl.shadowMap.Deinit();
     sl.shadowMap.Deinit();
+    pl.shadowMap.Deinit();
 
     CloseWindow();
 }
@@ -102,23 +137,37 @@ void Application::Run()
 
         ResetCounters();
 
+        GetShadowMapShader().Bind();    
         dl.shadowMap.Bind();
-        DrawModelsShadows(dl.lightSpaceMatrix);
+        DrawModelsShadows(GetShadowMapShader(), dl.lightSpaceMatrix);
         dl.shadowMap.Unbind();
 
         sl.shadowMap.Bind();
-        DrawModelsShadows(sl.lightSpaceMatrix);
+        DrawModelsShadows(GetShadowMapShader(), sl.lightSpaceMatrix);
         sl.shadowMap.Unbind();
+
+        GetPointLightShadowMapShader().Bind();
+        GetPointLightShadowMapShader().SetUniform3fv("lightPos", pl.pos);
+
+        for(int i = 0; i < 6; i++){
+            pl.shadowMap.Bind(i);
+            DrawModelsShadows(GetPointLightShadowMapShader(), pl.lightSpaceMatrix[i]);
+        }
+
+        pl.shadowMap.Unbind();
 
         GetDeferredShader().Bind();
         SetDirectionalLight(dl);
         SetSpotLight(sl);
+        SetPointLight(pl);
 
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, dl.shadowMap.GetShadowMap());
         glActiveTexture(GL_TEXTURE6);
         glBindTexture(GL_TEXTURE_2D, sl.shadowMap.GetShadowMap());
-        
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, pl.shadowMap.GetShadowMap());
+
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
 
         DrawFPS(1.0f / deltaTime, 10, 10);
@@ -139,6 +188,9 @@ void Application::Run()
                 DrawLine3D(glm::vec3(i, 0, j + 1), glm::vec3(i + 1, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             }
         }*/
+
+        DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
+        DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));
 
         if(m_MapEditMode){
             EditMode();

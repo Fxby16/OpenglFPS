@@ -147,18 +147,18 @@ float GetSignedDistanceToPlane(const Plane& p, glm::vec3 point)
 
 bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 {
-    for (const Plane& plane : frustum.Planes) {
+    for(const Plane& plane : frustum.Planes){
         glm::vec3 positiveVertex = min;
-        if (plane.normal.x >= 0) {
+        if(plane.normal.x >= 0){
             positiveVertex.x = max.x;
         }
-        if (plane.normal.y >= 0) {
+        if(plane.normal.y >= 0){
             positiveVertex.y = max.y;
         }
-        if (plane.normal.z >= 0) {
+        if(plane.normal.z >= 0){
             positiveVertex.z = max.z;
         }
-        if (GetSignedDistanceToPlane(plane, positiveVertex) < 0) {
+        if(GetSignedDistanceToPlane(plane, positiveVertex) < 0){
             return false;
         }
     }
@@ -167,26 +167,17 @@ bool AABBInFrustum(Frustum& frustum, glm::vec3 min, glm::vec3 max)
 
 bool OBBInFrustum(Frustum& frustum, glm::vec3 center, glm::vec3 extents, glm::mat3 rotation)
 {
-    for (const auto& plane : frustum.Planes) {
-        // Calculate the axes of the OBB
-        glm::vec3 axisX = rotation[0];
-        glm::vec3 axisY = rotation[1];
-        glm::vec3 axisZ = rotation[2];
+    glm::vec3 axisX = rotation[0];
+    glm::vec3 axisY = rotation[1];
+    glm::vec3 axisZ = rotation[2];
 
-        // Check intersection with each frustum plane
-        for (const auto& plane : frustum.Planes) {
-            // Project the OBB onto the plane normal
-            float projectedRadius = extents.x * std::abs(glm::dot(axisX, plane.normal)) +
-                                    extents.y * std::abs(glm::dot(axisY, plane.normal)) +
-                                    extents.z * std::abs(glm::dot(axisZ, plane.normal));
+    for(const Plane& plane : frustum.Planes){
+        float projectedRadius = extents.x * std::abs(glm::dot(axisX, plane.normal)) +
+                                extents.y * std::abs(glm::dot(axisY, plane.normal)) +
+                                extents.z * std::abs(glm::dot(axisZ, plane.normal));
 
-            // Calculate the signed distance between the OBB center and the plane
-            float distance = SignedDistanceToPlane(plane, center);
-
-            // Check if the OBB is completely outside the frustum plane
-            if (distance < -projectedRadius) {
-                return false;
-            }
+        if(SignedDistanceToPlane(plane, center) < -projectedRadius){
+            return false;
         }
     }
 

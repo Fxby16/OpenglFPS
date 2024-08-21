@@ -10,11 +10,19 @@ struct PointLight{
     glm::vec3 pos;
     glm::vec3 color;
     PointLightShadowMap shadowMap;
-    glm::mat4 lightSpaceMatrix;
+    glm::mat4 lightSpaceMatrix[6];
 
     PointLight() = default;
     PointLight(const glm::vec3& pos, const glm::vec3& color)
-        : pos(pos), color(color) {}
+        : pos(pos), color(color)
+    {
+        lightSpaceMatrix[0] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        lightSpaceMatrix[1] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        lightSpaceMatrix[2] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        lightSpaceMatrix[3] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        lightSpaceMatrix[4] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        lightSpaceMatrix[5] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+    }
 };
 
 struct DirectionalLight{
@@ -42,9 +50,9 @@ struct SpotLight{
 
     SpotLight() = default;
     SpotLight(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& color, float cutOff, float outerCutOff)
-        : pos(pos), dir(dir), color(color), cutOff(cutOff), outerCutOff(outerCutOff)
+        : pos(pos), dir(dir), color(color), cutOff(glm::cos(glm::radians(cutOff))), outerCutOff(glm::cos(glm::radians(outerCutOff)))
     {
-        lightSpaceMatrix = glm::perspective(glm::radians(60.0f), 1.0f, 1.0f, 30.0f) * glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
+        lightSpaceMatrix = glm::perspective(glm::radians(outerCutOff * 2), 1.0f, 0.1f, 30.0f) * glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 };
 

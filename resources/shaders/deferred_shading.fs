@@ -15,6 +15,7 @@ const int MAX_LIGHTS = 4;
 struct PointLight {
     vec3 position;
     vec3 color;
+    samplerCube shadowMap;
 };
 
 struct DirectionalLight {
@@ -72,6 +73,18 @@ float CalcShadow(sampler2D shadowMap, vec4 fragPosLightSpace, vec3 lightDir)
     //if outside of shadow map, consider not in shadow
     if(projCoords.z > 1.0)
         shadow = 1.0;
+
+    return shadow;
+}
+
+float CalcShadowCube(PointLight pointLight, vec3 fragPos)
+{
+    vec3 fragToLight = fragPos - pointLight.position;
+    float closestDepth = texture(pointLight.shadowMap, fragToLight).r;
+    closestDepth *= 25.0; 
+    float currentDepth = length(fragToLight);
+
+    float shadow = (currentDepth - 0.005 > closestDepth) ? 0.0 : 1.0;
 
     return shadow;
 }
@@ -145,9 +158,17 @@ void main()
     // reflectance equation
     vec3 Lo = vec3(0.0);
 
+    //vec3 fragToLight = position - pointLights[0].position;
+    //float closestDepth = texture(pointLights[0].shadowMap, fragToLight).r;
+
+    //FragColor = vec4(vec3(closestDepth), 1.0);
+    //return;
+
     // Point Lights
     for(int i = 0; i < numPointLights; i++) 
     {
+        float shadow = CalcShadowCube(pointLights[i], position);
+
         vec3 L = normalize(pointLights[i].position - position);
         vec3 H = normalize(V + L);
         float distance = length(pointLights[i].position - position);
@@ -175,8 +196,8 @@ void main()
         float NdotL = max(dot(normal, L), 0.0);     
         float NdotL2 = max(dot(-normal, L), 0.0);   
 
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
+        Lo += (kD * albedo / PI + specular2) * radiance * NdotL2 * shadow;
     }   
 
     // Directional Lights
@@ -196,11 +217,10 @@ void main()
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
-        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
-        vec3 specular = numerator / denominator;
-
         vec3 numerator2    = NDF2 * G2 * F;
+        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         float denominator2 = 4.0 * max(dot(-normal, V), 0.0) * max(dot(-normal, L), 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
         vec3 specular2 = numerator2 / denominator2;
         
         vec3 kS = F;
@@ -238,11 +258,10 @@ void main()
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
            
         vec3 numerator    = NDF * G * F; 
-        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
-        vec3 specular = numerator / denominator;
-
         vec3 numerator2    = NDF2 * G2 * F;
+        float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, L), 0.0) + 0.0001; 
         float denominator2 = 4.0 * max(dot(-normal, V), 0.0) * max(dot(-normal, L), 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
         vec3 specular2 = numerator2 / denominator2;
         
         vec3 kS = F;
@@ -257,7 +276,7 @@ void main()
     }
     
     // ambient lighting
-    vec3 ambient = vec3(0.03) * ao * albedo;
+    vec3 ambient = vec3(0.03) * albedo;
     
     vec3 color = ambient + Lo;
 
