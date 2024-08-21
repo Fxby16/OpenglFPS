@@ -11,5 +11,5 @@
 - option to scale by the same amount on all the axis
 - add lights through the editor
 - make object selection more accurate
-- shadow maps for point lights
 - cascaded shadow mapping
+- clean up the shadow mapping code

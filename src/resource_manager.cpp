@@ -5,7 +5,7 @@
 #include <stb_image.h>
 
 static ResourceManager g_ResourceManager;
-uint32_t g_GBufferShader, g_DeferredShader, g_ShadowMapShader;
+uint32_t g_GBufferShader, g_DeferredShader, g_ShadowMapShader, g_PointLightShadowMapShader;
 
 uint32_t g_Cube, g_Sphere;
 
@@ -188,13 +188,13 @@ void ResourceManager::DrawModels(Shader& shader, glm::mat4 view)
     }
 }
 
-void ResourceManager::DrawModelsShadows(glm::mat4 light_space_matrix)
+void ResourceManager::DrawModelsShadows(Shader& shader, glm::mat4 light_space_matrix)
 {
     for(auto& [id, model] : GetModels()){
         auto& transforms = model.GetTransforms();
 
         for(uint32_t i = 0; i < transforms.size(); i++){
-            model.DrawShadows(light_space_matrix, transforms[i]);
+            model.DrawShadows(shader, light_space_matrix, transforms[i]);
         }
     }
 }
@@ -204,9 +204,9 @@ void DrawModels(Shader& shader, glm::mat4 view)
     g_ResourceManager.DrawModels(shader, view);
 }
 
-void DrawModelsShadows(glm::mat4 light_space_matrix)
+void DrawModelsShadows(Shader& shader, glm::mat4 light_space_matrix)
 {
-    g_ResourceManager.DrawModelsShadows(light_space_matrix);
+    g_ResourceManager.DrawModelsShadows(shader, light_space_matrix);
 }
 
 void ResourceManager::UnloadModelsWithoutTransforms()

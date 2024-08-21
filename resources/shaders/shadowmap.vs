@@ -10,10 +10,13 @@ layout (location = 4) in vec3 vertexBitangent;
 layout (location = 5) in int boneIDs[MAX_BONE_INFLUENCE];
 layout (location = 6) in int weights[MAX_BONE_INFLUENCE];
 
+out vec4 FragPos;
+
 uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
 
 void main()
 {
+    FragPos = model * vec4(vertexPosition, 1.0);
     gl_Position = lightSpaceMatrix * model * vec4(vertexPosition, 1.0);
 }

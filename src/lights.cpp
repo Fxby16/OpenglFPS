@@ -4,7 +4,7 @@
 static unsigned int g_PointLightsCount = 0;
 static unsigned int g_SpotLightsCount = 0;
 static unsigned int g_DirectionalLightsCount = 0;
-constexpr unsigned int MAX_LIGHTS = 16;
+constexpr unsigned int MAX_LIGHTS = 4;
 
 void ResetCounters()
 {
@@ -24,6 +24,9 @@ void SetPointLight(const PointLight& pl)
         GetDeferredShader().Bind();
         GetDeferredShader().SetUniform3fv("pointLights[" + std::to_string(g_PointLightsCount) + "].position", pl.pos);
         GetDeferredShader().SetUniform3fv("pointLights[" + std::to_string(g_PointLightsCount) + "].color", pl.color);
+        for(unsigned int i = 0; i < MAX_LIGHTS; i++){
+            GetDeferredShader().SetUniform1i("pointLights[" + std::to_string(i) + "].shadowMap", 7); // 7 is the texture unit, needs to be changed
+        }
         g_PointLightsCount++;
         GetDeferredShader().SetUniform1i("numPointLights", g_PointLightsCount);
     }

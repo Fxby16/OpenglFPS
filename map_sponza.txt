@@ -1,11 +1,11 @@
 {
     "models": [
         {
-            "compressed": false,
+            "compressed": true,
             "gamma_correction": false,
             "name": "",
             "path": "resources/models/sponza/glTF/Sponza.gltf",
-            "pbr_enabled": false,
+            "pbr_enabled": true,
             "transforms": [
                 [
                     [

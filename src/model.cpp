@@ -122,10 +122,10 @@ void Model::Draw(Shader& shader, glm::mat4 view, glm::mat4 model)
     }
 }
 
-void Model::DrawShadows(glm::mat4 light_space_matrix, glm::mat4 model)
+void Model::DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 model)
 {
     for(int i = 0; i < m_Meshes.size(); i++){
-        m_Meshes[i].DrawShadows(GetShadowMapShader(), light_space_matrix, model);
+        m_Meshes[i].DrawShadows(shader, light_space_matrix, model);
     }
 }
 
