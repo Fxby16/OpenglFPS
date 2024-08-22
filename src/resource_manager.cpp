@@ -1,8 +1,11 @@
 #include <resource_manager.hpp>
 #include <predefined_meshes.hpp>
 #include <material.hpp>
+#include <globals.hpp>
+#include <shadowmap.hpp>
 
 #include <stb_image.h>
+#include <glad/glad.h>
 
 static ResourceManager g_ResourceManager;
 uint32_t g_GBufferShader, g_DeferredShader, g_ShadowMapShader, g_PointLightShadowMapShader;
@@ -79,6 +82,22 @@ void ResourceManager::Init()
     for(auto& mesh : sphere_meshes){
         mesh.SetMaterial(mat);
     }
+
+    m_ShadowMapArray = InitShadowMapArray(MAX_LIGHTS * 2); // directional + spot lights
+    m_CubeShadowMapArray = InitCubeShadowMapArray(MAX_LIGHTS); // point lights
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, m_ShadowMapArray);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, m_CubeShadowMapArray);
+
+    for(int i = 0; i < 20; i++){
+        m_ShadowMapArrayIndices.insert(i);
+    }
+
+    for(int i = 0; i < 10; i++){
+        m_CubeShadowMapArrayIndices.insert(i);
+    }
 }
 
 void ResourceManager::Deinit()
@@ -98,6 +117,9 @@ void ResourceManager::Deinit()
     m_Models.clear();
     m_Textures.clear();
     m_Shaders.clear();
+
+    glDeleteTextures(1, &m_ShadowMapArray);
+    glDeleteTextures(1, &m_CubeShadowMapArray);
 }
 
 void InitResourceManager()
@@ -237,4 +259,36 @@ void ClearModels()
             ++it;
         }
     }
+}
+
+void ResourceManager::FreeShadowMapArrayIndex(int index)
+{
+    m_ShadowMapArrayIndices.insert(index);
+}
+
+void ResourceManager::FreeCubeShadowMapArrayIndex(int index)
+{
+    m_CubeShadowMapArrayIndices.insert(index);
+}
+
+int ResourceManager::GetShadowMapArrayIndex()
+{
+    if(m_ShadowMapArrayIndices.empty()){
+        return -1;
+    }
+
+    int index = *m_ShadowMapArrayIndices.begin();
+    m_ShadowMapArrayIndices.erase(index);
+    return index;
+}
+
+int ResourceManager::GetCubeShadowMapArrayIndex()
+{
+    if(m_CubeShadowMapArrayIndices.empty()){
+        return -1;
+    }
+
+    int index = *m_CubeShadowMapArrayIndices.begin();
+    m_CubeShadowMapArrayIndices.erase(index);
+    return index;
 }

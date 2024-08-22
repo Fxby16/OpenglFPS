@@ -1,6 +1,7 @@
 #include <material.hpp>
 #include <resource_manager.hpp>
-#include <cstdio>
+#include <log.hpp>
+
 #include <cstring>
 #include <stb_image.h>
 
@@ -8,7 +9,7 @@ void Material::Load(const std::string& path)
 {
     FILE* file = fopen(path.c_str(), "r");
     if(!file){
-        printf("Failed to open file %s\n", path.c_str());
+        LogError("Failed to open file %s", path.c_str());
         return;
     }
 

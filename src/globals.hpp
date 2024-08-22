@@ -7,7 +7,9 @@ inline constexpr float g_AspectRatio = static_cast<float>(g_ScreenWidth) / stati
 inline constexpr float g_FOV = 60.0f;
 inline constexpr float g_Near = 0.1f;
 inline constexpr float g_Far = 40.0f;
-inline constexpr char* g_WindowTitle = "OpenglFPS";
+inline constexpr const char* g_WindowTitle = "OpenglFPS";
+
+inline constexpr unsigned int MAX_LIGHTS = 10;
 
 extern bool g_DrawBoundingBoxes;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <set>
 
 #include <model.hpp>
 #include <texture.hpp>
@@ -40,15 +41,26 @@ public:
     inline std::unordered_map<uint32_t, Model>& GetModels() { return m_Models; }
     inline std::unordered_map<uint32_t, Texture>& GetTextures() { return m_Textures; }
     inline std::unordered_map<uint32_t, Shader>& GetShaders() { return m_Shaders; }
+    inline unsigned int GetShadowMapArray() const { return m_ShadowMapArray; }
+    inline unsigned int GetCubeShadowMapArray() const { return m_CubeShadowMapArray; }
 
     void HotReloadShaders();
     void DrawModels(Shader& shader, glm::mat4 view);
     void DrawModelsShadows(Shader& shader, glm::mat4 light_space_matrix);
+
+    int GetShadowMapArrayIndex();
+    int GetCubeShadowMapArrayIndex();
+    void FreeShadowMapArrayIndex(int index);
+    void FreeCubeShadowMapArrayIndex(int index);
+
 private:
 
     std::unordered_map<uint32_t, Model> m_Models;
     std::unordered_map<uint32_t, Texture> m_Textures;
     std::unordered_map<uint32_t, Shader> m_Shaders;
+
+    unsigned int m_ShadowMapArray, m_CubeShadowMapArray;
+    std::unordered_set<int> m_ShadowMapArrayIndices, m_CubeShadowMapArrayIndices;
 };
 
 extern void InitResourceManager();
@@ -80,8 +92,15 @@ extern void UnloadModelsWithoutTransforms();
 inline std::unordered_map<uint32_t, Model>& GetModels() { return GetResourceManager().GetModels(); }
 inline std::unordered_map<uint32_t, Texture>& GetTextures() { return GetResourceManager().GetTextures(); }
 inline std::unordered_map<uint32_t, Shader>& GetShaders() { return GetResourceManager().GetShaders(); }
+inline unsigned int GetShadowMapArray() { return GetResourceManager().GetShadowMapArray(); }
+inline unsigned int GetCubeShadowMapArray() { return GetResourceManager().GetCubeShadowMapArray(); }
 
 extern void HotReloadShaders();
 extern void ClearModels();
 extern void DrawModels(Shader& shader, glm::mat4 view);
 extern void DrawModelsShadows(Shader& shader, glm::mat4 light_space_matrix);
+
+inline int GetShadowMapArrayIndex() { return GetResourceManager().GetShadowMapArrayIndex(); }
+inline int GetCubeShadowMapArrayIndex() { return GetResourceManager().GetCubeShadowMapArrayIndex(); }
+inline void FreeShadowMapArrayIndex(int index) { GetResourceManager().FreeShadowMapArrayIndex(index); }
+inline void FreeCubeShadowMapArrayIndex(int index) { GetResourceManager().FreeCubeShadowMapArrayIndex(index); }

@@ -1,7 +1,7 @@
 #include <framebuffer.hpp>
+#include <log.hpp>
 
 #include <glad/glad.h>
-#include <cstdio>
 
 Framebuffer::Framebuffer(float width, float height)
 {
@@ -46,7 +46,7 @@ void Framebuffer::Deinit()
 void Framebuffer::CheckStatus()
 {
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        printf("ERROR: Framebuffer is not complete\n");
+        LogError("Framebuffer is not complete");
     }
 }
 

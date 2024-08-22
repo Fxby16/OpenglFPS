@@ -135,38 +135,16 @@ void Application::Run()
 
         EnableColorBlend();
 
-        ResetCounters();
-
-        GetShadowMapShader().Bind();    
-        dl.shadowMap.Bind();
-        DrawModelsShadows(GetShadowMapShader(), dl.lightSpaceMatrix);
-        dl.shadowMap.Unbind();
-
-        sl.shadowMap.Bind();
-        DrawModelsShadows(GetShadowMapShader(), sl.lightSpaceMatrix);
-        sl.shadowMap.Unbind();
-
-        GetPointLightShadowMapShader().Bind();
-        GetPointLightShadowMapShader().SetUniform3fv("lightPos", pl.pos);
-
-        for(int i = 0; i < 6; i++){
-            pl.shadowMap.Bind(i);
-            DrawModelsShadows(GetPointLightShadowMapShader(), pl.lightSpaceMatrix[i]);
-        }
-
-        pl.shadowMap.Unbind();
+        ResetLightsCounters();
+  
+        DrawShadowMap(dl);
+        DrawShadowMap(sl);
+        DrawShadowMap(pl);
 
         GetDeferredShader().Bind();
         SetDirectionalLight(dl);
         SetSpotLight(sl);
         SetPointLight(pl);
-
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, dl.shadowMap.GetShadowMap());
-        glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, sl.shadowMap.GetShadowMap());
-        glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, pl.shadowMap.GetShadowMap());
 
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
 
@@ -179,15 +157,6 @@ void Application::Run()
         #endif
         
         if(g_DrawBoundingBoxes) DrawBoundingBoxes();
-
-        /*for(int i = 0; i < 10; i++){
-            for(int j = 0; j < 10; j++){
-                DrawLine3D(glm::vec3(i, 0, j), glm::vec3(i + 1, 0, j), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-                DrawLine3D(glm::vec3(i, 0, j), glm::vec3(i, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-                DrawLine3D(glm::vec3(i + 1, 0, j), glm::vec3(i + 1, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-                DrawLine3D(glm::vec3(i, 0, j + 1), glm::vec3(i + 1, 0, j + 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            }
-        }*/
 
         DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
         DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));

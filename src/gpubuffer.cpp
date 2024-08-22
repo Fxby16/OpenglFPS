@@ -1,7 +1,7 @@
 #include <gpubuffer.hpp>
+#include <log.hpp>
 
 #include <glad/glad.h>
-#include <cstdio>
 
 unsigned int GetGlTypeSize(unsigned int type)
 {
@@ -13,7 +13,7 @@ unsigned int GetGlTypeSize(unsigned int type)
         case GL_UNSIGNED_INT:
             return sizeof(unsigned int);
         default:
-            printf("Unknown type: %d\n", type);
+            LogWarning("Unknown type: %d", type);
             return 0;
     }
 }
@@ -25,10 +25,6 @@ GPUBuffer::GPUBuffer(unsigned int num_vertices, unsigned int vertex_size, unsign
 
 void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices)
 {
-    #ifdef DEBUG
-        printf("GPUBuffer::Init");
-    #endif
-
     if(num_vertices > 0){
         glGenBuffers(1, &m_VBO);
         glBindBuffer(GL_ARRAY_BUFFER ,m_VBO);
@@ -43,17 +39,6 @@ void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsign
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW); 
     }
 
-    #ifdef DEBUG
-        if(num_vertices > 0){
-            printf(" VBO: %d", m_VBO);
-        }
-        printf(" VAO: %d", m_VAO);
-        if(num_indices > 0){
-            printf(" EBO: %d", m_EBO);
-        }
-        printf("\n");
-    #endif
-
     UnbindVBO();
     UnbindEBO();
     UnbindVAO();
@@ -61,18 +46,6 @@ void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsign
 
 void GPUBuffer::Free()
 {
-    #ifdef DEBUG
-        printf("GPUBuffer::Free()");
-        if(m_VBO != std::numeric_limits<unsigned int>::max()){
-            printf(" VBO: %d", m_VBO);
-        }
-        printf(" VAO: %d", m_VAO);
-        if(m_EBO != std::numeric_limits<unsigned int>::max()){
-            printf(" EBO: %d", m_EBO);
-        }
-        printf("\n");
-    #endif
-
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
     glDeleteVertexArrays(1, &m_VAO);

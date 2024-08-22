@@ -59,4 +59,8 @@ struct SpotLight{
 extern void SetPointLight(const PointLight& pl);
 extern void SetDirectionalLight(const DirectionalLight& dl);
 extern void SetSpotLight(const SpotLight& dl);
-extern void ResetCounters();
+extern void ResetLightsCounters();
+
+extern void DrawShadowMap(const DirectionalLight& light);
+extern void DrawShadowMap(const PointLight& light);
+extern void DrawShadowMap(const SpotLight& light);
