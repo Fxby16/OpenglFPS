@@ -93,6 +93,8 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     deferred_s.SetUniform1i("Positions", 0);
     deferred_s.SetUniform1i("Normals", 1);
     deferred_s.SetUniform1i("Albedo", 2);
+    deferred_s.SetUniform1i("ShadowMaps", 3);
+    deferred_s.SetUniform1i("ShadowCubeMaps", 4);
 
     return 0;
 }

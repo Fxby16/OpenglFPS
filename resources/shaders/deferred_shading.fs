@@ -8,20 +8,23 @@ uniform sampler2D Positions;
 uniform sampler2D Normals;
 uniform sampler2D Albedo;
 
+uniform sampler2DArray ShadowMaps;
+uniform samplerCubeArray ShadowCubeMaps;
+
 uniform vec3 camPos;
 
-const int MAX_LIGHTS = 4;
+const int MAX_LIGHTS = 10;
 
 struct PointLight {
     vec3 position;
     vec3 color;
-    samplerCube shadowMap;
+    int shadowMapIndex;
 };
 
 struct DirectionalLight {
     vec3 direction;
     vec3 color;
-    sampler2D shadowMap;
+    int shadowMapIndex;
     mat4 lightSpaceMatrix;
 };
 
@@ -31,7 +34,7 @@ struct SpotLight {
     vec3 color;
     float cutOff;
     float outerCutOff;
-    sampler2D shadowMap;
+    int shadowMapIndex;
     mat4 lightSpaceMatrix;
 };
 
@@ -45,30 +48,27 @@ uniform int numSpotLights;
 const float PI = 3.14159265359;
 
 // return 0.0 if in shadow, 1.0 if not
-float CalcShadow(sampler2D shadowMap, vec4 fragPosLightSpace, vec3 lightDir)
+float CalcShadow(int shadowMapIndex, vec4 fragPosLightSpace, vec3 lightDir)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float closestDepth = texture(ShadowMaps, vec3(projCoords.xy, shadowMapIndex)).r;
     float currentDepth = projCoords.z;
 
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    
-    //get bias based on the surface angle towards the light
-    //vec3 normal = texture(Normals, TexCoords).rgb;
-    //float bias = max(0.008 * (1.0 - dot(normal, lightDir)), 0.005);
-
-    float bias = 0.005;
 
     //PCF (Percentage-Closer Filtering) to soften shadows
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / vec2(textureSize(ShadowMaps, 0).xy);
+    float bias = 0.005;
     for(int x = -1; x <= 1; x++){
         for(int y = -1; y <= 1; y++){
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            float pcfDepth = texture(ShadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, shadowMapIndex)).r; 
             shadow += ((currentDepth - bias > pcfDepth) ? 0.0 : 1.0);        
         }    
     }
     shadow /= 9.0;
+
+    //shadow = currentDepth - bias > closestDepth ? 0.0 : 1.0;
     
     //if outside of shadow map, consider not in shadow
     if(projCoords.z > 1.0)
@@ -80,11 +80,25 @@ float CalcShadow(sampler2D shadowMap, vec4 fragPosLightSpace, vec3 lightDir)
 float CalcShadowCube(PointLight pointLight, vec3 fragPos)
 {
     vec3 fragToLight = fragPos - pointLight.position;
-    float closestDepth = texture(pointLight.shadowMap, fragToLight).r;
+    float closestDepth = texture(ShadowCubeMaps, vec4(fragToLight, pointLight.shadowMapIndex)).r;
     closestDepth *= 25.0; 
     float currentDepth = length(fragToLight);
 
-    float shadow = (currentDepth - 0.005 > closestDepth) ? 0.0 : 1.0;
+    // PCF (Percentage-Closer Filtering) to soften shadows
+    float shadow = 0.0;
+    float bias = 0.005;
+    vec3 texelSize = 1.0 / vec3(textureSize(ShadowCubeMaps, 0).xy, textureSize(ShadowCubeMaps, 0).x);
+    for(int x = -1; x <= 1; x++){
+        for(int y = -1; y <= 1; y++){
+            for(int z = -1; z <= 1; z++){
+                vec3 offset = vec3(x, y, z) * texelSize;
+                float pcfDepth = texture(ShadowCubeMaps, vec4(fragToLight + offset, pointLight.shadowMapIndex)).r;
+                pcfDepth *= 25.0; 
+                shadow += currentDepth - bias > pcfDepth ? 0.0 : 1.0;
+            }
+        }
+    }
+    shadow /= 27.0;
 
     return shadow;
 }
@@ -158,12 +172,6 @@ void main()
     // reflectance equation
     vec3 Lo = vec3(0.0);
 
-    //vec3 fragToLight = position - pointLights[0].position;
-    //float closestDepth = texture(pointLights[0].shadowMap, fragToLight).r;
-
-    //FragColor = vec4(vec3(closestDepth), 1.0);
-    //return;
-
     // Point Lights
     for(int i = 0; i < numPointLights; i++) 
     {
@@ -204,7 +212,7 @@ void main()
     for(int i = 0; i < numDirectionalLights; i++) 
     {
         vec4 fragPosLightSpace = (directionalLights[i].lightSpaceMatrix * vec4(position, 1.0));
-        float shadow = CalcShadow(directionalLights[i].shadowMap, fragPosLightSpace, -directionalLights[i].direction);
+        float shadow = CalcShadow(directionalLights[i].shadowMapIndex, fragPosLightSpace, -directionalLights[i].direction);
 
         vec3 L = normalize(-directionalLights[i].direction);
         vec3 H = normalize(V + L);
@@ -238,7 +246,7 @@ void main()
     for(int i = 0; i < numSpotLights; i++) 
     {
         vec4 fragPosLightSpace = (spotLights[i].lightSpaceMatrix * vec4(position, 1.0));
-        float shadow = CalcShadow(spotLights[i].shadowMap, fragPosLightSpace, -spotLights[i].direction);
+        float shadow = CalcShadow(spotLights[i].shadowMapIndex, fragPosLightSpace, -spotLights[i].direction);
 
         vec3 L = normalize(spotLights[i].position - position);
         vec3 H = normalize(V + L);

@@ -22,9 +22,6 @@ Texture::Texture(const std::string& path, unsigned char* data, const std::string
 void Texture::Init(const std::string& path, bool flip)
 {
     m_Path = path;
-
-    printf("Texture without type %s\n", path.c_str());
-
     _Init(path, flip, nullptr);
 }
 
@@ -32,9 +29,6 @@ void Texture::Init(const std::string& path, const std::string& type, bool flip)
 {
     m_Path = path;
     m_Type = type;
-
-    printf("Texture with type %s %s\n", path.c_str(), type.c_str());
-
     _Init(path, flip, nullptr);
 }
 
@@ -44,9 +38,6 @@ void Texture::Init(const std::string& path, unsigned char* data, const std::stri
     m_Type = type;
     m_Width = width;
     m_Height = height;
-
-    printf("Raw texture with type %s %s\n", path.c_str(), type.c_str());
-
     _Init(path, flip, data);
 }
 
@@ -86,7 +77,7 @@ void Texture::_Init(const std::string& path, bool flip, unsigned char* data)
         glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, local_buffer);
         glGenerateMipmap(GL_TEXTURE_2D);
     }else{
-        printf("Failed to load texture\n");
+        LogError("Failed to load texture from data");
     }
 
     stbi_image_free(local_buffer);

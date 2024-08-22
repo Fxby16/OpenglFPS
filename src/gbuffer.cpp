@@ -1,7 +1,7 @@
 #include <gbuffer.hpp>
+#include <log.hpp>
 
 #include <glad/glad.h>
-#include <cstdio>
 
 GBuffer::GBuffer(unsigned int width, unsigned int height)
 {
@@ -57,7 +57,7 @@ void GBuffer::Deinit()
 void GBuffer::CheckStatus()
 {
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        printf("ERROR: Framebuffer is not complete\n");
+        LogError("Framebuffer is not complete");
     }
 }
 

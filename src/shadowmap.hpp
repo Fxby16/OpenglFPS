@@ -13,11 +13,11 @@ public:
     void Bind() const;
     void Unbind() const;
 
-    inline unsigned int GetShadowMap() const { return m_ShadowMap; }
+    inline unsigned int GetShadowMapIndex() const { return m_ShadowMapIndex; }
 
 private:
     unsigned int m_FBO;
-    unsigned int m_ShadowMap;
+    int m_ShadowMapIndex = -1;
 };
 
 class PointLightShadowMap{
@@ -31,9 +31,12 @@ public:
     void Bind(unsigned int face) const;
     void Unbind() const;
 
-    inline unsigned int GetShadowMap() const { return m_ShadowMap; }
+    inline unsigned int GetShadowMapIndex() const { return m_ShadowMapIndex; }
 
 private:
     unsigned int m_FBO;
-    unsigned int m_ShadowMap;
+    int m_ShadowMapIndex = -1;
 };
+
+unsigned int InitShadowMapArray(unsigned int count);
+unsigned int InitCubeShadowMapArray(unsigned int count);
