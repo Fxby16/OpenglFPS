@@ -18,6 +18,7 @@
 #include <predefined_meshes.hpp>
 #include <serializer.hpp>
 #include <filedialog.hpp>
+#include <timer.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -100,12 +101,20 @@ void Application::Run()
 {
     double lastFrameTime = GetTime();
     double deltaTime = 0.0;
+    double lastTime = GetTime();
+
+    ShouldDisplayTimers(true);
 
     while(!WindowShouldClose())
     {
         double currentFrameTime = GetTime();
         deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
+
+        if(GetTime() - lastTime >= 1.0){
+            lastTime = GetTime();
+            ShouldDisplayTimers(true);
+        }
 
         PollEvents();
         HandleInputs(deltaTime);
@@ -119,6 +128,8 @@ void Application::Run()
             drawn = 0;
             culled = 0; 
         #endif
+
+        Timer timer2("GBUFFER_PASS");
 
         GetDeferredShader().Bind();
         GetDeferredShader().SetUniform3fv("camPos", GetCamera().GetPosition(), 1);
@@ -135,6 +146,10 @@ void Application::Run()
 
         EnableColorBlend();
 
+        timer2.PrintTime();
+
+        Timer timer3("SHADOW_MAPPING");
+
         ResetLightsCounters();
   
         DrawShadowMap(dl);
@@ -146,7 +161,13 @@ void Application::Run()
         SetSpotLight(sl);
         SetPointLight(pl);
 
+        timer3.PrintTime();
+
+        Timer timer4("DEFERRED_PASS");
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
+        timer4.PrintTime();
+
+        Timer timer5("OTHER_THINGS");
 
         DrawFPS(1.0f / deltaTime, 10, 10);
         DrawFrameTime(deltaTime, 10, 40);
@@ -165,12 +186,16 @@ void Application::Run()
             EditMode();
         }
 
+        timer5.PrintTime();
+
         SwapBuffers();
 
         if(m_ShouldTakeScreenshot){
             TakeScreenshot();
             m_ShouldTakeScreenshot = false;
         }
+
+        ShouldDisplayTimers(false);
     }
 }
 
