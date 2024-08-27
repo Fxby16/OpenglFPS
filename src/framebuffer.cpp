@@ -8,11 +8,6 @@ Framebuffer::Framebuffer(float width, float height)
     Init(width, height);
 }
 
-Framebuffer::~Framebuffer()
-{
-    Deinit();
-}
-
 void Framebuffer::Init(float width, float height)
 {
     glGenFramebuffers(1, &m_FBO);

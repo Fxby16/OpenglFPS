@@ -61,7 +61,7 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     ImGui_ImplGlfw_InitForOpenGL(g_Window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
-    EnableVSync();
+    DisableVSync();
     EnableDepthTest();
 
     // modules initialization
@@ -72,17 +72,17 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
 
     GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
 
-    g_GBufferShader = LoadShader("resources/shaders/gbuffer.vs",
-                                 "resources/shaders/gbuffer.fs");
+    g_GBufferShader = LoadShader("resources/shaders/gbuffer.vert",
+                                 "resources/shaders/gbuffer.frag");
 
-    g_DeferredShader = LoadShader("resources/shaders/deferred_shading.vs",
-                                  "resources/shaders/deferred_shading.fs");
+    g_DeferredShader = LoadShader("resources/shaders/deferred_shading.vert",
+                                  "resources/shaders/deferred_shading.frag");
 
-    g_ShadowMapShader = LoadShader("resources/shaders/shadowmap.vs",
-                                   "resources/shaders/shadowmap.fs");
+    g_ShadowMapShader = LoadShader("resources/shaders/shadowmap.vert",
+                                   "resources/shaders/shadowmap.frag");
 
-    g_PointLightShadowMapShader = LoadShader("resources/shaders/shadowmap.vs",
-                                             "resources/shaders/pointlight_shadowmap.fs");
+    g_PointLightShadowMapShader = LoadShader("resources/shaders/shadowmap.vert",
+                                             "resources/shaders/pointlight_shadowmap.frag");
 
     Shader& gbuffer_s = GetGBufferShader();
     gbuffer_s.Bind();

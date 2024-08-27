@@ -19,44 +19,31 @@
 #include <serializer.hpp>
 #include <filedialog.hpp>
 #include <timer.hpp>
+#include <compute_shader.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+#define MIPS 7
+
+#define ACES 0
+#define UNCHARTED 1
+#define FILMIC 2
+#define REINHARD 3
+
+float exposure = 1.0f;
+float bloomIntensity = 0.28f;
+float bloomThreshold = 0.5f;
+float knee = 0.5f;
+int tonemapping = REINHARD;
+
 DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
-SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(50.0f, 0.0f, 0.0f), 30.0f, 34.0f};
-PointLight pl = {glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(0.0f, 0.0f, 100.0f)};
+SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), 30.0f, 34.0f};
+PointLight pl = {glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(1.0f, 1.0f, 10.0f)};
 
 void DrawCube(glm::vec3 cubePosition, glm::vec4 color)
 {
-    float cubeSize = 0.2f;
-
-    glm::vec3 minPoint = cubePosition - glm::vec3(cubeSize / 2.0f);
-    glm::vec3 maxPoint = cubePosition + glm::vec3(cubeSize / 2.0f);
-
-    glm::vec3 p1 = glm::vec3(minPoint.x, minPoint.y, minPoint.z);
-    glm::vec3 p2 = glm::vec3(maxPoint.x, minPoint.y, minPoint.z);
-    glm::vec3 p3 = glm::vec3(maxPoint.x, minPoint.y, maxPoint.z);
-    glm::vec3 p4 = glm::vec3(minPoint.x, minPoint.y, maxPoint.z);
-    glm::vec3 p5 = glm::vec3(minPoint.x, maxPoint.y, minPoint.z);
-    glm::vec3 p6 = glm::vec3(maxPoint.x, maxPoint.y, minPoint.z);
-    glm::vec3 p7 = glm::vec3(maxPoint.x, maxPoint.y, maxPoint.z);
-    glm::vec3 p8 = glm::vec3(minPoint.x, maxPoint.y, maxPoint.z);
-
-    DrawLine3D(p1, p2, color);
-    DrawLine3D(p2, p3, color);
-    DrawLine3D(p3, p4, color);
-    DrawLine3D(p4, p1, color);
-
-    DrawLine3D(p5, p6, color);
-    DrawLine3D(p6, p7, color);
-    DrawLine3D(p7, p8, color);
-    DrawLine3D(p8, p5, color);
-
-    DrawLine3D(p1, p5, color);
-    DrawLine3D(p2, p6, color);
-    DrawLine3D(p3, p7, color);
-    DrawLine3D(p4, p8, color);
+    DrawSolidCube(cubePosition, glm::vec3(0.2f), color);
 }
 
 Application::Application()
@@ -104,6 +91,43 @@ void Application::Run()
     double lastTime = GetTime();
 
     ShouldDisplayTimers(true);
+
+    GLuint srcTexture;
+    glGenTextures(1, &srcTexture);
+    glActiveTexture(GL_TEXTURE10);
+    glBindTexture(GL_TEXTURE_2D, srcTexture);
+
+    glTexStorage2D(GL_TEXTURE_2D, MIPS, GL_RGBA16F, g_ScreenWidth, g_ScreenHeight);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // Set texture parameters for sampling
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    GLuint dstTexture;
+    glGenTextures(1, &dstTexture);
+    glActiveTexture(GL_TEXTURE10);
+    glBindTexture(GL_TEXTURE_2D, dstTexture);
+
+    glTexStorage2D(GL_TEXTURE_2D, MIPS, GL_RGBA16F, g_ScreenWidth, g_ScreenHeight);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // Set texture parameters for sampling
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    ComputeShader downsampling;
+    downsampling.Load("resources/shaders/bloom_downsampling.comp");
+    ComputeShader upscaling;
+    upscaling.Load("resources/shaders/bloom_upscaling.comp");
+    ComputeShader filter;
+    filter.Load("resources/shaders/bloom_filter.comp");
+    Shader postprocessing;
+    postprocessing.Load("resources/shaders/post_processing.vert", "resources/shaders/post_processing.frag");
 
     while(!WindowShouldClose())
     {
@@ -157,7 +181,7 @@ void Application::Run()
         DrawShadowMap(pl);
 
         GetDeferredShader().Bind();
-        SetDirectionalLight(dl);
+        //SetDirectionalLight(dl);
         SetSpotLight(sl);
         SetPointLight(pl);
 
@@ -167,7 +191,89 @@ void Application::Run()
         DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
         timer4.PrintTime();
 
-        Timer timer5("OTHER_THINGS");
+        DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
+        DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));
+
+        //bloom pass
+
+        Timer timer6("BLOOM_PASS");
+
+        Framebuffer& fbo = GetDeferredPassFramebuffer();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo.GetFBO());
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glActiveTexture(GL_TEXTURE9);
+        glBindTexture(GL_TEXTURE_2D, srcTexture);
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, g_ScreenWidth, g_ScreenHeight);
+
+        filter.Bind();
+        glBindImageTexture(0, srcTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glUniform4f(glGetUniformLocation(filter.GetID(), "u_prefilter_threshold"), bloomThreshold, bloomThreshold - knee, knee * 2.0f, 0.25f / knee);
+        int groupCountX = glm::ceil(g_ScreenWidth / 16.0f);
+        int groupCountY = glm::ceil(g_ScreenHeight / 16.0f);
+        glDispatchCompute(groupCountX, groupCountY, 1);
+        
+        //downsampling pass
+        downsampling.Bind();
+        for(int i = 0; i < MIPS - 1; i++){
+            glBindImageTexture(0, (i & 1) ? dstTexture : srcTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
+            glBindImageTexture(1, (i & 1) ? srcTexture : dstTexture, i + 1, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+
+            glUniform2i(glGetUniformLocation(downsampling.GetID(), "srcResolution"), g_ScreenWidth / (1 << i), g_ScreenHeight / (1 << i));
+            glUniform1i(glGetUniformLocation(downsampling.GetID(), "mipLevel"), i);
+        
+            int width = g_ScreenWidth / (1 << (i + 1));
+            int height = g_ScreenHeight / (1 << (i + 1));
+
+            groupCountX = glm::ceil(width / 16.0f);
+            groupCountY = glm::ceil(height / 16.0f);
+
+            glDispatchCompute(groupCountX, groupCountY, 1);
+
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
+
+        //upscaling pass. smaller is saved in srcTexture. the destination should always be the texture with 
+        //the previously downscaled image, to allow for additive blending
+
+        upscaling.Bind();
+        for(int i = MIPS - 1; i > 0; i--){
+            glBindImageTexture(0, (i & 1) ? dstTexture : srcTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
+            glBindImageTexture(1, (i & 1) ? srcTexture : dstTexture, i - 1, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+
+            glUniform2i(glGetUniformLocation(upscaling.GetID(), "srcResolution"), g_ScreenWidth / (1 << i), g_ScreenHeight / (1 << i));
+
+            int width = g_ScreenWidth / (1 << (i - 1));
+            int height = g_ScreenHeight / (1 << (i - 1));
+
+            int groupCountX = glm::ceil(width / 16.0f);
+            int groupCountY = glm::ceil(height / 16.0f);
+
+            glDispatchCompute(groupCountX, groupCountY, 1);
+
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
+
+        UnbindFramebuffer();
+
+        timer6.PrintTime();
+
+        unsigned int textureView;
+        glGenTextures(1, &textureView);
+        glTextureView(textureView, GL_TEXTURE_2D, srcTexture, GL_RGBA16F, 0, 1, 0, 1);
+
+        postprocessing.Bind();
+        BindTexture(textureView, 0);
+        BindTexture(GetDeferredPassFramebuffer().GetColorBufferTexture(), 1);   
+        postprocessing.SetUniform1i("bloomBlurTexture", 0);
+        postprocessing.SetUniform1i("screenTexture", 1);
+        postprocessing.SetUniform1f("exposure", exposure);
+        postprocessing.SetUniform1i("toneMappingType", tonemapping);
+        postprocessing.SetUniform1f("bloomStrength", bloomIntensity);
+
+        DrawFullscreenQuad();
+
+        glDeleteTextures(1, &textureView);
 
         DrawFPS(1.0f / deltaTime, 10, 10);
         DrawFrameTime(deltaTime, 10, 40);
@@ -179,14 +285,9 @@ void Application::Run()
         
         if(g_DrawBoundingBoxes) DrawBoundingBoxes();
 
-        DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
-        DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));
-
         if(m_MapEditMode){
             EditMode();
         }
-
-        timer5.PrintTime();
 
         SwapBuffers();
 
@@ -197,6 +298,13 @@ void Application::Run()
 
         ShouldDisplayTimers(false);
     }
+
+    downsampling.Unload();
+    upscaling.Unload();
+    filter.Unload();
+    postprocessing.Unload();
+    glDeleteTextures(1, &srcTexture);
+    glDeleteTextures(1, &dstTexture);
 }
 
 void Application::HandleInputs(double deltaTime)
@@ -240,7 +348,7 @@ void Application::HandleInputs(double deltaTime)
     if(IsKeyPressed(KEY_F8)) HotReloadShaders();
     if(IsKeyPressed(KEY_F9)) g_DrawBoundingBoxes = !g_DrawBoundingBoxes;
     if(IsKeyPressed(KEY_F10)) ToggleVSync();
-    if(IsKeyPressed(KEY_F12)) m_ShouldTakeScreenshot = true;
+    if(IsKeyPressed(KEY_F12) && IsKeyDown(KEY_LEFT_CONTROL)) m_ShouldTakeScreenshot = true;
     if(IsKeyPressed(KEY_ESCAPE)) SetWindowShouldClose();
 
     UpdateProj(GetCamera().GetProjectionMatrix());
@@ -535,6 +643,12 @@ void Application::EditMode()
 
         ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)));
     }
+
+    ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
+    ImGui::Combo("Tonemapping", &tonemapping, "ACES\0Uncharted\0Filmic\0Reinhard\0");
+    ImGui::SliderFloat("Bloom Intensity", &bloomIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Bloom Threshold", &bloomThreshold, 0.0f, 10.0f);
+    ImGui::SliderFloat("Knee", &knee, 0.0f, 10.0f);
 
     ImGui::End();
 

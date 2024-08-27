@@ -8,12 +8,15 @@
 static GPUBuffer g_FullscreenQuadBuffer;
 static GPUBuffer g_TextureBuffer;
 static GPUBuffer g_LineBuffer;
+static GPUBuffer g_CubeBuffer;
+static Framebuffer g_DeferredPassFramebuffer;
 
-static Shader g_LineShader;
+static Shader g_SolidShapeShader;
 static Shader g_TextureShader;
 
 static glm::mat4 g_Proj = glm::mat4(1.0f);
-static glm::mat4 g_View = glm::mat4(1.0f);    
+static glm::mat4 g_View = glm::mat4(1.0f);   
+static glm::mat4 g_Model = glm::mat4(1.0f); 
 
 void InitRenderer()
 {
@@ -28,21 +31,72 @@ void InitRenderer()
          1.0f,  1.0f,          1.0f, 1.0f   // Top-right
     };
 
+    float cubeData[] = {
+        // 1st face
+        -0.5f, -0.5f, -0.5f,  // Bottom-left
+         0.5f, -0.5f, -0.5f,  // Bottom-right
+         0.5f,  0.5f, -0.5f,  // Top-right
+         0.5f,  0.5f, -0.5f,  // Top-right
+        -0.5f,  0.5f, -0.5f,  // Top-left
+        -0.5f, -0.5f, -0.5f,  // Bottom-left
+        // 2nd face
+        -0.5f, -0.5f,  0.5f,  // Bottom-left
+         0.5f, -0.5f,  0.5f,  // Bottom-right
+         0.5f,  0.5f,  0.5f,  // Top-right
+         0.5f,  0.5f,  0.5f,  // Top-right
+        -0.5f,  0.5f,  0.5f,  // Top-left
+        -0.5f, -0.5f,  0.5f,  // Bottom-left
+        // 3rd face
+        -0.5f,  0.5f,  0.5f,  // Bottom-left
+        -0.5f,  0.5f, -0.5f,  // Bottom-right
+        -0.5f, -0.5f, -0.5f,  // Top-right
+        -0.5f, -0.5f, -0.5f,  // Top-right
+        -0.5f, -0.5f,  0.5f,  // Top-left
+        -0.5f,  0.5f,  0.5f,  // Bottom-left
+        // 4th face
+         0.5f,  0.5f,  0.5f,  // Bottom-left
+         0.5f,  0.5f, -0.5f,  // Bottom-right
+         0.5f, -0.5f, -0.5f,  // Top-right
+         0.5f, -0.5f, -0.5f,  // Top-right
+         0.5f, -0.5f,  0.5f,  // Top-left
+         0.5f,  0.5f,  0.5f,  // Bottom-left
+        // 5th face
+        -0.5f, -0.5f, -0.5f,  // Bottom-left
+         0.5f, -0.5f, -0.5f,  // Bottom-right
+         0.5f, -0.5f,  0.5f,  // Top-right
+         0.5f, -0.5f,  0.5f,  // Top-right
+        -0.5f, -0.5f,  0.5f,  // Top-left
+        -0.5f, -0.5f, -0.5f,  // Bottom-left
+        // 6th face
+        -0.5f,  0.5f, -0.5f,  // Bottom-left
+         0.5f,  0.5f, -0.5f,  // Bottom-right
+         0.5f,  0.5f,  0.5f,  // Top-right
+         0.5f,  0.5f,  0.5f,  // Top-right
+        -0.5f,  0.5f,  0.5f,  // Top-left
+        -0.5f,  0.5f, -0.5f   // Bottom-left
+    };
+
     g_FullscreenQuadBuffer.Init(6, 4 * sizeof(float), 0);
     g_FullscreenQuadBuffer.SetData(0, fullscreenQuadData, 6, 4 * sizeof(float));
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
 
-    g_TextureShader.Load("resources/shaders/texture.vs", "resources/shaders/texture.fs");
+    g_TextureShader.Load("resources/shaders/texture.vert", "resources/shaders/texture.frag");
     g_TextureBuffer.Init(6, 4 * sizeof(float), 0);
     g_TextureBuffer.BindVBO();
     g_TextureBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
     g_TextureBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
 
-    g_LineShader.Load("resources/shaders/line.vs", "resources/shaders/line.fs");
+    g_SolidShapeShader.Load("resources/shaders/solid_shape.vert", "resources/shaders/solid_shape.frag");
     g_LineBuffer.Init(2, 3 * sizeof(float), 0);
     g_LineBuffer.BindVBO();
     g_LineBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
+
+    g_CubeBuffer.Init(36, 3 * sizeof(float), 0);
+    g_CubeBuffer.SetData(0, cubeData, 36, 3 * sizeof(float));
+    g_CubeBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
+
+    g_DeferredPassFramebuffer.Init(g_ScreenWidth, g_ScreenHeight);
 }
 
 void DeinitRenderer()
@@ -51,7 +105,9 @@ void DeinitRenderer()
     g_TextureBuffer.Free();
     g_LineBuffer.Free();
     g_TextureShader.Unload();
-    g_LineShader.Unload();
+    g_SolidShapeShader.Unload();
+
+    g_DeferredPassFramebuffer.Deinit();
 }
 
 void UpdateProj(glm::mat4 proj)
@@ -69,6 +125,9 @@ void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, Defe
     switch (deferredMode){
         case DEFERRED_SHADING:
         {
+            g_DeferredPassFramebuffer.Bind();
+            ClearScreen();
+
             DisableColorBlend();
             DisableDepthTest();
             
@@ -77,8 +136,6 @@ void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, Defe
             BindTexture(gBuffer.GetNormalTexture(), 1);
             BindTexture(gBuffer.GetAlbedoTexture(), 2);
 
-            UnbindFramebuffer();
-
             DrawFullscreenQuad();
             
             EnableColorBlend();
@@ -86,9 +143,8 @@ void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, Defe
 
             // As a last step, we now copy over the depth buffer from our g-buffer to the default framebuffer.
             BindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.GetFBO());
-            BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            BindFramebuffer(GL_DRAW_FRAMEBUFFER, g_DeferredPassFramebuffer.GetFBO());
             BlitFramebuffer(0, 0, g_ScreenWidth, g_ScreenHeight, 0, 0, g_ScreenWidth, g_ScreenHeight, GL_DEPTH_BUFFER_BIT);
-            UnbindFramebuffer();
         } break;
         case DEFERRED_POSITION:
         {
@@ -129,12 +185,18 @@ void DrawFullscreenQuad()
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }   
 
+Framebuffer& GetDeferredPassFramebuffer()
+{
+    return g_DeferredPassFramebuffer;
+}
+
 void DrawLine3D(glm::vec3 start, glm::vec3 end, glm::vec4 color)
 {
-    g_LineShader.Bind();
-    g_LineShader.SetUniform4fv("color", color, 1);
-    g_LineShader.SetUniformMat4fv("proj", g_Proj, 1);
-    g_LineShader.SetUniformMat4fv("view", g_View, 1);
+    g_SolidShapeShader.Bind();
+    g_SolidShapeShader.SetUniform4fv("color", color, 1);
+    g_SolidShapeShader.SetUniformMat4fv("proj", g_Proj, 1);
+    g_SolidShapeShader.SetUniformMat4fv("view", g_View, 1);
+    g_SolidShapeShader.SetUniformMat4fv("model", glm::mat4(1.0f), 1);
 
     float data[] = {
         start.x, start.y, start.z,
@@ -146,6 +208,20 @@ void DrawLine3D(glm::vec3 start, glm::vec3 end, glm::vec4 color)
     g_LineBuffer.BindVBO();
 
     glDrawArrays(GL_LINES, 0, 2);
+}
+
+void DrawSolidCube(glm::vec3 position, glm::vec3 scale, glm::vec4 color)
+{
+    g_SolidShapeShader.Bind();
+    g_SolidShapeShader.SetUniform4fv("color", color, 1);
+    g_SolidShapeShader.SetUniformMat4fv("proj", g_Proj, 1);
+    g_SolidShapeShader.SetUniformMat4fv("view", g_View, 1);
+    g_SolidShapeShader.SetUniformMat4fv("model", glm::translate(g_Model, position) * glm::scale(g_Model, scale), 1);
+
+    g_CubeBuffer.BindVAO();
+    g_CubeBuffer.BindVBO();
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void DrawBoundingBox(glm::vec3 min, glm::vec3 max, glm::vec4 color)

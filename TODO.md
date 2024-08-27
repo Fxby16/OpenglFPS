@@ -12,4 +12,5 @@
 - add lights through the editor
 - make object selection more accurate
 - cascaded shadow mapping
-- clean up the shadow mapping code
+
+- free remaining timers
