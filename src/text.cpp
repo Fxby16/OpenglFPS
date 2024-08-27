@@ -86,7 +86,7 @@ void TextRenderer::Init(const std::string& font_path, float glyph_size){
     m_GPUBuffer.SetData(0, vertices, 4, sizeof(float) * 2);
     m_GPUBuffer.AddAttribute(2, GL_FLOAT, 2 * sizeof(float));
 
-    m_Shader.Load("resources/shaders/text.vs", "resources/shaders/text.fs");
+    m_Shader.Load("resources/shaders/text.vert", "resources/shaders/text.frag");
 
     glm::mat4 proj = glm::ortho(0.0f, (float) g_ScreenWidth, 0.0f, (float) g_ScreenHeight);
     m_Shader.Bind();

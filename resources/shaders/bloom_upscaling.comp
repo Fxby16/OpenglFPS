@@ -1,0 +1,43 @@
+#version 460 core
+
+// Based on Call Of Duty Advanced Warfare method, presented at ACM Siggraph 2014.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+uniform ivec2 srcResolution;
+
+layout(rgba16f, binding = 0) uniform image2D srcTexture;
+layout(rgba16f, binding = 1) uniform image2D dstTexture;
+
+void main(){
+    ivec2 dstCoord = ivec2(gl_GlobalInvocationID.xy);
+
+    ivec2 texCoord = dstCoord / 2;
+
+    if(texCoord.x >= srcResolution.x || texCoord.y >= srcResolution.y){
+        return;
+    }
+
+    vec3 a = imageLoad(srcTexture, texCoord + ivec2(-1, 1)).rgb;
+    vec3 b = imageLoad(srcTexture, texCoord + ivec2(0, 1)).rgb;
+    vec3 c = imageLoad(srcTexture, texCoord + ivec2(1, 1)).rgb;
+
+    vec3 d = imageLoad(srcTexture, texCoord + ivec2(-1, 0)).rgb;
+    vec3 e = imageLoad(srcTexture, texCoord + ivec2(0, 0)).rgb;
+    vec3 f = imageLoad(srcTexture, texCoord + ivec2(1, 0)).rgb;
+
+    vec3 g = imageLoad(srcTexture, texCoord + ivec2(-1, -1)).rgb;
+    vec3 h = imageLoad(srcTexture, texCoord + ivec2(0, -1)).rgb;
+    vec3 i = imageLoad(srcTexture, texCoord + ivec2(1, -1)).rgb;
+
+    vec3 upsample = e * 4.0;
+    upsample += (b + d + f + h) * 2.0;
+    upsample += (a + c + g + i);
+    upsample *= 1.0 / 16.0;
+
+    vec4 existingValue = imageLoad(dstTexture, dstCoord);
+
+    vec4 blendedValue = existingValue + vec4(upsample, 1.0);
+
+    imageStore(dstTexture, dstCoord, blendedValue);
+}

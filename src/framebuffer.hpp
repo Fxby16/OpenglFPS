@@ -4,7 +4,10 @@ class Framebuffer{
 public:
     Framebuffer() = default;
     Framebuffer(float width, float height);
-    ~Framebuffer();
+    ~Framebuffer() = default;
+
+    void Init(float width, float height);
+    void Deinit();
 
     void Bind() const;
     void Unbind() const;
@@ -16,9 +19,6 @@ public:
     inline unsigned int GetRBO() const { return m_RBO; }
 
 private:
-    void Init(float width, float height);
-    void Deinit();
-
     void CheckStatus();
 
     unsigned int m_FBO;

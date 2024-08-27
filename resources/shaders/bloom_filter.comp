@@ -1,0 +1,25 @@
+#version 460 core
+layout(local_size_x = 16, local_size_y = 16) in;
+layout(rgba32f, binding = 0) uniform image2D tex_src;
+
+uniform vec4 u_prefilter_threshold;
+
+vec4 prefilter(vec4 color){
+    float br = max(color.x, max(color.y, color.z)); //brightness
+
+    vec3 curve = u_prefilter_threshold.yzw; // curve = (threshold - knee, knee * 2, 0.25 / knee)
+    float rq = clamp(br - curve.x, 0.0f, curve.y);
+    rq = curve.z * rq * rq;
+
+    float threshold = u_prefilter_threshold.x;
+    color *= max(rq, br - threshold) / max(br, 0.00001f);
+
+    return color;
+}
+
+void main(){
+    vec4 pixel = vec4(0.0);    
+    ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);    
+    pixel = imageLoad(tex_src, pixel_coords);
+    imageStore(tex_src, pixel_coords, prefilter(pixel));
+}
