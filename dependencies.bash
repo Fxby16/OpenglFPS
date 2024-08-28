@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd vendor/glfw
+cd Vendor/glfw
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
 cd build
 make -j6

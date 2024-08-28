@@ -1,27 +1,27 @@
-[submodule "vendor/raylib"]
-	path = vendor/raylib
+[submodule "Vendor/raylib"]
+	path = Vendor/raylib
 	url = https://github.com/raysan5/raylib.git
-[submodule "vendor/assimp"]
-	path = vendor/assimp
+[submodule "Vendor/assimp"]
+	path = Vendor/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "vendor/glfw"]
-	path = vendor/glfw
+[submodule "Vendor/glfw"]
+	path = Vendor/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "vendor/glm"]
-	path = vendor/glm
+[submodule "Vendor/glm"]
+	path = Vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "vendor/freetype"]
-	path = vendor/freetype
+[submodule "Vendor/freetype"]
+	path = Vendor/freetype
 	url = https://github.com/freetype/freetype.git
-[submodule "vendor/json"]
-	path = vendor/json
+[submodule "Vendor/json"]
+	path = Vendor/json
 	url = https://github.com/nlohmann/json.git
-[submodule "vendor/imgui"]
-	path = vendor/imgui
+[submodule "Vendor/imgui"]
+	path = Vendor/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "vendor/imguizmo"]
-	path = vendor/imguizmo
+[submodule "Vendor/imguizmo"]
+	path = Vendor/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
-[submodule "vendor/nativefiledialog"]
-	path = vendor/nativefiledialog
+[submodule "Vendor/nativefiledialog"]
+	path = Vendor/nativefiledialog
 	url = https://github.com/Fxby16/nativefiledialog.git
