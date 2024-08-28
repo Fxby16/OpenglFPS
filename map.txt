@@ -4,7 +4,7 @@
             "compressed": true,
             "gamma_correction": false,
             "name": "",
-            "path": "/home/fabio/OpenglFPS/resources/models/leather_sofa/scene.gltf",
+            "path": "/home/fabio/OpenglFPS/Resources/Models/leather_sofa/scene.gltf",
             "pbr_enabled": true,
             "transforms": [
                 [

@@ -5,17 +5,18 @@ project "OpenglFPS"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
-    targetdir "bin/%{cfg.buildcfg}"
+    targetdir "Bin/%{cfg.buildcfg}"
+    objdir "Obj/%{cfg.buildcfg}"
 
-    files { "src/**", "vendor/glad/src/glad.c" }
+    files { "Source/**", "Vendor/glad/src/glad.c" }
 
-    includedirs { "src", "vendor/assimp/include", "vendor/glfw/include", "vendor/stb",
-                  "vendor/glad/include", "vendor/glm/glm", "vendor/freetype/include",
-                  "vendor/json/single_include/nlohmann", "vendor/imgui", "vendor/imgui/backends",
-                  "vendor/imguizmo", "vendor/nativefiledialog/src", "vendor/nativefiledialog/src/include" }
+    includedirs { "Source", "Vendor/assimp/include", "Vendor/glfw/include", "Vendor/stb",
+                  "Vendor/glad/include", "Vendor/glm/glm", "Vendor/freetype/include",
+                  "Vendor/json/single_include/nlohmann", "Vendor/imgui", "Vendor/imgui/backends",
+                  "Vendor/imguizmo", "Vendor/nativefiledialog/src", "Vendor/nativefiledialog/src/include" }
 
-    libdirs { "vendor/assimp/build/lib", "vendor/glfw/build/src", "vendor/freetype/objs",
-              "vendor/imgui/build/Release", "vendor/nativefiledialog/build/lib/Release/x64" }
+    libdirs { "Vendor/assimp/build/lib", "Vendor/glfw/build/src", "Vendor/freetype/objs",
+              "Vendor/imgui/build/Release", "Vendor/nativefiledialog/build/lib/Release/x64" }
 
     links { "glfw3", "assimp", "z", "minizip", "freetype", "ImGui", "nfd", "gtk-3", "glib-2.0" }
 

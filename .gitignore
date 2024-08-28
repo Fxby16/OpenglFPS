@@ -1,5 +1,5 @@
-bin
-obj
+Bin
+Obj
 *.make
 Makefile
 .vscode
