@@ -6,6 +6,7 @@ project "ImGui"
     language "C++"
     cppdialect "C++20"
     targetdir "imgui/build/%{cfg.buildcfg}"
+    objdir "Obj/%{cfg.buildcfg}"
 
     files{ "imgui/*.cpp", "imgui/backends/imgui_impl_glfw.cpp", "imgui/backends/imgui_impl_opengl3.cpp",
            "imguizmo/*.cpp" }
