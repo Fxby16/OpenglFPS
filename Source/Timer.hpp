@@ -19,3 +19,4 @@ private:
 };
 
 extern void ShouldDisplayTimers(bool shouldDisplay);
+extern void FreeRemainingTimers();

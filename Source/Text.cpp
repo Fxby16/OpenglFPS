@@ -19,11 +19,11 @@ void TextRenderer::Init(const std::string& font_path, float glyph_size){
     m_ToRender.resize(CH_LIMIT);
 
     if(FT_Init_FreeType(&m_FT)){
-        LogError("Couldn't init FreeType Library\n");
+        LogError("Couldn't init FreeType Library");
     }
 
     if(FT_New_Face(m_FT, font_path.c_str(), 0, &m_Face)){
-        LogError("Failed to load font\n");
+        LogError("Failed to load font");
         return;
     }else{
         FT_Select_Charmap(m_Face, ft_encoding_unicode);
@@ -38,13 +38,13 @@ void TextRenderer::Init(const std::string& font_path, float glyph_size){
 
         for(int ch = 0; ch < CH_NUM; ch++){
             if(FT_Load_Char(m_Face, ch, FT_LOAD_RENDER)){
-                LogError("Failed to load Glyph\n");
+                LogError("Failed to load Glyph");
                 continue;
             }
 
             if(m_Face->glyph->bitmap.rows > glyph_size){
                 #ifdef DEBUG
-                    LogWarning("Glyph %c is too tall\n",ch);
+                    LogWarning("Glyph %c is too tall",ch);
                 #endif
                 continue;
             }
@@ -83,7 +83,7 @@ void TextRenderer::Init(const std::string& font_path, float glyph_size){
     };
 
     m_GPUBuffer.Init(4, 2 * sizeof(float), 0);
-    m_GPUBuffer.SetData(0, vertices, 4, sizeof(float) * 2);
+    m_GPUBuffer.SetData(0, (void*) vertices, 4, sizeof(float) * 2);
     m_GPUBuffer.AddAttribute(2, GL_FLOAT, 2 * sizeof(float));
 
     m_Shader.Load("Resources/Shaders/Text.vert", "Resources/Shaders/Text.frag");

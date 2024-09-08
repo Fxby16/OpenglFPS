@@ -1,16 +1,13 @@
 - indirect lighting
 - Ssao
-- Bloom
-- Skeletal animations
 - loading screen
 - multithreaded models loading
 - batch rendering
 - save models id to file
-- display info about the selected model
 - apply materials to meshes and save them (through the editor)
 - option to scale by the same amount on all the axis
 - add lights through the editor
 - make object selection more accurate
 - cascaded shadow mapping
-
-- free remaining timers
+- modify shadow mapping to make it work with animated models
+- interpolation between different animations

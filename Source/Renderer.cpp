@@ -77,7 +77,7 @@ void InitRenderer()
     };
 
     g_FullscreenQuadBuffer.Init(6, 4 * sizeof(float), 0);
-    g_FullscreenQuadBuffer.SetData(0, fullscreenQuadData, 6, 4 * sizeof(float));
+    g_FullscreenQuadBuffer.SetData(0, (void*) fullscreenQuadData, 6, 4 * sizeof(float));
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
     g_FullscreenQuadBuffer.AddAttribute(2, GL_FLOAT, 4 * sizeof(float));
 
@@ -93,7 +93,7 @@ void InitRenderer()
     g_LineBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
 
     g_CubeBuffer.Init(36, 3 * sizeof(float), 0);
-    g_CubeBuffer.SetData(0, cubeData, 36, 3 * sizeof(float));
+    g_CubeBuffer.SetData(0, (void*) cubeData, 36, 3 * sizeof(float));
     g_CubeBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
 
     g_DeferredPassFramebuffer.Init(g_ScreenWidth, g_ScreenHeight);
@@ -203,7 +203,7 @@ void DrawLine3D(glm::vec3 start, glm::vec3 end, glm::vec4 color)
         end.x, end.y, end.z
     };
 
-    g_LineBuffer.SetData(0, data, 2, 3 * sizeof(float));
+    g_LineBuffer.SetData(0, (void*) data, 2, 3 * sizeof(float));
     g_LineBuffer.BindVAO();
     g_LineBuffer.BindVBO();
 
@@ -276,6 +276,6 @@ void DrawTexture(unsigned int texture, float x, float y, float width, float heig
         x + width, y + height, 1.0f, 1.0f   // Top-right
     };
 
-    g_TextureBuffer.SetData(0, data, 6, 4 * sizeof(float));
+    g_TextureBuffer.SetData(0, (void*) data, 6, 4 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

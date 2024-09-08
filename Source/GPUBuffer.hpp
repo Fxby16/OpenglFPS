@@ -11,7 +11,7 @@ public:
     void Init(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices);
     void Free();
 
-    void SetData(unsigned int start_index, const float* data, unsigned int num_vertices, unsigned int vertex_size) const;
+    void SetData(unsigned int start_index, const void* data, unsigned int num_vertices, unsigned int vertex_size) const;
     void SetIndices(const unsigned int* indices, unsigned int num_indices) const;
 
     void AddAttribute(unsigned int num_elements, unsigned int type, unsigned int stride);

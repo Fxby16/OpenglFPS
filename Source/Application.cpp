@@ -22,6 +22,8 @@
 #include <ComputeShader.hpp>
 #include <Bloom.hpp>
 #include <PostProcessing.hpp>
+#include <Animation.hpp>
+#include <Animator.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -45,6 +47,8 @@ Application::~Application()
     Deinit();
 }
 
+Model swat;
+
 void Application::Init()
 {
     InitWindow(g_ScreenWidth, g_ScreenHeight, g_WindowTitle);
@@ -63,10 +67,15 @@ void Application::Init()
     pl.shadowMap.Init();
 
     SetDirtTexture("Resources/DirtMasks/DirtMask.jpg");
+
+    swat.Load("Resources/Models/saiga/scene.gltf");
+    //swat.Load("Resources/Models/mixamo/Capoeira.dae");
 }
 
 void Application::Deinit()
 {
+    swat.Unload();
+
     m_GBuffer.Deinit();
     dl.shadowMap.Deinit();
     sl.shadowMap.Deinit();
@@ -83,8 +92,11 @@ void Application::Run()
 
     ShouldDisplayTimers(true);
 
-    while(!WindowShouldClose())
-    {
+    Animation animation("Resources/Models/saiga/scene.gltf", swat, 500.0f);
+    //Animation animation("Resources/Models/mixamo/Capoeira.dae", swat);
+    Animator animator(animation);
+
+    while(!WindowShouldClose()){
         double currentFrameTime = GetTime();
         deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
@@ -96,6 +108,21 @@ void Application::Run()
 
         PollEvents();
         HandleInputs(deltaTime);
+
+        for(int i = KEY_0; i <= KEY_9; i++){
+            if(IsKeyPressed(i)){
+                animation.SetCurrentAnimation(i - KEY_0);
+                animator.SetLooping(false);
+                animator.PlayAnimation();
+            }
+        }
+
+        if(!animator.IsPlaying()){
+            animation.SetCurrentAnimation(0);
+            animator.SetLooping(true);
+        }
+
+        animator.Update(deltaTime);
         
         ExtractFrustum(g_Frustum, GetCamera());
 
@@ -121,6 +148,10 @@ void Application::Run()
         DisableColorBlend();
 
         DrawModels(GetGBufferShader(), GetCamera().GetViewMatrix());
+
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(1.2f, 1.4f, 2.8f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+        animator.UploadFinalBoneMatrices();
+        swat.Draw(GetGBufferShader(), GetCamera().GetViewMatrix(), model);
 
         EnableColorBlend();
 

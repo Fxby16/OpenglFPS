@@ -51,7 +51,7 @@ void GPUBuffer::Free()
     glDeleteVertexArrays(1, &m_VAO);
 }
 
-void GPUBuffer::SetData(unsigned int start_index, const float* data, unsigned int num_vertices, unsigned int vertex_size) const
+void GPUBuffer::SetData(unsigned int start_index, const void* data, unsigned int num_vertices, unsigned int vertex_size) const
 {
     BindVBO();
     glBufferSubData(GL_ARRAY_BUFFER, start_index, num_vertices * vertex_size, data);

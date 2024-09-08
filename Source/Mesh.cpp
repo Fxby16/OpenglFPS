@@ -24,13 +24,12 @@ void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsig
 
     m_GPUBuffer.Init(vertices.size(), sizeof(Vertex), indices.size());
 
-    m_GPUBuffer.SetData(0, (float*)vertices.data(), vertices.size(), sizeof(Vertex));
+    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
     m_GPUBuffer.SetIndices(indices.data(), indices.size());
 
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(2, GL_FLOAT, sizeof(Vertex));
-    m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(4, GL_INT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(4, GL_FLOAT, sizeof(Vertex));
@@ -44,13 +43,12 @@ void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsig
 
     m_GPUBuffer.Init(vertices.size(), sizeof(Vertex), indices.size());
 
-    m_GPUBuffer.SetData(0, (float*)vertices.data(), vertices.size(), sizeof(Vertex));
+    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
     m_GPUBuffer.SetIndices(indices.data(), indices.size());
 
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(2, GL_FLOAT, sizeof(Vertex));
-    m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(4, GL_INT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(4, GL_FLOAT, sizeof(Vertex));
@@ -93,6 +91,9 @@ void Mesh::Draw(Shader& shader, glm::mat4 view, glm::mat4 model) const
     }
 
     for(int i = 0; i < NUM_TEXTURE_TYPES; i++){
+        if(i == 4){ // AO not used. skip it so opengl doesn't complain
+            continue;
+        }
         shader.SetUniform1i(("hasTextures[" + std::to_string(i) + "]"), m_HasTexture[i]);
     }
 

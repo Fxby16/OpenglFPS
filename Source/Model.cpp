@@ -2,6 +2,7 @@
 #include <Frustum.hpp>
 #include <Log.hpp>
 #include <ResourceManager.hpp>
+#include <Utils.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -16,25 +17,13 @@ static std::mutex* g_LogsMutex = nullptr;
 
 glm::mat4 g_DummyTransform = glm::mat4(1.0f);
 
-glm::mat4 AiToGlm(const aiMatrix4x4& from)
-{
-    glm::mat4 to;
-
-    to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
-    to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
-    to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
-    to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
-
-    return to;
-}
-
 void Model::Load(const std::string& path, bool gamma)
 {
     m_Path = path;
     m_GammaCorrection = gamma;
 
     if(!g_Logs){
-        LogMessage("Loading model %s\n", path.c_str());
+        LogMessage("Loading model %s", path.c_str());
     }else{
         g_LogsMutex->lock();
         g_Logs->push_back("Loading model " + path + "\n");
@@ -49,7 +38,7 @@ void Model::Load(const std::string& path, bool gamma)
                                                    aiProcess_GenNormals);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
-        LogError("ASSIMP::%s\n", importer.GetErrorString());
+        LogError("ASSIMP::%s", importer.GetErrorString());
         return;
     }
 
@@ -172,6 +161,8 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
         Vertex vertex;
         glm::vec3 vector;
 
+        ResetVertexBoneData(vertex);
+
         if(mesh->HasPositions()){
             vector.x = mesh->mVertices[i].x;
             vector.y = mesh->mVertices[i].y;
@@ -208,18 +199,14 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 parent_tra
             vector.y = mesh->mTangents[i].y;
             vector.z = mesh->mTangents[i].z;
             vertex.Tangent = vector;
-        
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
-            vertex.Bitangent = vector;
         }else{
             vertex.Tangent = glm::vec3(0.0f, 0.0f, 0.0f);
-            vertex.Bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
         }
 
         vertices.push_back(vertex);
     }
+
+    ExtractBoneWeightForVertices(mesh, scene, vertices);
 
     for(int i = 0; i < mesh->mNumFaces; i++){
         aiFace face = mesh->mFaces[i];
@@ -285,7 +272,7 @@ std::vector<uint32_t> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene
         aiString str;
         mat->GetTexture(type, i, &str);
 
-        LogMessage("Texture type: %s\n", typeName.c_str());
+        LogMessage("Texture type: %s", typeName.c_str());
 
         for(int i = 0; i < strlen(str.C_Str()); i++){
             if(str.data[i] == '\\'){
@@ -295,7 +282,7 @@ std::vector<uint32_t> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene
 
         if(str.data[0] != '*'){
             if(!g_Logs){
-                LogMessage("Loading texture %s\n", str.C_Str());
+                LogMessage("Loading texture %s", str.C_Str());
             }else{
                 g_LogsMutex->lock();
                 g_Logs->push_back("Loading texture " + std::string(str.C_Str()) + "\n");
@@ -321,7 +308,7 @@ std::vector<uint32_t> Model::LoadMaterialTextures(aiMaterial* mat, const aiScene
             //    m_TexturesLoaded.push_back(texture);
             //}
 
-            LogMessage("Embedded textures not supported\n");
+            LogMessage("Embedded textures not supported");
         }
     }
 
@@ -338,4 +325,56 @@ void UnsetLogsOutput()
 {
     g_Logs = nullptr;
     g_LogsMutex = nullptr;
+}
+
+void Model::ResetVertexBoneData(Vertex& vertex)
+{
+    for(int i = 0; i < MAX_BONE_INFLUENCE; i++){
+        vertex.BoneIDs[i] = -1;
+        vertex.Weights[i] = 0.0f;
+    }
+}
+
+void Model::SetVertexBoneData(Vertex& vertex, int bone_id, float weight)
+{
+    for(int i = 0; i < MAX_BONE_INFLUENCE; i++){
+        if(vertex.BoneIDs[i] < 0){
+            vertex.BoneIDs[i] = bone_id;
+            vertex.Weights[i] = weight;
+            break;
+        }
+    }
+}
+
+void Model::ExtractBoneWeightForVertices(aiMesh* mesh, const aiScene* scene, std::vector<Vertex>& vertices)
+{
+    assert(mesh != nullptr);
+    assert(scene != nullptr);
+
+    for(int i = 0; i < mesh->mNumBones; i++){
+        int boneID = -1;
+        std::string bone_name = mesh->mBones[i]->mName.C_Str();
+
+        if(m_BoneInfoMap.find(bone_name) == m_BoneInfoMap.end()){
+            BoneInfo bone_info;
+            bone_info.id = m_BoneCount;
+            bone_info.offset = AiToGlm(mesh->mBones[i]->mOffsetMatrix);
+            m_BoneInfoMap[bone_name] = bone_info;
+            boneID = m_BoneCount;
+            m_BoneCount++;
+        }else{
+            boneID = m_BoneInfoMap[bone_name].id;
+        }
+
+        auto weights = mesh->mBones[i]->mWeights;
+        int num_weights = mesh->mBones[i]->mNumWeights;
+
+        for(int j = 0; j < num_weights; j++){
+            int vertex_id = weights[j].mVertexId;
+            float weight = weights[j].mWeight;
+
+            assert(vertex_id < vertices.size());
+            SetVertexBoneData(vertices[vertex_id], boneID, weight);
+        }
+    }
 }
