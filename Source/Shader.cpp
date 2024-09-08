@@ -14,14 +14,14 @@ void Shader::Load(const char* vertexPath, const char* fragmentPath)
     FILE* vertex_file = fopen(vertexPath, "r");
     
     if(!vertex_file){
-        LogError("Could not open vertex shader file %s\n", vertexPath);
+        LogError("Could not open vertex shader file %s", vertexPath);
         return;
     }
 
     FILE* fragment_file = fopen(fragmentPath, "r");
 
     if(!fragment_file){
-        LogError("Could not open fragment shader file %s\n", fragmentPath);
+        LogError("Could not open fragment shader file %s", fragmentPath);
         return;
     }
 
@@ -44,7 +44,7 @@ void Shader::Load(const char* vertexPath, const char* fragmentPath)
     Compile(vertex_src_code.c_str(), fragment_src_code.c_str());
 
     #ifdef DEBUG
-        LogMessage("Shader %s and %s loaded successfully\n", vertexPath, fragmentPath);
+        LogMessage("Shader %s and %s loaded successfully", vertexPath, fragmentPath);
     #endif
 }
 
@@ -60,7 +60,7 @@ void Shader::Compile(const char* vertex_src_code, const char* fragment_src_code)
     status = CheckCompileErrors(vertex_shader);
 
     if(!status){
-        LogError("Couldn't compile shader %s\n", m_VertexPath.c_str());
+        LogError("Couldn't compile shader %s", m_VertexPath.c_str());
     }
 
     //compile fragment Shader
@@ -70,7 +70,7 @@ void Shader::Compile(const char* vertex_src_code, const char* fragment_src_code)
     status = CheckCompileErrors(fragment_shader);
     
     if(!status){
-        LogError("Couldn't compile shader %s\n", m_FragmentPath.c_str());
+        LogError("Couldn't compile shader %s", m_FragmentPath.c_str());
     }
 
     glAttachShader(m_ID, vertex_shader);
@@ -80,7 +80,7 @@ void Shader::Compile(const char* vertex_src_code, const char* fragment_src_code)
     status = CheckLinkErrors();
 
     if(!status){
-        LogError("Couldn't link Shaders %s and %s\n", m_VertexPath.c_str(), m_FragmentPath.c_str());
+        LogError("Couldn't link Shaders %s and %s", m_VertexPath.c_str(), m_FragmentPath.c_str());
     }
     
     glDeleteShader(vertex_shader);
@@ -101,7 +101,7 @@ bool Shader::CheckCompileErrors(unsigned int shader_id)
         int buffer_size;
         glGetShaderInfoLog(shader_id, info_log_length, &buffer_size, buffer);
 
-        LogError("%s\n", buffer);
+        LogError("%s", buffer);
 
         delete[] buffer;
 
@@ -124,7 +124,7 @@ bool Shader::CheckLinkErrors()
         int buffer_size;
         glGetProgramInfoLog(m_ID, info_log_length, &buffer_size, buffer);
 
-        LogError("%s\n", buffer);
+        LogError("%s", buffer);
 
         delete[] buffer;
 

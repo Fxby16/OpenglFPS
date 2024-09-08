@@ -9,6 +9,7 @@
 #include <PredefinedMeshes.hpp>
 #include <Bloom.hpp>
 #include <PostProcessing.hpp>
+#include <Timer.hpp>
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -99,6 +100,7 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     deferred_s.SetUniform1i("Albedo", 2);
     deferred_s.SetUniform1i("ShadowMaps", 3);
     deferred_s.SetUniform1i("ShadowCubeMaps", 4);
+    deferred_s.SetUniform1i("isPlaying", 0);
 
     return 0;
 }
@@ -110,6 +112,7 @@ void CloseWindow()
     DeinitPredefinedMeshes();
     DeinitBloom();
     DeinitResourceManager();
+    FreeRemainingTimers();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

@@ -15,7 +15,7 @@ void SerializeMap(const std::string& path)
     {
         nlohmann::json model_json;
         Serialize(model_json, model.second);
-        j["Models"].push_back(model_json);
+        j["models"].push_back(model_json);
     }
 
     std::ofstream file(path);

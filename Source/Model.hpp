@@ -4,6 +4,7 @@
 #include <Texture.hpp>
 
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <string>
 #include <deque>
@@ -12,6 +13,11 @@
 #include <glm.hpp>
 
 extern glm::mat4 g_DummyTransform;
+
+struct BoneInfo{
+    int id;
+    glm::mat4 offset;
+};
 
 class Model{
 public:
@@ -40,6 +46,15 @@ public:
     inline bool GetGammaCorrection() { return m_GammaCorrection; }
     inline const std::string& GetPath() const { return m_Path; }
     inline const std::string& GetName() const { return m_Name; }
+    inline const std::map<std::string, BoneInfo>& GetBoneInfoMap() const { return m_BoneInfoMap; }
+    inline int GetBoneCount() const { return m_BoneCount; }
+    inline void IncrementBoneCount() { m_BoneCount++; }
+    inline std::map<std::string, BoneInfo>& GetBoneInfoMap() { return m_BoneInfoMap; }
+    inline void SetBoneInfoMap(const std::map<std::string, BoneInfo>& bone_info_map) { m_BoneInfoMap = bone_info_map; }
+
+    void ResetVertexBoneData(Vertex& vertex);
+    void SetVertexBoneData(Vertex& vertex, int bone_id, float weight);
+    void ExtractBoneWeightForVertices(aiMesh* mesh, const aiScene* scene, std::vector<Vertex>& vertices);
 
 private:
     void ProcessNode(aiNode* node, const aiScene* scene, glm::mat4 parent_transform = glm::mat4(1.0f));
@@ -55,6 +70,9 @@ private:
     std::string m_Name;
     
     bool m_GammaCorrection;
+
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
+    int m_BoneCount = 0;
 };
 
 void SetLogsOutput(std::deque<std::string>* logs, std::mutex* logs_mutex);

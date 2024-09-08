@@ -1,11 +1,9 @@
 {
     "models": [
         {
-            "compressed": true,
             "gamma_correction": false,
             "name": "",
             "path": "/home/fabio/OpenglFPS/Resources/Models/leather_sofa/scene.gltf",
-            "pbr_enabled": true,
             "transforms": [
                 [
                     [
@@ -36,11 +34,9 @@
             ]
         },
         {
-            "compressed": false,
             "gamma_correction": false,
             "name": "SPHERE",
             "path": "",
-            "pbr_enabled": true,
             "transforms": [
                 [
                     [
@@ -114,32 +110,6 @@
                         0.0
                     ],
                     [
-                        1.1390268802642822,
-                        1.4179894924163818,
-                        2.8764500617980957,
-                        1.0
-                    ]
-                ],
-                [
-                    [
-                        0.20000000298023224,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.20000000298023224,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.20000000298023224,
-                        0.0
-                    ],
-                    [
                         3.2492802143096924,
                         0.8301742076873779,
                         5.478399276733398,
@@ -175,11 +145,9 @@
             ]
         },
         {
-            "compressed": false,
             "gamma_correction": false,
             "name": "CUBE",
             "path": "",
-            "pbr_enabled": true,
             "transforms": [
                 [
                     [

@@ -11,6 +11,7 @@
 #include <glm.hpp>
 
 inline constexpr unsigned int MAX_BONE_INFLUENCE = 4;
+inline constexpr unsigned int MAX_BONES = 100;
 
 enum TextureType{
     ALBEDO,
@@ -26,10 +27,31 @@ struct Vertex{
     glm::vec3 Normal;
     glm::vec2 TexCoords;
     glm::vec3 Tangent;
-    glm::vec3 Bitangent;
 
     int BoneIDs[MAX_BONE_INFLUENCE];
     float Weights[MAX_BONE_INFLUENCE];
+
+    Vertex() = default;
+    Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& tex_coords, const glm::vec3& tangent, const int bone_ids[4], const float weights[4])
+        : Position(position), Normal(normal), TexCoords(tex_coords), Tangent(tangent)
+    {
+        for(int i = 0; i < MAX_BONE_INFLUENCE; i++){
+            BoneIDs[i] = bone_ids[i];
+            Weights[i] = weights[i];
+        }
+    }
+    Vertex(float* pos, float* norm, float* tex, float* tan, int* bone_ids, float* weights)
+    {
+        Position = glm::vec3(pos[0], pos[1], pos[2]);
+        Normal = glm::vec3(norm[0], norm[1], norm[2]);
+        TexCoords = glm::vec2(tex[0], tex[1]);
+        Tangent = glm::vec3(tan[0], tan[1], tan[2]);
+
+        for(int i = 0; i < MAX_BONE_INFLUENCE; i++){
+            BoneIDs[i] = bone_ids[i];
+            Weights[i] = weights[i];
+        }
+    }
 };
 
 class Mesh{

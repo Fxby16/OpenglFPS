@@ -7,9 +7,9 @@
 
 static unsigned int g_LogBufferSize = 10;
 
-static std::vector<const char*> g_LogMessages;
-static std::vector<const char*> g_LogErrors;
-static std::vector<const char*> g_LogWarnings;
+static std::vector<std::string> g_LogMessages;
+static std::vector<std::string> g_LogErrors;
+static std::vector<std::string> g_LogWarnings;
 
 static bool g_LogMessagesToFile = false;
 static bool g_LogErrorsToFile = false;
@@ -19,24 +19,23 @@ static char g_LogMessagesFilename[256];
 static char g_LogErrorsFilename[256];
 static char g_LogWarningsFilename[256];
 
-char* FormatMessage(const char* type, const char* message, va_list args)
+char* FormatMessage(const std::string& type, const std::string& message, va_list args)
 {
     char buffer[256];
-    vsnprintf(buffer + snprintf(buffer, sizeof(buffer), "[%s] ", type), sizeof(buffer), message, args);
+    vsnprintf(buffer + snprintf(buffer, sizeof(buffer), "[%s] ", type.c_str()), sizeof(buffer), message.c_str(), args);
     return strdup(buffer);
 }
 
-void InsertMessage(std::vector<const char*>& buffer, const char* message)
+void InsertMessage(std::vector<std::string>& buffer, const std::string& message)
 {
     if(buffer.size() >= g_LogBufferSize){
-        free((void*) buffer[0]);
         buffer.erase(buffer.begin());
     }
 
     buffer.push_back(message);
 } 
 
-void LogMessage(const char* message, ...)
+void LogMessage(const std::string& message, ...)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_MESSAGES_ENABLED)
 
@@ -46,18 +45,18 @@ void LogMessage(const char* message, ...)
     if(g_LogMessagesToFile){
         FILE* file = fopen(g_LogMessagesFilename, "a");
         if(file){
-            fprintf(file, "%s\n", g_LogMessages.back());
+            fprintf(file, "%s\n", g_LogMessages.back().c_str());
             fclose(file);
         }
     }else{
-        printf("%s\n", g_LogMessages.back());
+        printf("%s\n", g_LogMessages.back().c_str());
     }
     va_end(args);
 
     #endif
 }
 
-void LogError(const char* message, ...)
+void LogError(const std::string& message, ...)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_ERRORS_ENABLED)
 
@@ -67,18 +66,18 @@ void LogError(const char* message, ...)
     if(g_LogErrorsToFile){
         FILE* file = fopen(g_LogErrorsFilename, "a");
         if(file){
-            fprintf(file, "%s\n", g_LogErrors.back());
+            fprintf(file, "%s\n", g_LogErrors.back().c_str());
             fclose(file);
         }
     }else{
-        printf("%s\n", g_LogErrors.back());
+        printf("%s\n", g_LogErrors.back().c_str());
     }
     va_end(args);
 
     #endif
 }
 
-void LogWarning(const char* message, ...)
+void LogWarning(const std::string& message, ...)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_WARNINGS_ENABLED)
 
@@ -88,23 +87,23 @@ void LogWarning(const char* message, ...)
     if(g_LogWarningsToFile){
         FILE* file = fopen(g_LogWarningsFilename, "a");
         if(file){
-            fprintf(file, "%s\n", g_LogWarnings.back());
+            fprintf(file, "%s\n", g_LogWarnings.back().c_str());
             fclose(file);
         }
     }else{
-        printf("%s\n", g_LogWarnings.back());
+        printf("%s\n", g_LogWarnings.back().c_str());
     }
     va_end(args);
 
     #endif
 }
 
-const char* GetLogMessage(unsigned int index)
+const std::string* GetLogMessage(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_MESSAGES_ENABLED)
 
     if(index < g_LogMessages.size()){
-        return g_LogMessages[g_LogMessages.size() - index - 1];
+        return &g_LogMessages[g_LogMessages.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -114,12 +113,12 @@ const char* GetLogMessage(unsigned int index)
     #endif
 }
 
-const char* GetLogError(unsigned int index)
+const std::string* GetLogError(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_ERRORS_ENABLED)
 
     if(index < g_LogErrors.size()){
-        return g_LogErrors[g_LogErrors.size() - index - 1];
+        return &g_LogErrors[g_LogErrors.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -129,12 +128,12 @@ const char* GetLogError(unsigned int index)
     #endif
 }
 
-const char* GetLogWarning(unsigned int index)
+const std::string* GetLogWarning(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_WARNINGS_ENABLED)
 
     if(index < g_LogWarnings.size()){
-        return g_LogWarnings[g_LogWarnings.size() - index - 1];
+        return &g_LogWarnings[g_LogWarnings.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -159,45 +158,33 @@ unsigned int GetLogWarningsCount()
 
 void ClearLogMessages()
 {
-    for(auto message : g_LogMessages){
-        free((void*) message);
-    }
-
     g_LogMessages.clear();
 }
 void ClearLogErrors()
 {
-    for(auto message : g_LogErrors){
-        free((void*) message);
-    }
-
     g_LogErrors.clear();
 }
 void ClearLogWarnings()
 {
-    for(auto message : g_LogWarnings){
-        free((void*) message);
-    }
-
     g_LogWarnings.clear();
 }
 
-void LogMessagesToFile(const char* filename)
+void LogMessagesToFile(const std::string& filename)
 {
     g_LogMessagesToFile = true;
-    strncpy(g_LogMessagesFilename, filename, sizeof(g_LogMessagesFilename) - 1);
+    strncpy(g_LogMessagesFilename, filename.c_str(), sizeof(g_LogMessagesFilename) - 1);
 }
 
-void LogErrorsToFile(const char* filename)
+void LogErrorsToFile(const std::string& filename)
 {
     g_LogErrorsToFile = true;
-    strncpy(g_LogErrorsFilename, filename, sizeof(g_LogErrorsFilename) - 1);
+    strncpy(g_LogErrorsFilename, filename.c_str(), sizeof(g_LogErrorsFilename) - 1);
 }
 
-void LogWarningsToFile(const char* filename)
+void LogWarningsToFile(const std::string& filename)
 {
     g_LogWarningsToFile = true;
-    strncpy(g_LogWarningsFilename, filename, sizeof(g_LogWarningsFilename) - 1);
+    strncpy(g_LogWarningsFilename, filename.c_str(), sizeof(g_LogWarningsFilename) - 1);
 }
 
 void LogMessagesToConsole()

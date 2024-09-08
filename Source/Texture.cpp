@@ -43,7 +43,7 @@ void Texture::Init(const std::string& path, unsigned char* data, const std::stri
 
 void Texture::_Init(const std::string& path, bool flip, unsigned char* data)
 {
-    LogMessage("Loading texture %s\n", path.c_str());
+    LogMessage("Loading texture %s", path.c_str());
 
     glGenTextures(1, &m_ID);
     glBindTexture(GL_TEXTURE_2D, m_ID);

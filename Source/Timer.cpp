@@ -108,3 +108,14 @@ int Timer::Hash(const char* str)
 
     return h;
 }
+
+void FreeRemainingTimers()
+{
+    #if defined(DEBUG) || defined(PROFILE)
+
+    for(int id : TimersStarted){
+        glDeleteQueries(1, &GPUQueries[id].first);
+    }
+
+    #endif
+}
