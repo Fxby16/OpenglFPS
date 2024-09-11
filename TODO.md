@@ -8,4 +8,3 @@
 - physics
 - 3D audio
 - fix light bleeding through thin objects
-- load animated models through the editor
