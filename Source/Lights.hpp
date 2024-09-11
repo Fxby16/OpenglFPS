@@ -52,7 +52,7 @@ struct SpotLight{
     SpotLight(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& color, float cutOff, float outerCutOff)
         : pos(pos), dir(dir), color(color), cutOff(glm::cos(glm::radians(cutOff))), outerCutOff(glm::cos(glm::radians(outerCutOff)))
     {
-        lightSpaceMatrix = glm::perspective(glm::radians(outerCutOff * 2), 1.0f, 0.1f, 30.0f) * glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
+        lightSpaceMatrix = glm::perspective(glm::radians(outerCutOff * 2), 1.0f, 0.1f, 20.0f) * glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 };
 

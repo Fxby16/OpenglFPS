@@ -20,6 +20,7 @@ public:
     inline int GetID() const { return m_ID; }
 
     void SetUniform1i(const std::string& name, int value);
+    void SetUniform1ui(const std::string& name, unsigned int value);
     void SetUniform1f(const std::string& name, float value);
     void SetUniformMat4fv(const std::string& name, const glm::mat4& matrix, unsigned int count = 1);
     void SetUniform1iv(const std::string& name, int* values, unsigned int count = 1);

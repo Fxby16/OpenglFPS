@@ -1,13 +1,11 @@
-- indirect lighting
-- Ssao
-- loading screen
-- multithreaded models loading
-- batch rendering
-- save models id to file
-- apply materials to meshes and save them (through the editor)
-- option to scale by the same amount on all the axis
-- add lights through the editor
-- make object selection more accurate
+- skydome with HDRIs
+- global illumination
+  - voxel cone tracing?
+- screen space reflections
+- screen space ambient occlusion
 - cascaded shadow mapping
-- modify shadow mapping to make it work with animated models
-- interpolation between different animations
+- FXAA?
+- physics
+- 3D audio
+- fix light bleeding through thin objects
+- load animated models through the editor

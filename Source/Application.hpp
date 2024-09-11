@@ -29,8 +29,10 @@ private:
 
     struct SelectedData{
         uint32_t model_id;
-        int mesh_index;
         int transform_index;
+
+        SelectedData() = default;
+        SelectedData(std::pair<uint32_t, unsigned int> data) : model_id(data.first), transform_index(data.second) {}
     };
 
     SelectedData m_SelectedModel;

@@ -10,6 +10,7 @@
 #include <Bloom.hpp>
 #include <PostProcessing.hpp>
 #include <Timer.hpp>
+#include <MousePicking.hpp>
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -68,14 +69,14 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     EnableDepthTest();
 
     // modules initialization
+    GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
     InitRenderer();
     InitTextRenderer("Resources/Fonts/tektur/Tektur-Regular.ttf", 30);
     InitPredefinedMeshes();
     InitResourceManager();
     InitBloom();
     InitPostProcessing();
-
-    GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);
+    InitMousePicking();
 
     g_GBufferShader = LoadShader("Resources/Shaders/GBuffer.vert",
                                  "Resources/Shaders/GBuffer.frag");
@@ -102,6 +103,14 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     deferred_s.SetUniform1i("ShadowCubeMaps", 4);
     deferred_s.SetUniform1i("isPlaying", 0);
 
+    Shader& shadowmap_s = GetShadowMapShader();
+    shadowmap_s.Bind();
+    shadowmap_s.SetUniform1i("isPlaying", 0);
+
+    Shader& pointlightshadowmap_s = GetPointLightShadowMapShader();
+    pointlightshadowmap_s.Bind();
+    pointlightshadowmap_s.SetUniform1i("isPlaying", 0);
+
     return 0;
 }
 
@@ -112,6 +121,7 @@ void CloseWindow()
     DeinitPredefinedMeshes();
     DeinitBloom();
     DeinitResourceManager();
+    DeinitMousePicking();
     FreeRemainingTimers();
 
     ImGui_ImplOpenGL3_Shutdown();

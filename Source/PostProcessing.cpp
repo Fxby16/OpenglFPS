@@ -15,14 +15,14 @@ static uint32_t g_PostProcessingShader = std::numeric_limits<uint32_t>::max();
 void InitPostProcessing()
 {
     g_PostProcessingShader = LoadShader("Resources/Shaders/PostProcessing.vert", "Resources/Shaders/PostProcessing.frag");
-    GetShader(g_PostProcessingShader).Bind();
-    GetShader(g_PostProcessingShader).SetUniform1i("useDirtTexture", 0);
-    GetShader(g_PostProcessingShader).SetUniform1i("bloomBlurTexture", 0);
-    GetShader(g_PostProcessingShader).SetUniform1i("screenTexture", 1);
-    GetShader(g_PostProcessingShader).SetUniform1i("dirtTexture", 2);
-    GetShader(g_PostProcessingShader).SetUniform1f("exposure", g_Exposure);
-    GetShader(g_PostProcessingShader).SetUniform1i("toneMappingType", g_ToneMapping);
-    GetShader(g_PostProcessingShader).SetUniform1f("bloomStrength", g_BloomStrength);
+    GetShader(g_PostProcessingShader)->Bind();
+    GetShader(g_PostProcessingShader)->SetUniform1i("useDirtTexture", 0);
+    GetShader(g_PostProcessingShader)->SetUniform1i("bloomBlurTexture", 0);
+    GetShader(g_PostProcessingShader)->SetUniform1i("screenTexture", 1);
+    GetShader(g_PostProcessingShader)->SetUniform1i("dirtTexture", 2);
+    GetShader(g_PostProcessingShader)->SetUniform1f("exposure", g_Exposure);
+    GetShader(g_PostProcessingShader)->SetUniform1i("toneMappingType", g_ToneMapping);
+    GetShader(g_PostProcessingShader)->SetUniform1f("bloomStrength", g_BloomStrength);
 }
 
 void PostProcessingPass()
@@ -30,10 +30,10 @@ void PostProcessingPass()
     BindTexture(GetBloomTexture(), 0);
     BindTexture(GetDeferredPassFramebuffer().GetColorBufferTexture(), 1);   
     if(g_DirtTexture != std::numeric_limits<uint32_t>::max()){
-        BindTexture(GetTexture(g_DirtTexture).GetID(), 2);
+        BindTexture(GetTexture(g_DirtTexture)->GetID(), 2);
     }
 
-    GetShader(g_PostProcessingShader).Bind();
+    GetShader(g_PostProcessingShader)->Bind();
     DrawFullscreenQuad();
 }
 
@@ -74,6 +74,6 @@ void SetDirtTexture(const std::string& path)
     }
 
     g_DirtTexture = LoadTexture(path);
-    GetShader(g_PostProcessingShader).Bind();
-    GetShader(g_PostProcessingShader).SetUniform1i("useDirtTexture", 1);
+    GetShader(g_PostProcessingShader)->Bind();
+    GetShader(g_PostProcessingShader)->SetUniform1i("useDirtTexture", 1);
 }

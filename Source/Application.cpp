@@ -24,6 +24,7 @@
 #include <PostProcessing.hpp>
 #include <Animation.hpp>
 #include <Animator.hpp>
+#include <MousePicking.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -47,8 +48,6 @@ Application::~Application()
     Deinit();
 }
 
-Model swat;
-
 void Application::Init()
 {
     InitWindow(g_ScreenWidth, g_ScreenHeight, g_WindowTitle);
@@ -67,15 +66,10 @@ void Application::Init()
     pl.shadowMap.Init();
 
     SetDirtTexture("Resources/DirtMasks/DirtMask.jpg");
-
-    swat.Load("Resources/Models/saiga/scene.gltf");
-    //swat.Load("Resources/Models/mixamo/Capoeira.dae");
 }
 
 void Application::Deinit()
 {
-    swat.Unload();
-
     m_GBuffer.Deinit();
     dl.shadowMap.Deinit();
     sl.shadowMap.Deinit();
@@ -92,10 +86,6 @@ void Application::Run()
 
     ShouldDisplayTimers(true);
 
-    Animation animation("Resources/Models/saiga/scene.gltf", swat, 500.0f);
-    //Animation animation("Resources/Models/mixamo/Capoeira.dae", swat);
-    Animator animator(animation);
-
     while(!WindowShouldClose()){
         double currentFrameTime = GetTime();
         deltaTime = currentFrameTime - lastFrameTime;
@@ -109,20 +99,26 @@ void Application::Run()
         PollEvents();
         HandleInputs(deltaTime);
 
-        for(int i = KEY_0; i <= KEY_9; i++){
-            if(IsKeyPressed(i)){
-                animation.SetCurrentAnimation(i - KEY_0);
-                animator.SetLooping(false);
-                animator.PlayAnimation();
+        constexpr uint32_t saiga_id = 2398989031;
+        SkinnedModel* saiga = GetSkinnedModel(saiga_id);
+
+        if(saiga){
+            for(int i = KEY_0; i <= KEY_9; i++){
+                if(IsKeyPressed(i)){
+                    saiga->animator.SetCurrentAnimation(i - KEY_0);
+                    saiga->animator.SetLooping(false);
+                    saiga->animator.PlayAnimation();
+                }
+            }
+
+            if(!saiga->animator.IsPlaying()){
+                saiga->animator.SetCurrentAnimation(0);
+                saiga->animator.SetLooping(true);
+                saiga->animator.PlayAnimation();
             }
         }
 
-        if(!animator.IsPlaying()){
-            animation.SetCurrentAnimation(0);
-            animator.SetLooping(true);
-        }
-
-        animator.Update(deltaTime);
+        UpdateAnimations(deltaTime);
         
         ExtractFrustum(g_Frustum, GetCamera());
 
@@ -148,10 +144,6 @@ void Application::Run()
         DisableColorBlend();
 
         DrawModels(GetGBufferShader(), GetCamera().GetViewMatrix());
-
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(1.2f, 1.4f, 2.8f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-        animator.UploadFinalBoneMatrices();
-        swat.Draw(GetGBufferShader(), GetCamera().GetViewMatrix(), model);
 
         EnableColorBlend();
 
@@ -323,109 +315,17 @@ void Application::DrawBoundingBoxes()
     EnableDepthTest();
 }
 
-bool MouseInAABB(const glm::vec2& mouse, const glm::vec2& bb_min, const glm::vec2& bb_max)
-{
-    return (mouse.x >= bb_min.x && mouse.x <= bb_max.x && mouse.y >= bb_min.y && mouse.y <= bb_max.y);
-}
-
-
-
 void Application::EditMode()
 {
+    UpdateMousePicking();
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
 
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ImGui::GetIO().WantCaptureMouse){
-        std::vector<SelectedData> hovered_meshes;
-        auto& Models = GetModels();
-
-        for(auto& [key, model] : Models){
-            for(int j = 0; j < model.GetTransforms().size(); j++){
-                auto& transform = model.GetTransforms()[j];
-                for(int i = 0; i < model.GetMeshes().size(); i++){
-                    auto& mesh = model.GetMeshes()[i];
-
-                    glm::vec3 bb_min = mesh.GetAABB().min;
-                    glm::vec3 bb_max = mesh.GetAABB().max;
-
-                    // transform bounding box corners to screen space
-                    std::vector<glm::vec3> corners;
-                    corners.push_back(glm::vec3(bb_min.x, bb_min.y, bb_min.z));
-                    corners.push_back(glm::vec3(bb_max.x, bb_min.y, bb_min.z));
-                    corners.push_back(glm::vec3(bb_max.x, bb_max.y, bb_min.z));
-                    corners.push_back(glm::vec3(bb_min.x, bb_max.y, bb_min.z));
-                    corners.push_back(glm::vec3(bb_min.x, bb_min.y, bb_max.z));
-                    corners.push_back(glm::vec3(bb_max.x, bb_min.y, bb_max.z));
-                    corners.push_back(glm::vec3(bb_max.x, bb_max.y, bb_max.z));
-                    corners.push_back(glm::vec3(bb_min.x, bb_max.y, bb_max.z));
-
-                    for(uint32_t i = 0; i < corners.size(); i++){
-                        glm::vec4 tmp = GetCamera().GetProjectionMatrix() * GetCamera().GetViewMatrix() * transform * glm::vec4(corners[i], 1.0f);
-                        corners[i] = glm::vec3(tmp) / tmp.w;
-                    }
-
-                    // create a bounding box in screen space (not really accurate for selection, maybe i will improve it later)
-                    glm::vec2 min_screen = glm::vec2(corners[0].x, corners[0].y);
-                    glm::vec2 max_screen = glm::vec2(corners[0].x, corners[0].y);
-
-                    for(uint32_t i = 1; i < corners.size(); i++){
-                        min_screen.x = glm::min(min_screen.x, corners[i].x);
-                        min_screen.y = glm::min(min_screen.y, corners[i].y);
-                        max_screen.x = glm::max(max_screen.x, corners[i].x);
-                        max_screen.y = glm::max(max_screen.y, corners[i].y);
-                    }
-
-                    glm::vec2 mouse = glm::vec2(GetMousePosition().x, GetMousePosition().y);
-                    mouse = glm::vec2((mouse.x / g_ScreenWidth) * 2.0f - 1.0f, (mouse.y / g_ScreenHeight) * 2.0f - 1.0f);
-
-                    // check if mouse is inside the bounding box
-                    if(MouseInAABB(mouse, min_screen, max_screen)){
-                        hovered_meshes.push_back({key, i, j});
-                    }
-                }
-            }
-        }
-
-        // sort meshes by distance to camera
-        if(hovered_meshes.size() > 1){
-            std::sort(hovered_meshes.begin(), hovered_meshes.end(), [&](const SelectedData& a, const SelectedData& b){
-                auto& model_a = GetModel(a.model_id);
-                auto& model_b = GetModel(b.model_id);
-
-                auto& mesh_a = model_a.GetMeshes()[a.mesh_index];
-                auto& mesh_b = model_b.GetMeshes()[b.mesh_index];
-
-                AABB bb_a = mesh_a.GetAABB();
-                AABB bb_b = mesh_b.GetAABB();
-
-                bb_a.max = GetCamera().GetViewMatrix() * model_a.GetTransform(a.transform_index) * glm::vec4(bb_a.max, 1.0f);
-                bb_a.min = GetCamera().GetViewMatrix() * model_a.GetTransform(a.transform_index) * glm::vec4(bb_a.min, 1.0f);
-                bb_b.max = GetCamera().GetViewMatrix() * model_b.GetTransform(b.transform_index) * glm::vec4(bb_b.max, 1.0f);
-                bb_b.min = GetCamera().GetViewMatrix() * model_b.GetTransform(b.transform_index) * glm::vec4(bb_b.min, 1.0f);
-
-                glm::vec3 center_a = (bb_a.max + bb_a.min) * 0.5f;
-                glm::vec3 center_b = (bb_b.max + bb_b.min) * 0.5f;
-
-                float dist_a = glm::length(center_a);
-                float dist_b = glm::length(center_b);
-
-                return dist_a < dist_b;
-            });
-        }
-
-        // select the closest mesh
-        if(hovered_meshes.size() > 0){
-            /*AABB aabb = GetModel(hovered_meshes[0].model_id).GetMeshes()[hovered_meshes[0].mesh_index].GetAABB();
-
-            aabb.max = GetModel(hovered_meshes[0].model_id).GetTransform(hovered_meshes[0].transform_index) * glm::vec4(aabb.max, 1.0f);
-            aabb.min = GetModel(hovered_meshes[0].model_id).GetTransform(hovered_meshes[0].transform_index) * glm::vec4(aabb.min, 1.0f);
-
-            DrawAABB(aabb, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));*/
-
-            m_SelectedModel = hovered_meshes[0];
-        }
+        m_SelectedModel = GetSelectedModel(GetMousePosition());
     }
 
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
@@ -441,22 +341,39 @@ void Application::EditMode()
     ImGui::Begin("Menu");
     ImGui::SetWindowSize(ImVec2(0, 0));
 
-    if(ImGui::Button("Delete Selected")){
-        GetModel(m_SelectedModel.model_id).RemoveTransform(m_SelectedModel.transform_index);
+    Model* selected_model = nullptr;
+    selected_model = GetModel(m_SelectedModel.model_id);
+    if(!selected_model){
+        SkinnedModel* skinned_model = GetSkinnedModel(m_SelectedModel.model_id);
+        if(skinned_model){
+            selected_model = &skinned_model->model;
+        }
+    }
+
+    if(ImGui::Button("Delete Selected") && m_SelectedModel.model_id != std::numeric_limits<uint32_t>::max()){
+        selected_model->RemoveTransform(m_SelectedModel.transform_index);
         UnloadModelsWithoutTransforms();
         m_SelectedModel.model_id = std::numeric_limits<uint32_t>::max();
     }
 
     if(ImGui::Button("Add Cube")){
-        GetModel(g_Cube).AddTransform(glm::mat4(1.0f));
+        GetModel(g_Cube)->AddTransform(glm::mat4(1.0f));
     }
 
     if(ImGui::Button("Add Sphere")){
-        GetModel(g_Sphere).AddTransform(glm::mat4(1.0f));
+        GetModel(g_Sphere)->AddTransform(glm::mat4(1.0f));
     }
 
     if(ImGui::Button("Load Model")){
         ImGui::OpenPopup("Load Model");   
+    }
+
+    if(ImGui::Button("Load Animated Model")){
+        ImGui::OpenPopup("Load Animated Model");
+    }
+
+    if(ImGui::Button("Add Animation") && GetSkinnedModel(m_SelectedModel.model_id) != nullptr){
+        ImGui::OpenPopup("Add Animation");
     }
 
     if(ImGui::BeginPopup("Load Model")){
@@ -465,7 +382,7 @@ void Application::EditMode()
         ImGui::InputText("Path", model_path, 256);
         ImGui::SameLine();
         if(ImGui::Button("Open")){
-            char* path = OpenFile("gltf;obj;");
+            char* path = OpenFile("gltf;obj;dae;");
             if(path){
                 strcpy(model_path, path);
             }
@@ -474,7 +391,65 @@ void Application::EditMode()
 
         if(ImGui::Button("Load")){
             uint32_t id = LoadModel(model_path);
-            GetModel(id).AddTransform(glm::mat4(1.0f));
+            GetModel(id)->AddTransform(glm::mat4(1.0f));
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if(ImGui::BeginPopup("Load Animated Model")){
+        static char model_path[256] = {0};
+        static char animation_path[256] = {0};
+        static float ticks_per_second = 0.0f;
+
+        ImGui::InputText("Path", model_path, 256);
+        ImGui::SameLine();
+        if(ImGui::Button("Open")){
+            char* path = OpenFile("gltf;obj;dae;");
+            if(path){
+                strcpy(model_path, path);
+            }
+            free(path);
+        }
+
+        ImGui::InputText("Animation Path", animation_path, 256);
+        ImGui::SameLine();
+        if(ImGui::Button("Open##2")){
+            char* path = OpenFile("gltf;obj;dae;fbx;");
+            if(path){
+                strcpy(animation_path, path);
+            }
+            free(path);
+        }
+
+        ImGui::InputFloat("Ticks Per Second", &ticks_per_second);
+
+        if(ImGui::Button("Load")){
+            uint32_t id = LoadSkinnedModel(model_path, animation_path, ticks_per_second);
+            GetSkinnedModel(id)->model.AddTransform(glm::mat4(1.0f));
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if(ImGui::BeginPopup("Add Animation")){
+        static char animation_path[256] = {0};
+        static float ticks_per_second = 0.0f;
+
+        ImGui::InputText("Animation Path", animation_path, 256);
+        ImGui::SameLine();
+        if(ImGui::Button("Open")){
+            char* path = OpenFile("gltf;obj;fbx;dae;");
+            if(path){
+                strcpy(animation_path, path);
+            }
+            free(path);
+        }
+
+        ImGui::InputFloat("Ticks Per Second", &ticks_per_second);
+
+        if(ImGui::Button("Add")){
+            GetSkinnedModel(m_SelectedModel.model_id)->AddAnimation(animation_path, ticks_per_second);
         }
 
         ImGui::EndPopup();
@@ -528,9 +503,9 @@ void Application::EditMode()
     float translation[3], rotation[3], scale[3];
     if(m_SelectedModel.model_id != std::numeric_limits<uint32_t>::max()){
         ImGuizmo::SetRect(0, 0, g_ScreenWidth, g_ScreenHeight);
-        ImGuizmo::Manipulate(glm::value_ptr(GetCamera().GetViewMatrix()), glm::value_ptr(GetCamera().GetProjectionMatrix()), m_GizmoMode, ImGuizmo::MODE::WORLD, glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)));
+        ImGuizmo::Manipulate(glm::value_ptr(GetCamera().GetViewMatrix()), glm::value_ptr(GetCamera().GetProjectionMatrix()), m_GizmoMode, ImGuizmo::MODE::WORLD, glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)));
         
-        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)), translation, rotation, scale);
+        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)), translation, rotation, scale);
 
         ImGui::Text("Translation");
         ImGui::SameLine();
@@ -544,7 +519,7 @@ void Application::EditMode()
         ImGui::SameLine();
         ImGui::InputFloat3("##scale", scale);
 
-        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, glm::value_ptr(GetModel(m_SelectedModel.model_id).GetTransform(m_SelectedModel.transform_index)));
+        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)));
     }
 
     ImGui::End();
@@ -552,52 +527,3 @@ void Application::EditMode()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
-// Cannot be used because i currently don't have something to call opengl functions from another thread
-/*
-void Application::LoadResources()
-{
-    std::deque<std::string> logs;
-    std::mutex m;
-    bool loaded = false;
-
-    SetLogsOutput(&logs, &m);
-
-    std::thread t1([&loaded, this](){
-        m_Map = LoadModel("/home/fabio/the_bathroom/scene.gltf");
-        //m_Map.Load("/home/fabio/sponza/Main.1_Sponza/NewSponza_Main_glTF_003.gltf");
-    
-        loaded = true;
-    });
-
-    t1.detach();
-
-    unsigned int max_lines = g_ScreenHeight / 30;
-
-    while(!loaded){
-        PollEvents();
-
-        ClearColor(0, 0, 0, 1);
-        ClearScreen();
-
-        m.lock();
-        unsigned int num_logs = logs.size();
-
-        if(num_logs > max_lines){
-            while(num_logs > max_lines){
-                logs.pop_front();
-                num_logs--;
-            }
-        }
-
-        for(int i = 0; i < num_logs; i++){
-            DrawText(logs[i], 10, 10 + i * 30, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-        }
-
-        m.unlock();
-
-        SwapBuffers();
-    }
-
-    UnsetLogsOutput();
-}*/

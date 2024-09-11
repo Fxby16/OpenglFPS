@@ -9,5 +9,11 @@
 `Bin/Debug/RaylibFPS` or `Bin/Release/RaylibFPS`
 
 ## Images
-![1](Images/screenshot1.png)
-![0](Images/screenshot0.png)
+![1](Demos/screenshot1.png)
+![0](Demos/screenshot0.png)
+
+## Clips
+<video controls>
+  <source src="Demos/animated_shadows.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>

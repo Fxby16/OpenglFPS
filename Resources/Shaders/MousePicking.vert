@@ -10,10 +10,9 @@ layout (location = 3) in vec3 vertexTangent;
 layout (location = 4) in ivec4 boneIDsIn;
 layout (location = 5) in vec4 weightsIn;
 
-out vec4 FragPos;
-
-uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 uniform mat4 finalBonesMatrices[MAX_BONES];
 uniform int isPlaying;
 
@@ -50,7 +49,6 @@ void main()
     }else{
         totalPosition = vec4(vertexPosition, 1.0f);
     }
-    
-    FragPos = model * totalPosition;
-    gl_Position = lightSpaceMatrix * model * totalPosition;
+
+    gl_Position = projection * view * model * totalPosition;
 }
