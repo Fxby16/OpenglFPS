@@ -13,7 +13,4 @@
 ![0](Demos/screenshot0.png)
 
 ## Clips
-<video controls>
-  <source src="Demos/animated_shadows.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![1](Demos/animated_shadows.gif)
