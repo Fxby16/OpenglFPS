@@ -82,7 +82,7 @@ void Model::SetTransforms(const std::vector<glm::mat4>& transforms)
 void Model::SetTransform(uint32_t index, const glm::mat4& transform)
 {
     while(m_Transforms.size() <= index){
-    
+        m_Transforms.push_back(glm::mat4(1.0f));
     }
 
     m_Transforms[index] = transform;
@@ -111,6 +111,13 @@ void Model::DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 
 {
     for(int i = 0; i < m_Meshes.size(); i++){
         m_Meshes[i].DrawShadows(shader, light_space_matrix, model);
+    }
+}
+
+void Model::DrawDepth(Shader& shader, glm::mat4 view, glm::mat4 model)
+{
+    for(int i = 0; i < m_Meshes.size(); i++){
+        m_Meshes[i].DrawDepth(shader, view, model);
     }
 }
 

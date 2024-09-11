@@ -7,7 +7,7 @@
 
 #include <queue>
 
-Animation::Animation(const std::string& animationPath, Model& model, float ticksPerSecond)
+Animation::Animation(const std::string& animationPath, Model& model, unsigned int animIndex, float ticksPerSecond)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
@@ -19,29 +19,31 @@ Animation::Animation(const std::string& animationPath, Model& model, float ticks
 
     m_GlobalInverseTransform = glm::inverse(AiToGlm(scene->mRootNode->mTransformation));
 
-    m_Duration.resize(scene->mNumAnimations);
-    m_TicksPerSecond.resize(scene->mNumAnimations);
-    m_RootNode.resize(scene->mNumAnimations);
-    m_Bones.resize(scene->mNumAnimations);
-    m_BoneInfoMap.resize(scene->mNumAnimations);
-    
+    aiAnimation* animation = scene->mAnimations[animIndex];
 
-    m_NumAnimations = scene->mNumAnimations;
+    m_Duration = animation->mDuration;
+    m_TicksPerSecond = (ticksPerSecond == 0.0f) ? animation->mTicksPerSecond : ticksPerSecond;      
 
-    for(unsigned int i = 0; i < scene->mNumAnimations; i++){
-        aiAnimation* animation = scene->mAnimations[i];
+    ReadHierarchyData(m_RootNode, scene->mRootNode);
+    ReadBones(animation, model);
+}
 
-        m_Duration[i] = animation->mDuration;
-        m_TicksPerSecond[i] = (ticksPerSecond == 0.0f) ? animation->mTicksPerSecond : ticksPerSecond;      
+Animation::Animation(const aiScene* scene, Model& model, unsigned int animIndex, float ticksPerSecond)
+{
+    m_GlobalInverseTransform = glm::inverse(AiToGlm(scene->mRootNode->mTransformation));
 
-        ReadHierarchyData(m_RootNode[i], scene->mRootNode);
-        ReadBones(animation, model, i);
-    }
+    aiAnimation* animation = scene->mAnimations[animIndex];
+
+    m_Duration = animation->mDuration;
+    m_TicksPerSecond = (ticksPerSecond == 0.0f) ? animation->mTicksPerSecond : ticksPerSecond;      
+
+    ReadHierarchyData(m_RootNode, scene->mRootNode);
+    ReadBones(animation, model);
 }
 
 Bone* Animation::FindBone(const std::string& name)
 {
-    for(Bone& bone : m_Bones[m_CurrentAnimation]){
+    for(Bone& bone : m_Bones){
         if(bone.GetName() == name){
             return &bone;
         }
@@ -62,14 +64,14 @@ void Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)
     }
 }
 
-void Animation::ReadBones(const aiAnimation* animation, Model& model, unsigned int index)
+void Animation::ReadBones(const aiAnimation* animation, Model& model)
 {
-    m_BoneInfoMap[index] = model.GetBoneInfoMap();
+    m_BoneInfoMap = model.GetBoneInfoMap();
 
     for(unsigned int i = 0; i < animation->mNumChannels; i++){
         aiNodeAnim* channel = animation->mChannels[i];
         std::string boneName = channel->mNodeName.C_Str();
 
-        m_Bones[index].push_back(Bone(boneName, m_BoneInfoMap[index][boneName].id, channel));
+        m_Bones.push_back(Bone(boneName, m_BoneInfoMap[boneName].id, channel));
     }
 }

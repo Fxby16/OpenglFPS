@@ -2,8 +2,9 @@
     "models": [
         {
             "gamma_correction": false,
+            "id": 419091563,
             "name": "",
-            "path": "/home/fabio/OpenglFPS/Resources/Models/leather_sofa/scene.gltf",
+            "path": "Resources/Models/leather_sofa/scene.gltf",
             "transforms": [
                 [
                     [
@@ -35,6 +36,7 @@
         },
         {
             "gamma_correction": false,
+            "id": 1,
             "name": "SPHERE",
             "path": "",
             "transforms": [
@@ -146,6 +148,7 @@
         },
         {
             "gamma_correction": false,
+            "id": 0,
             "name": "CUBE",
             "path": "",
             "transforms": [
@@ -276,6 +279,48 @@
                         5.0,
                         -0.5,
                         5.0,
+                        1.0
+                    ]
+                ]
+            ]
+        }
+    ],
+    "skinnedModels": [
+        {
+            "animationsPaths": [
+                "Resources/Models/saiga/scene.gltf"
+            ],
+            "animationsTicksPerSecond": [
+                750.0
+            ],
+            "gamma_correction": false,
+            "id": 2398989031,
+            "name": "",
+            "path": "Resources/Models/saiga/scene.gltf",
+            "transforms": [
+                [
+                    [
+                        0.5,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.5,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.5,
+                        0.0
+                    ],
+                    [
+                        1.2000000476837158,
+                        1.399999976158142,
+                        2.799999952316284,
                         1.0
                     ]
                 ]

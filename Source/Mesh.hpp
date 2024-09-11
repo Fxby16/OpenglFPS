@@ -69,6 +69,7 @@ public:
 
     void Draw(Shader& shader, glm::mat4 view, glm::mat4 model) const;
     void DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 model) const;
+    void DrawDepth(Shader& shader, glm::mat4 view, glm::mat4 model) const;
 
     inline const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
     inline const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
