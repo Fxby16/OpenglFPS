@@ -25,11 +25,12 @@
 #include <Animation.hpp>
 #include <Animator.hpp>
 #include <MousePicking.hpp>
+#include <Skydome.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-DirectionalLight dl = {glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
+DirectionalLight dl = {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
 SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), 30.0f, 34.0f};
 PointLight pl = {glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(1.0f, 1.0f, 10.0f)};
 
@@ -66,6 +67,8 @@ void Application::Init()
     pl.shadowMap.Init();
 
     SetDirtTexture("Resources/DirtMasks/DirtMask.jpg");
+    //LoadSkydome("Resources/HDRI/overcast_soil_puresky_2k.hdr");
+    LoadSkydome("Resources/HDRI/kloppenheim_02_puresky_4k.hdr");
 }
 
 void Application::Deinit()
@@ -74,6 +77,7 @@ void Application::Deinit()
     dl.shadowMap.Deinit();
     sl.shadowMap.Deinit();
     pl.shadowMap.Deinit();
+    UnloadSkydome();
 
     CloseWindow();
 }
@@ -158,7 +162,7 @@ void Application::Run()
         DrawShadowMap(pl);
 
         GetDeferredShader().Bind();
-        //SetDirectionalLight(dl);
+        SetDirectionalLight(dl);
         SetSpotLight(sl);
         SetPointLight(pl);
 
@@ -170,6 +174,8 @@ void Application::Run()
 
         DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
         DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));
+
+        DrawSkydome(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix(), glm::translate(glm::mat4(1.0f), GetCamera().GetPosition()));
 
         //bloom pass
 

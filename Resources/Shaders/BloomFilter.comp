@@ -2,24 +2,35 @@
 layout(local_size_x = 16, local_size_y = 16) in;
 layout(rgba32f, binding = 0) uniform image2D tex_src;
 
-uniform vec4 u_prefilter_threshold;
+uniform float gBloomThreshold;  // 1.0 0 100 bloom
+uniform float gBloomSoftKnee;   // 0.5 0 4
 
-vec4 prefilter(vec4 color){
-    float br = max(color.x, max(color.y, color.z)); //brightness
+float brightness(vec3 c) { 
+    return max(max(c.r, c.g), c.b); 
+}
 
-    vec3 curve = u_prefilter_threshold.yzw; // curve = (threshold - knee, knee * 2, 0.25 / knee)
-    float rq = clamp(br - curve.x, 0.0f, curve.y);
+void mainImage(out vec4 fragColor, in ivec2 pixel_coords) {
+    float softKnee = gBloomSoftKnee;
+    float lthresh = gBloomThreshold;
+
+    vec4 color = imageLoad(tex_src, pixel_coords);
+    vec3 m = color.rgb;
+    float br = brightness(m);
+
+    float knee = lthresh * softKnee + 1e-5;
+    vec3 curve = vec3(lthresh - knee, knee * 2.0, 0.25 / knee);
+    float rq = clamp(br - curve.x, 0.0, curve.y);
     rq = curve.z * rq * rq;
 
-    float threshold = u_prefilter_threshold.x;
-    color *= max(rq, br - threshold) / max(br, 0.00001f);
+    m *= max(rq, br - lthresh) / max(br, 1e-5);
+    m = max(m, vec3(0.0));
 
-    return color;
+    fragColor = vec4(m, color.a);
 }
 
 void main(){
-    vec4 pixel = vec4(0.0);    
     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);    
-    pixel = imageLoad(tex_src, pixel_coords);
-    imageStore(tex_src, pixel_coords, prefilter(pixel));
+    vec4 fragColor;
+    mainImage(fragColor, pixel_coords);
+    imageStore(tex_src, pixel_coords, fragColor);
 }

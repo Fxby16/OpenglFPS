@@ -67,6 +67,9 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
 
     DisableVSync();
     EnableDepthTest();
+    SetCullFace(GL_BACK);
+    SetWindingOrder(GL_CCW);
+    EnableCullFace();
 
     // modules initialization
     GetCamera().Init({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, g_FOV);

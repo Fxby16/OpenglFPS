@@ -76,6 +76,11 @@ void ComputeShader::SetUniform1i(const std::string& name, int value)
     glUniform1i(GetUniformLocation(name), value);
 }
 
+void ComputeShader::SetUniform1f(const std::string& name, float value)
+{
+    glUniform1f(GetUniformLocation(name), value);
+}
+
 void ComputeShader::SetUniform2i(const std::string& name, int x, int y)
 {
     glUniform2i(GetUniformLocation(name), x, y);

@@ -70,3 +70,23 @@ void BlitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int 
 {
     glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, ((mask & GL_DEPTH_BUFFER_BIT) || (mask & GL_STENCIL_BUFFER_BIT)) ? GL_NEAREST : GL_LINEAR);
 }
+
+void EnableCullFace()
+{
+    glEnable(GL_CULL_FACE);
+}
+
+void DisableCullFace()
+{
+    glDisable(GL_CULL_FACE);
+}
+
+void SetCullFace(int face)
+{
+    glCullFace(face);
+}
+
+void SetWindingOrder(int order)
+{
+    glFrontFace(order);
+}

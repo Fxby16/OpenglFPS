@@ -32,48 +32,61 @@ void InitRenderer()
     };
 
     float cubeData[] = {
-        // 1st face
-        -0.5f, -0.5f, -0.5f,  // Bottom-left
-         0.5f, -0.5f, -0.5f,  // Bottom-right
-         0.5f,  0.5f, -0.5f,  // Top-right
-         0.5f,  0.5f, -0.5f,  // Top-right
-        -0.5f,  0.5f, -0.5f,  // Top-left
-        -0.5f, -0.5f, -0.5f,  // Bottom-left
-        // 2nd face
-        -0.5f, -0.5f,  0.5f,  // Bottom-left
-         0.5f, -0.5f,  0.5f,  // Bottom-right
-         0.5f,  0.5f,  0.5f,  // Top-right
-         0.5f,  0.5f,  0.5f,  // Top-right
-        -0.5f,  0.5f,  0.5f,  // Top-left
-        -0.5f, -0.5f,  0.5f,  // Bottom-left
-        // 3rd face
-        -0.5f,  0.5f,  0.5f,  // Bottom-left
-        -0.5f,  0.5f, -0.5f,  // Bottom-right
-        -0.5f, -0.5f, -0.5f,  // Top-right
-        -0.5f, -0.5f, -0.5f,  // Top-right
-        -0.5f, -0.5f,  0.5f,  // Top-left
-        -0.5f,  0.5f,  0.5f,  // Bottom-left
-        // 4th face
-         0.5f,  0.5f,  0.5f,  // Bottom-left
-         0.5f,  0.5f, -0.5f,  // Bottom-right
-         0.5f, -0.5f, -0.5f,  // Top-right
-         0.5f, -0.5f, -0.5f,  // Top-right
-         0.5f, -0.5f,  0.5f,  // Top-left
-         0.5f,  0.5f,  0.5f,  // Bottom-left
-        // 5th face
-        -0.5f, -0.5f, -0.5f,  // Bottom-left
-         0.5f, -0.5f, -0.5f,  // Bottom-right
-         0.5f, -0.5f,  0.5f,  // Top-right
-         0.5f, -0.5f,  0.5f,  // Top-right
-        -0.5f, -0.5f,  0.5f,  // Top-left
-        -0.5f, -0.5f, -0.5f,  // Bottom-left
-        // 6th face
-        -0.5f,  0.5f, -0.5f,  // Bottom-left
-         0.5f,  0.5f, -0.5f,  // Bottom-right
-         0.5f,  0.5f,  0.5f,  // Top-right
-         0.5f,  0.5f,  0.5f,  // Top-right
-        -0.5f,  0.5f,  0.5f,  // Top-left
-        -0.5f,  0.5f, -0.5f   // Bottom-left
+        // Front face
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
+        -0.5f, 0.5f, -0.5f,
+
+        // Back face
+        -0.5f, -0.5f, 0.5f,
+        0.5f, -0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+
+        // Left face
+        -0.5f, -0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        // Right face
+        0.5f, -0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+
+        // Top face
+        -0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+
+        // Bottom face
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, 0.5f,
+        -0.5f, -0.5f, 0.5f
+    };
+
+    unsigned int cubeIndices[] = {
+        0, 3, 2,  // Front face
+        2, 1, 0,  // Front face
+    
+        4, 5, 6,  // Back face
+        6, 7, 4,  // Back face
+    
+        8, 9, 10, // Left face
+        10, 11, 8, // Left face
+    
+        12, 15, 14, // Right face
+        14, 13, 12, // Right face
+    
+        16, 19, 18, // Top face
+        18, 17, 16, // Top face
+    
+        20, 21, 22, // Bottom face
+        22, 23, 20  // Bottom face
     };
 
     g_FullscreenQuadBuffer.Init(6, 4 * sizeof(float), 0);
@@ -92,8 +105,9 @@ void InitRenderer()
     g_LineBuffer.BindVBO();
     g_LineBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
 
-    g_CubeBuffer.Init(36, 3 * sizeof(float), 0);
-    g_CubeBuffer.SetData(0, (void*) cubeData, 36, 3 * sizeof(float));
+    g_CubeBuffer.Init(24, 3 * sizeof(float), 36);
+    g_CubeBuffer.SetData(0, (void*) cubeData, 24, 3 * sizeof(float));
+    g_CubeBuffer.SetIndices(cubeIndices, 36);
     g_CubeBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
 
     g_DeferredPassFramebuffer.Init(g_ScreenWidth, g_ScreenHeight);
@@ -220,8 +234,9 @@ void DrawSolidCube(glm::vec3 position, glm::vec3 scale, glm::vec4 color)
 
     g_CubeBuffer.BindVAO();
     g_CubeBuffer.BindVBO();
+    g_CubeBuffer.BindEBO();
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
 void DrawBoundingBox(glm::vec3 min, glm::vec3 max, glm::vec4 color)

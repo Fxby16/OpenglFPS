@@ -9,7 +9,7 @@
 
 static unsigned int g_BloomTexture = std::numeric_limits<unsigned int>::max();
 static unsigned int g_BloomTexView = std::numeric_limits<unsigned int>::max();
-static float g_BloomThreshold = 0.5f;
+static float g_BloomThreshold = 100000.0f;
 static float g_BloomKnee = 0.5f;
 static ComputeShader g_BloomFilterShader;
 static ComputeShader g_BloomDownsampleShader;
@@ -21,7 +21,7 @@ void InitBloom()
     glActiveTexture(GL_TEXTURE10);
     glBindTexture(GL_TEXTURE_2D, g_BloomTexture);
 
-    glTexStorage2D(GL_TEXTURE_2D, NUM_MIPS, GL_RGBA16F, g_ScreenWidth, g_ScreenHeight);
+    glTexStorage2D(GL_TEXTURE_2D, NUM_MIPS, GL_RGBA32F, g_ScreenWidth, g_ScreenHeight);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -30,7 +30,7 @@ void InitBloom()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &g_BloomTexView);
-    glTextureView(g_BloomTexView, GL_TEXTURE_2D, g_BloomTexture, GL_RGBA16F, 0, 1, 0, 1);
+    glTextureView(g_BloomTexView, GL_TEXTURE_2D, g_BloomTexture, GL_RGBA32F, 0, 1, 0, 1);
 
     g_BloomFilterShader.Load("Resources/Shaders/BloomFilter.comp");
     g_BloomDownsampleShader.Load("Resources/Shaders/BloomDownsampling.comp");
@@ -58,9 +58,10 @@ void BloomPass()
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, g_ScreenWidth, g_ScreenHeight);
 
     g_BloomFilterShader.Bind();
-    g_BloomFilterShader.SetUniform4f("u_prefilter_threshold", g_BloomThreshold, g_BloomThreshold - g_BloomKnee, g_BloomKnee * 2.0f, 0.25f / g_BloomKnee);
-    
-    glBindImageTexture(0, g_BloomTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+    g_BloomFilterShader.SetUniform1f("gBloomThreshold", g_BloomThreshold);
+    g_BloomFilterShader.SetUniform1f("gBloomSoftKnee", g_BloomKnee);
+
+    glBindImageTexture(0, g_BloomTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
     
     int groupCountX = glm::ceil(g_ScreenWidth / 16.0f);
     int groupCountY = glm::ceil(g_ScreenHeight / 16.0f);
@@ -70,8 +71,8 @@ void BloomPass()
 
     g_BloomDownsampleShader.Bind();
     for(int i = 0; i < NUM_MIPS - 1; i++){
-        glBindImageTexture(0, g_BloomTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
-        glBindImageTexture(1, g_BloomTexture, i + 1, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        glBindImageTexture(0, g_BloomTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, g_BloomTexture, i + 1, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         g_BloomDownsampleShader.SetUniform2i("srcResolution", g_ScreenWidth / (1 << i), g_ScreenHeight / (1 << i));
 
@@ -88,8 +89,8 @@ void BloomPass()
 
     g_BloomUpsampleShader.Bind();
     for(int i = NUM_MIPS - 1; i > 0; i--){
-        glBindImageTexture(0, g_BloomTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA16F);
-        glBindImageTexture(1, g_BloomTexture, i - 1, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glBindImageTexture(0, g_BloomTexture, i, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, g_BloomTexture, i - 1, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
         g_BloomUpsampleShader.SetUniform2i("srcResolution", g_ScreenWidth / (1 << i), g_ScreenHeight / (1 << i));
 

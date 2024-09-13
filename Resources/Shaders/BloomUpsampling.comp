@@ -6,8 +6,8 @@ layout(local_size_x = 16, local_size_y = 16) in;
 
 uniform ivec2 srcResolution;
 
-layout(rgba16f, binding = 0) uniform image2D srcTexture;
-layout(rgba16f, binding = 1) uniform image2D dstTexture;
+layout(rgba32f, binding = 0) uniform image2D srcTexture;
+layout(rgba32f, binding = 1) uniform image2D dstTexture;
 
 void main(){
     ivec2 dstCoord = ivec2(gl_GlobalInvocationID.xy);
