@@ -48,7 +48,7 @@ uniform int numSpotLights;
 const float PI = 3.14159265359;
 
 // return 0.0 if in shadow, 1.0 if not
-float CalcShadow(int shadowMapIndex, vec4 fragPosLightSpace, vec3 lightDir, float minBias)
+float CalcShadowSpot(int shadowMapIndex, vec4 fragPosLightSpace, vec3 lightDir)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -60,7 +60,36 @@ float CalcShadow(int shadowMapIndex, vec4 fragPosLightSpace, vec3 lightDir, floa
     float shadow = 0.0;
     vec2 texelSize = 1.0 / vec2(textureSize(ShadowMaps, 0).xy);
 
-    float bias = max(0.05 * (1.0 - dot(texture(Normals, TexCoords).rgb, lightDir)), minBias);
+    float bias = max(0.05 * (1.0 - dot(texture(Normals, TexCoords).rgb, lightDir)), 0.002);
+    
+    for(int x = -1; x <= 1; x++){
+        for(int y = -1; y <= 1; y++){
+            float pcfDepth = texture(ShadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, shadowMapIndex)).r; 
+            shadow += ((currentDepth - bias > pcfDepth) ? 0.0 : 1.0);        
+        }    
+    }
+    shadow /= 9.0;
+    
+    //if outside of shadow map, consider not in shadow
+    if(projCoords.z > 1.0)
+        shadow = 1.0;
+
+    return shadow;
+}
+
+float CalcShadowDirectional(int shadowMapIndex, vec4 fragPosLightSpace, vec3 lightDir)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(ShadowMaps, vec3(projCoords.xy, shadowMapIndex)).r;
+    float currentDepth = projCoords.z;
+
+
+    //PCF (Percentage-Closer Filtering) to soften shadows
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / vec2(textureSize(ShadowMaps, 0).xy);
+
+    float bias = 0.005;
     
     for(int x = -1; x <= 1; x++){
         for(int y = -1; y <= 1; y++){
@@ -200,7 +229,7 @@ void main()
     for(int i = 0; i < numDirectionalLights; i++) 
     {
         vec4 fragPosLightSpace = (directionalLights[i].lightSpaceMatrix * vec4(position, 1.0));
-        float shadow = CalcShadow(directionalLights[i].shadowMapIndex, fragPosLightSpace, -directionalLights[i].direction, 0.005);
+        float shadow = CalcShadowDirectional(directionalLights[i].shadowMapIndex, fragPosLightSpace, -directionalLights[i].direction);
 
         vec3 L = normalize(-directionalLights[i].direction);
         vec3 H = normalize(V + L);
@@ -234,7 +263,7 @@ void main()
     for(int i = 0; i < numSpotLights; i++) 
     {
         vec4 fragPosLightSpace = (spotLights[i].lightSpaceMatrix * vec4(position, 1.0));
-        float shadow = CalcShadow(spotLights[i].shadowMapIndex, fragPosLightSpace, -spotLights[i].direction, 0.002);
+        float shadow = CalcShadowSpot(spotLights[i].shadowMapIndex, fragPosLightSpace, -spotLights[i].direction);
 
         vec3 L = normalize(spotLights[i].position - position);
         vec3 H = normalize(V + L);

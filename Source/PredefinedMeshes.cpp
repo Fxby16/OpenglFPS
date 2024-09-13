@@ -10,51 +10,61 @@ void InitPredefinedMeshes()
 
     // Cube
     vertices = {
-        // Face 1 (front)
+        // Front face
         Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
 
-        // Face 2 (back)
+        // Back face
         Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
 
-        // Face 3 (left)
+        // Left face
+        Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
 
-        // Face 4 (right)
+        // Right face
+        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
         Vertex(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
 
-        // Face 5 (top)
-        Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        // Top face
+        Vertex(glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
 
-        // Face 6 (bottom)
-        Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
-        Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f})
+        // Bottom face
+        Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f}),
+        Vertex(glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), (int[]){-1, -1, -1, -1}, (float[]){0.0f, 0.0f, 0.0f, 0.0f})
     };
 
-    // Use the same indices array as before
     indices = {
-        0, 1, 2, 2, 3, 0,
-        4, 5, 6, 6, 7, 4,
-        8, 9, 10, 10, 11, 8,
-        12, 13, 14, 14, 15, 12,
-        16, 17, 18, 18, 19, 16,
-        20, 21, 22, 22, 23, 20
+        0, 3, 2,  // Front face
+        2, 1, 0,  // Front face
+    
+        4, 5, 6,  // Back face
+        6, 7, 4,  // Back face
+    
+        8, 9, 10, // Left face
+        10, 11, 8, // Left face
+    
+        12, 15, 14, // Right face
+        14, 13, 12, // Right face
+    
+        16, 19, 18, // Top face
+        18, 17, 16, // Top face
+    
+        20, 21, 22, // Bottom face
+        22, 23, 20  // Bottom face
     };
 
     CUBE_MESH.InitMesh(vertices, indices, AABB(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f, 0.5f, 0.5f)));
@@ -89,12 +99,12 @@ void InitPredefinedMeshes()
             int i3 = i2 + 1;
 
             indices.push_back(i0);
-            indices.push_back(i2);
             indices.push_back(i1);
+            indices.push_back(i2);
 
             indices.push_back(i1);
-            indices.push_back(i2);
             indices.push_back(i3);
+            indices.push_back(i2);
         }
     }
 

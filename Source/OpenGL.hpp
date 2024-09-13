@@ -16,3 +16,7 @@ extern void BindTextureArray(unsigned int textureArray, int slot);
 extern void BindFramebuffer(int target, unsigned int framebuffer);
 extern void UnbindFramebuffer();
 extern void BlitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, unsigned int mask);
+extern void EnableCullFace();
+extern void DisableCullFace();
+extern void SetCullFace(int face);
+extern void SetWindingOrder(int order);

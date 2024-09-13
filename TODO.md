@@ -1,4 +1,3 @@
-- skydome with HDRIs
 - global illumination
   - voxel cone tracing?
 - screen space reflections
@@ -8,3 +7,5 @@
 - physics
 - 3D audio
 - fix light bleeding through thin objects
+- edit lights through the editor
+- serialize the lights

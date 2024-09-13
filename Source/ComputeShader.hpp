@@ -17,6 +17,7 @@ public:
     inline unsigned int GetID() const { return m_ID; }
 
     void SetUniform1i(const std::string& name, int value);
+    void SetUniform1f(const std::string& name, float value);
     void SetUniform2i(const std::string& name, int x, int y);
     void SetUniform4f(const std::string& name, float x, float y, float z, float w);
 
