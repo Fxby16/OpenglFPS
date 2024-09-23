@@ -10,7 +10,7 @@ Everything else is cloned with the repo.
 ### Build
 `./dependencies.bash`  
 `premake5 gmake2`  
-`make`. Use `make config=release` to build in release mode.  
+`make`. Use `make config=release_x64` to build in release mode.  
 
 ## Run
 `Bin/Debug/RaylibFPS` or `Bin/Release/RaylibFPS`
