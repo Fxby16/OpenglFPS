@@ -3,3 +3,7 @@ Obj
 *.make
 Makefile
 .vscode
+*.sln
+*.vcxproj
+*.vcxproj.*
+.vs

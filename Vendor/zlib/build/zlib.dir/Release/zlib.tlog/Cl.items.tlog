@@ -1,0 +1,15 @@
+C:\OpenglFPS\Vendor\zlib\adler32.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\adler32.obj
+C:\OpenglFPS\Vendor\zlib\compress.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\compress.obj
+C:\OpenglFPS\Vendor\zlib\crc32.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\crc32.obj
+C:\OpenglFPS\Vendor\zlib\deflate.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\deflate.obj
+C:\OpenglFPS\Vendor\zlib\gzclose.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\gzclose.obj
+C:\OpenglFPS\Vendor\zlib\gzlib.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\gzlib.obj
+C:\OpenglFPS\Vendor\zlib\gzread.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\gzread.obj
+C:\OpenglFPS\Vendor\zlib\gzwrite.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\gzwrite.obj
+C:\OpenglFPS\Vendor\zlib\inflate.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\inflate.obj
+C:\OpenglFPS\Vendor\zlib\infback.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\infback.obj
+C:\OpenglFPS\Vendor\zlib\inftrees.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\inftrees.obj
+C:\OpenglFPS\Vendor\zlib\inffast.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\inffast.obj
+C:\OpenglFPS\Vendor\zlib\trees.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\trees.obj
+C:\OpenglFPS\Vendor\zlib\uncompr.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\uncompr.obj
+C:\OpenglFPS\Vendor\zlib\zutil.c;C:\OpenglFPS\Vendor\zlib\build\zlib.dir\Release\zutil.obj

@@ -56,4 +56,4 @@ extern void InitTextRenderer(const std::string& font_path, float glyph_size);
 extern void DeinitTextRenderer();
 
 extern void DrawText(const std::string& text, unsigned int x, unsigned int y, unsigned int size, glm::vec4 color);
-extern std::string FormatText(const std::string& text, ...);
+extern std::string FormatText(const char* text, ...);

@@ -1,5 +1,6 @@
 workspace "ImGui"
     configurations { "Debug", "Release" }
+	platforms { "x64" }
 
 project "ImGui"
     kind "StaticLib"
