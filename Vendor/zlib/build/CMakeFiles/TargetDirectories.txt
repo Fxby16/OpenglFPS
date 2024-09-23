@@ -1,0 +1,8 @@
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/zlib.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/zlibstatic.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/example.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/minigzip.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/RUN_TESTS.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/INSTALL.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/ALL_BUILD.dir
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/ZERO_CHECK.dir

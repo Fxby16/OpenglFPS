@@ -1,0 +1,29 @@
+# CMake generation dependency list for this directory.
+C:/OpenglFPS/Vendor/zlib/CMakeLists.txt
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/3.30.3/CMakeCCompiler.cmake
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/3.30.3/CMakeRCCompiler.cmake
+C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/3.30.3/CMakeSystem.cmake
+C:/OpenglFPS/Vendor/zlib/zconf.h.cmakein
+C:/OpenglFPS/Vendor/zlib/zlib.pc.cmakein
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CheckCSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CheckFunctionExists.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Compiler/MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Compiler/MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Internal/CheckSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Platform/Windows-Initialize.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/Platform/WindowsPaths.cmake

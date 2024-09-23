@@ -1,0 +1,486 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      The system is: Windows - 10.0.19045 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+      Compilazione avviata 23/09/2024 15:26:19.
+      
+      Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\3.30.3\\CompilerIdC\\CompilerIdC.vcxproj" sul nodo 1 (destinazioni predefinite).
+      PrepareForBuild:
+        Creazione directory "Debug\\".
+        L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+        Creazione directory "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Creazione di "Debug\\CompilerIdC.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+        Aggiornamento timestamp di "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\3.30.3\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Eliminazione del file "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" in corso.
+        Aggiornamento timestamp di "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\3.30.3\\CompilerIdC\\CompilerIdC.vcxproj" (destinazioni predefinite) completata.
+      
+      Compilazione completata.
+          Avvisi: 0
+          Errori: 0
+      
+      Tempo trascorso 00:00:01.79
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/3.30.3/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-zbrj3h"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-zbrj3h"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-zbrj3h'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_ce8e5.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:21.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zbrj3h\\cmTC_ce8e5.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_ce8e5.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zbrj3h\\Debug\\".
+          Creazione directory "cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ce8e5.dir\\Debug\\\\" /Fd"cmTC_ce8e5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.30\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ce8e5.dir\\Debug\\\\" /Fd"cmTC_ce8e5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.30\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zbrj3h\\Debug\\cmTC_ce8e5.exe" /INCREMENTAL /ILK:"cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-zbrj3h/Debug/cmTC_ce8e5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-zbrj3h/Debug/cmTC_ce8e5.lib" /MACHINE:X64  /machine:x64 cmTC_ce8e5.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_ce8e5.vcxproj -> C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zbrj3h\\Debug\\cmTC_ce8e5.exe
+        FinalizeBuildStatus:
+          Eliminazione del file "cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.tlog\\unsuccessfulbuild" in corso.
+          Aggiornamento timestamp di "cmTC_ce8e5.dir\\Debug\\cmTC_ce8e5.tlog\\cmTC_ce8e5.lastbuildstate".
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zbrj3h\\cmTC_ce8e5.vcxproj" (destinazioni predefinite) completata.
+        
+        Compilazione completata.
+            Avvisi: 0
+            Errori: 0
+        
+        Tempo trascorso 00:00:01.76
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.41.34120/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.41.34120/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.41.34120.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:22 (check_include_file)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-plef7w"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-plef7w"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-plef7w'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_e6c6e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:24.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\cmTC_e6c6e.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_e6c6e.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\Debug\\".
+          Creazione directory "cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e6c6e.dir\\Debug\\\\" /Fd"cmTC_e6c6e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e6c6e.dir\\Debug\\\\" /Fd"cmTC_e6c6e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\Debug\\cmTC_e6c6e.exe" /INCREMENTAL /ILK:"cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-plef7w/Debug/cmTC_e6c6e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-plef7w/Debug/cmTC_e6c6e.lib" /MACHINE:X64  /machine:x64 cmTC_e6c6e.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_e6c6e.vcxproj -> C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\Debug\\cmTC_e6c6e.exe
+        FinalizeBuildStatus:
+          Eliminazione del file "cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.tlog\\unsuccessfulbuild" in corso.
+          Aggiornamento timestamp di "cmTC_e6c6e.dir\\Debug\\cmTC_e6c6e.tlog\\cmTC_e6c6e.lastbuildstate".
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-plef7w\\cmTC_e6c6e.vcxproj" (destinazioni predefinite) completata.
+        
+        Compilazione completata.
+            Avvisi: 0
+            Errori: 0
+        
+        Tempo trascorso 00:00:01.77
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:23 (check_include_file)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4859e"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4859e"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4859e'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_2d9bb.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:26.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\cmTC_2d9bb.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_2d9bb.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\Debug\\".
+          Creazione directory "cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2d9bb.dir\\Debug\\\\" /Fd"cmTC_2d9bb.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2d9bb.dir\\Debug\\\\" /Fd"cmTC_2d9bb.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\Debug\\cmTC_2d9bb.exe" /INCREMENTAL /ILK:"cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4859e/Debug/cmTC_2d9bb.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4859e/Debug/cmTC_2d9bb.lib" /MACHINE:X64  /machine:x64 cmTC_2d9bb.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_2d9bb.vcxproj -> C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\Debug\\cmTC_2d9bb.exe
+        FinalizeBuildStatus:
+          Eliminazione del file "cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.tlog\\unsuccessfulbuild" in corso.
+          Aggiornamento timestamp di "cmTC_2d9bb.dir\\Debug\\cmTC_2d9bb.tlog\\cmTC_2d9bb.lastbuildstate".
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4859e\\cmTC_2d9bb.vcxproj" (destinazioni predefinite) completata.
+        
+        Compilazione completata.
+            Avvisi: 0
+            Errori: 0
+        
+        Tempo trascorso 00:00:01.81
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:24 (check_include_file)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-6km3x0"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-6km3x0"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-6km3x0'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b97ec.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:28.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\cmTC_b97ec.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_b97ec.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\Debug\\".
+          Creazione directory "cmTC_b97ec.dir\\Debug\\cmTC_b97ec.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_b97ec.dir\\Debug\\cmTC_b97ec.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_b97ec.dir\\Debug\\cmTC_b97ec.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b97ec.dir\\Debug\\\\" /Fd"cmTC_b97ec.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b97ec.dir\\Debug\\\\" /Fd"cmTC_b97ec.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\Debug\\cmTC_b97ec.exe" /INCREMENTAL /ILK:"cmTC_b97ec.dir\\Debug\\cmTC_b97ec.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-6km3x0/Debug/cmTC_b97ec.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-6km3x0/Debug/cmTC_b97ec.lib" /MACHINE:X64  /machine:x64 cmTC_b97ec.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_b97ec.vcxproj -> C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\Debug\\cmTC_b97ec.exe
+        FinalizeBuildStatus:
+          Eliminazione del file "cmTC_b97ec.dir\\Debug\\cmTC_b97ec.tlog\\unsuccessfulbuild" in corso.
+          Aggiornamento timestamp di "cmTC_b97ec.dir\\Debug\\cmTC_b97ec.tlog\\cmTC_b97ec.lastbuildstate".
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-6km3x0\\cmTC_b97ec.vcxproj" (destinazioni predefinite) completata.
+        
+        Compilazione completata.
+            Avvisi: 0
+            Errori: 0
+        
+        Tempo trascorso 00:00:01.82
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckTypeSize.cmake:147 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckTypeSize.cmake:272 (__check_type_size_impl)"
+      - "CMakeLists.txt:42 (check_type_size)"
+    checks:
+      - "Check size of off64_t"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-4ifsux"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-4ifsux"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_OFF64_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-4ifsux'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7b362.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:31.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_7b362.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\Debug\\".
+          Creazione directory "cmTC_7b362.dir\\Debug\\cmTC_7b362.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_7b362.dir\\Debug\\cmTC_7b362.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_7b362.dir\\Debug\\cmTC_7b362.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7b362.dir\\Debug\\\\" /Fd"cmTC_7b362.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7b362.dir\\Debug\\\\" /Fd"cmTC_7b362.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c"
+          OFF64_T.c
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(29,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(30,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(31,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(32,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(33,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj" (destinazioni predefinite) NON COMPLETATA.
+        
+        Compilazione NON RIUSCITA.
+        
+        "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj" (destinazione predefinita) (1) ->
+        (destinazione: ClCompile) -> 
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(29,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(30,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(31,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(32,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\OFF64_T.c(33,12): error C2065: 'off64_t': identificatore non dichiarato [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4ifsux\\cmTC_7b362.vcxproj]
+        
+            Avvisi: 0
+            Errori: 5
+        
+        Tempo trascorso 00:00:01.75
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:51 (check_function_exists)"
+    checks:
+      - "Looking for fseeko"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-1dcl5c"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-1dcl5c"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_FSEEKO"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-1dcl5c'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_68050.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:33.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_68050.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\Debug\\".
+          Creazione directory "cmTC_68050.dir\\Debug\\cmTC_68050.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_68050.dir\\Debug\\cmTC_68050.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_68050.dir\\Debug\\cmTC_68050.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_68050.dir\\Debug\\\\" /Fd"cmTC_68050.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_68050.dir\\Debug\\\\" /Fd"cmTC_68050.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\Debug\\cmTC_68050.exe" /INCREMENTAL /ILK:"cmTC_68050.dir\\Debug\\cmTC_68050.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-1dcl5c/Debug/cmTC_68050.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-1dcl5c/Debug/cmTC_68050.lib" /MACHINE:X64  /machine:x64 cmTC_68050.dir\\Debug\\CheckFunctionExists.obj
+        CheckFunctionExists.obj : error LNK2019: riferimento al simbolo esterno fseeko non risolto nella funzione main [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj]
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\Debug\\cmTC_68050.exe : fatal error LNK1120: 1 esterni non risolti [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj]
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj" (destinazioni predefinite) NON COMPLETATA.
+        
+        Compilazione NON RIUSCITA.
+        
+        "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj" (destinazione predefinita) (1) ->
+        (destinazione: Link) -> 
+          CheckFunctionExists.obj : error LNK2019: riferimento al simbolo esterno fseeko non risolto nella funzione main [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj]
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\Debug\\cmTC_68050.exe : fatal error LNK1120: 1 esterni non risolti [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-1dcl5c\\cmTC_68050.vcxproj]
+        
+            Avvisi: 0
+            Errori: 2
+        
+        Tempo trascorso 00:00:01.83
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.30/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:59 (check_include_file)"
+    checks:
+      - "Looking for unistd.h"
+    directories:
+      source: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4c0ec"
+      binary: "C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4c0ec"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "Z_HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/OpenglFPS/Vendor/zlib/build/CMakeFiles/CMakeScratch/TryCompile-d4c0ec'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_e5267.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Versione di MSBuild 17.11.9+a69bbaaf5 per .NET Framework
+        Compilazione avviata 23/09/2024 15:26:36.
+        
+        Progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\cmTC_e5267.vcxproj" sul nodo 1 (destinazioni predefinite).
+        PrepareForBuild:
+          Creazione directory "cmTC_e5267.dir\\Debug\\".
+          L'output strutturato ├¿ abilitato. La formattazione della diagnostica del compilatore rifletter├á la gerarchia degli errori. Per altri dettagli, vedere https://aka.ms/cpp/structured-output.
+          Creazione directory "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\Debug\\".
+          Creazione directory "cmTC_e5267.dir\\Debug\\cmTC_e5267.tlog\\".
+        InitializeBuildStatus:
+          Creazione di "cmTC_e5267.dir\\Debug\\cmTC_e5267.tlog\\unsuccessfulbuild". ├ê stato specificato "AlwaysCreate".
+          Aggiornamento timestamp di "cmTC_e5267.dir\\Debug\\cmTC_e5267.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e5267.dir\\Debug\\\\" /Fd"cmTC_e5267.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler versione 19.41.34120 per x64
+          Copyright (C) Microsoft Corporation. Tutti i diritti  sono riservati.
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e5267.dir\\Debug\\\\" /Fd"cmTC_e5267.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\CheckIncludeFile.c(1,10): error C1083: Non ├¿ possibile aprire il file inclusione: 'unistd.h': No such file or directory [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\cmTC_e5267.vcxproj]
+        Compilazione progetto "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\cmTC_e5267.vcxproj" (destinazioni predefinite) NON COMPLETATA.
+        
+        Compilazione NON RIUSCITA.
+        
+        "C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\cmTC_e5267.vcxproj" (destinazione predefinita) (1) ->
+        (destinazione: ClCompile) -> 
+          C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\CheckIncludeFile.c(1,10): error C1083: Non ├¿ possibile aprire il file inclusione: 'unistd.h': No such file or directory [C:\\OpenglFPS\\Vendor\\zlib\\build\\CMakeFiles\\CMakeScratch\\TryCompile-d4c0ec\\cmTC_e5267.vcxproj]
+        
+            Avvisi: 0
+            Errori: 1
+        
+        Tempo trascorso 00:00:01.84
+        
+      exitCode: 1
+...

@@ -174,11 +174,11 @@ void DrawText(const std::string& text, unsigned int x, unsigned int y, unsigned 
     g_DefaultTextRenderer.DrawText(text, x, y, size, color);
 }
 
-std::string FormatText(const std::string& text, ...){
+std::string FormatText(const char* text, ...){
     va_list args;
     va_start(args, text);
     char buffer[256];
-    vsnprintf(buffer, 256, text.c_str(), args);
+    vsnprintf(buffer, 256, text, args);
     va_end(args);
     return std::string(buffer);
 }

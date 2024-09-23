@@ -5,9 +5,9 @@
 extern void SetLogBufferSize(unsigned int size);
 extern unsigned int GetLogBufferSize();
 
-extern void LogMessage(const std::string& message, ...);
-extern void LogError(const std::string& message, ...);
-extern void LogWarning(const std::string& message, ...);
+extern void LogMessage(const char* message, ...);
+extern void LogError(const char* message, ...);
+extern void LogWarning(const char* message, ...);
 
 /**
  * \brief Get the log message at the specified index (last message is at index 0)
@@ -38,9 +38,9 @@ extern void ClearLogMessages();
 extern void ClearLogErrors();
 extern void ClearLogWarnings();
 
-extern void LogMessagesToFile(const std::string& filename);
-extern void LogErrorsToFile(const std::string& filename);
-extern void LogWarningsToFile(const std::string& filename);
+extern void LogMessagesToFile(const char* filename);
+extern void LogErrorsToFile(const char* filename);
+extern void LogWarningsToFile(const char* filename);
 
 extern void LogMessagesToConsole();
 extern void LogErrorsToConsole();
