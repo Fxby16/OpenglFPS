@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
+#include <functional>
 
 extern int InitWindow(unsigned int width, unsigned int height, const char* title);
 extern void CloseWindow();
@@ -24,6 +25,17 @@ extern void SwapBuffers();
 
 extern void GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 extern double GetScrollYDelta();
+
+extern uint32_t AddWindowResizeCallback(std::function<void(int, int)> callback);
+extern void RemoveWindowResizeCallback(uint32_t id);
+
+extern std::vector<std::pair<int, int>> QueryAvailableResolutions();
+extern void SetWindowResolution(int width, int height);
+
+extern bool IsFullscreen();
+extern void ToggleFullscreen();
+extern void EnableFullscreen();
+extern void DisableFullscreen();
 
 extern bool IsKeyPressed(int key);
 extern bool IsKeyReleased(int key);

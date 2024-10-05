@@ -71,6 +71,27 @@ uint32_t ResourceManager::LoadShader(const std::string& vertex_path, const std::
     return id;
 }
 
+uint32_t ResourceManager::LoadDirectionalLight(const glm::vec3& direction, const glm::vec3& color)
+{
+    uint32_t id = RandUint32();
+    m_DirectionalLights[id] = DirectionalLight(direction, color);
+    return id;
+}
+
+uint32_t ResourceManager::LoadPointLight(const glm::vec3& position, const glm::vec3& color)
+{
+    uint32_t id = RandUint32();
+    m_PointLights[id] = PointLight(position, color);
+    return id;
+}
+
+uint32_t ResourceManager::LoadSpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& color, float cutOff, float outerCutOff)
+{
+    uint32_t id = RandUint32();
+    m_SpotLights[id] = SpotLight(position, direction, color, cutOff, outerCutOff);
+    return id;
+}
+
 void ResourceManager::UnloadModel(uint32_t id)
 {
     m_Models[id].Unload();
@@ -93,6 +114,24 @@ void ResourceManager::UnloadShader(uint32_t id)
 {
     m_Shaders[id].Unload();
     m_Shaders.erase(id);
+}
+
+void ResourceManager::UnloadDirectionalLight(uint32_t id)
+{
+    m_DirectionalLights[id].DeinitShadowMap();
+    m_DirectionalLights.erase(id);
+}
+
+void ResourceManager::UnloadPointLight(uint32_t id)
+{
+    m_PointLights[id].DeinitShadowMap();
+    m_PointLights.erase(id);
+}
+
+void ResourceManager::UnloadSpotLight(uint32_t id)
+{
+    m_SpotLights[id].DeinitShadowMap();
+    m_SpotLights.erase(id);
 }
 
 void ResourceManager::Init()
@@ -150,10 +189,25 @@ void ResourceManager::Deinit()
         shader.Unload();
     }
 
+    for(auto& [id, directional_light] : m_DirectionalLights){
+        directional_light.DeinitShadowMap();
+    }
+
+    for(auto& [id, point_light] : m_PointLights){
+        point_light.DeinitShadowMap();
+    }
+
+    for(auto& [id, spot_light] : m_SpotLights){
+        spot_light.DeinitShadowMap();
+    }
+
     m_Models.clear();
     m_SkinnedModels.clear();
     m_Textures.clear();
     m_Shaders.clear();
+    m_DirectionalLights.clear();
+    m_PointLights.clear();
+    m_SpotLights.clear();
 
     glDeleteTextures(1, &m_ShadowMapArray);
     glDeleteTextures(1, &m_CubeShadowMapArray);
@@ -228,6 +282,39 @@ void ResourceManager::DrawModelsShadows(Shader& shader, glm::mat4 light_space_ma
             skinned_model.animator.UploadFinalBoneMatrices(shader);
             skinned_model.model.DrawShadows(shader, light_space_matrix, transforms[i]);
         }
+    }
+}
+
+void ResourceManager::DrawShadowMaps()
+{
+    for(auto& [id, directional_light] : GetDirectionalLights()){
+        DrawShadowMap(directional_light);
+    }
+
+    for(auto& [id, point_light] : GetPointLights()){
+        DrawShadowMap(point_light);
+    }
+
+    for(auto& [id, spot_light] : GetSpotLights()){
+        DrawShadowMap(spot_light);
+    }
+}
+
+void ResourceManager::SetShadowMaps()
+{
+    GetDeferredShader().Bind();
+    ResetLightsCounters();
+
+    for(auto& [id, directional_light] : GetDirectionalLights()){
+        SetDirectionalLight(directional_light);
+    }
+
+    for(auto& [id, point_light] : GetPointLights()){
+        SetPointLight(point_light);
+    }
+
+    for(auto& [id, spot_light] : GetSpotLights()){
+        SetSpotLight(spot_light);
     }
 }
 

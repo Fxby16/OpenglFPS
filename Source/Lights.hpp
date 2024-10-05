@@ -22,6 +22,16 @@ struct PointLight{
         lightSpaceMatrix[3] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
         lightSpaceMatrix[4] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
         lightSpaceMatrix[5] = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 25.0f) * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+    
+        shadowMap.Init();
+    }
+
+    void InitShadowMap(){
+        shadowMap.Init();
+    }
+
+    void DeinitShadowMap(){
+        shadowMap.Deinit();
     }
 };
 
@@ -36,6 +46,16 @@ struct DirectionalLight{
         : dir(dir), color(color)
     {
         lightSpaceMatrix = glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, 1.0f, 50.0f) * glm::lookAt(-dir * 20.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    
+        shadowMap.Init();
+    }
+
+    void InitShadowMap(){
+        shadowMap.Init();
+    }
+
+    void DeinitShadowMap(){
+        shadowMap.Deinit();
     }
 };
 
@@ -53,6 +73,16 @@ struct SpotLight{
         : pos(pos), dir(dir), color(color), cutOff(glm::cos(glm::radians(cutOff))), outerCutOff(glm::cos(glm::radians(outerCutOff)))
     {
         lightSpaceMatrix = glm::perspective(glm::radians(outerCutOff * 2), 1.0f, 0.1f, 20.0f) * glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
+    
+        shadowMap.Init();
+    }
+
+    void InitShadowMap(){
+        shadowMap.Init();
+    }
+
+    void DeinitShadowMap(){
+        shadowMap.Deinit();
     }
 };
 

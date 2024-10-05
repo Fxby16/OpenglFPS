@@ -39,9 +39,6 @@ private:
     glm::vec2 m_EditModeLastMousePosition;
     ImGuizmo::OPERATION m_GizmoMode = ImGuizmo::OPERATION::TRANSLATE;
 
-    GBuffer m_GBuffer;
-    DeferredMode m_DeferredMode = DEFERRED_SHADING;
-
     bool m_ShouldTakeScreenshot = false;
     bool m_MapEditMode = false;
 };
