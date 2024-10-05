@@ -1,14 +1,21 @@
 #include <GBuffer.hpp>
 #include <Log.hpp>
+#include <Window.hpp>
 
 #include <glad/glad.h>
 
-GBuffer::GBuffer(unsigned int width, unsigned int height)
+GBuffer::GBuffer(int width, int height)
 {
     Init(width, height);
+    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&GBuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void GBuffer::Init(unsigned int width, unsigned int height)
+GBuffer::~GBuffer()
+{
+    RemoveWindowResizeCallback(m_ResizeCallbackID);
+}
+
+void GBuffer::Init(int width, int height)
 {
     glGenFramebuffers(1, &m_FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
@@ -69,4 +76,10 @@ void GBuffer::Bind() const
 void GBuffer::Unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GBuffer::Resize(int width, int height)
+{
+    Deinit();
+    Init(width, height);
 }

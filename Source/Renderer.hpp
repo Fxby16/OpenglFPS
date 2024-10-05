@@ -18,7 +18,7 @@ extern void UpdateView(glm::mat4 view);
 
 extern void InitRenderer();
 extern void DeinitRenderer();
-extern void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, DeferredMode deferredMode);
+extern void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera);
 extern void DrawFullscreenQuad();
 
 extern Framebuffer& GetDeferredPassFramebuffer();
@@ -33,3 +33,7 @@ extern void DrawBoundingBox(const AABB& box, glm::vec4 color);
 extern void DrawTexture(unsigned int texture, float x, float y, float width, float height);
 
 extern void DrawSolidCube(glm::vec3 position, glm::vec3 scale, glm::vec4 color);
+
+extern GBuffer& GetGBuffer();
+extern DeferredMode GetDeferredMode();
+extern void SetDeferredMode(DeferredMode mode);

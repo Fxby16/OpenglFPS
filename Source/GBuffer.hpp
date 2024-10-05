@@ -1,12 +1,15 @@
 #pragma once
 
+#include <cstdint>
+#include <limits>
+
 class GBuffer{
 public:
     GBuffer() = default;
-    GBuffer(unsigned int width, unsigned int height);
-    ~GBuffer() = default;
+    GBuffer(int width, int height);
+    ~GBuffer();
 
-    void Init(unsigned int width, unsigned int height);
+    void Init(int width, int height);
     void Deinit();
 
     void Bind() const;
@@ -19,6 +22,8 @@ public:
     inline unsigned int GetFBO() const { return m_FBO; }
     inline unsigned int GetRBO() const { return m_RBO; }
 
+    void Resize(int width, int height);
+
 private:
     void CheckStatus();
 
@@ -29,4 +34,6 @@ private:
     unsigned int m_PositionTexture; // .rgb = position, .a = roughness
     unsigned int m_NormalTexture; // .rgb = normal, .a = metallic
     unsigned int m_AlbedoTexture; // .rgb = albedo, .a = ambient occlusion
+
+    uint32_t m_ResizeCallbackID = std::numeric_limits<uint32_t>::max();
 };

@@ -30,10 +30,6 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-DirectionalLight dl = {glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(10.0f, 10.0f, 10.0f)};
-SpotLight sl = {glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), 30.0f, 34.0f};
-PointLight pl = {glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(1.0f, 1.0f, 10.0f)};
-
 void DrawCube(glm::vec3 cubePosition, glm::vec4 color)
 {
     DrawSolidCube(cubePosition, glm::vec3(0.2f), color);
@@ -59,24 +55,16 @@ void Application::Init()
 
     DeserializeMap("map.txt");
 
-    // Initialize G-Buffer
-    m_GBuffer.Init(g_ScreenWidth, g_ScreenHeight);
-
-    dl.shadowMap.Init();
-    sl.shadowMap.Init();
-    pl.shadowMap.Init();
+    LoadDirectionalLight(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+    LoadSpotLight(glm::vec3(3.0f, 1.0f, 3.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), 30.0f, 34.0f);
+    LoadPointLight(glm::vec3(3.0f, 2.0f, 5.0f), glm::vec3(1.0f, 1.0f, 10.0f));
 
     SetDirtTexture("Resources/DirtMasks/DirtMask.jpg");
-    //LoadSkydome("Resources/HDRI/overcast_soil_puresky_2k.hdr");
     LoadSkydome("Resources/HDRI/kloppenheim_02_puresky_4k.hdr");
 }
 
 void Application::Deinit()
 {
-    m_GBuffer.Deinit();
-    dl.shadowMap.Deinit();
-    sl.shadowMap.Deinit();
-    pl.shadowMap.Deinit();
     UnloadSkydome();
 
     CloseWindow();
@@ -142,7 +130,8 @@ void Application::Run()
         ClearColor(0, 0, 0, 1);
         ClearScreen();
 
-        m_GBuffer.Bind();
+        GBuffer& gbuffer = GetGBuffer();
+        gbuffer.Bind();
         ClearScreen();
 
         DisableColorBlend();
@@ -155,25 +144,26 @@ void Application::Run()
 
         Timer timer3("SHADOW_MAPPING");
 
-        ResetLightsCounters();
-  
-        DrawShadowMap(dl);
-        DrawShadowMap(sl);
-        DrawShadowMap(pl);
-
         GetDeferredShader().Bind();
-        SetDirectionalLight(dl);
-        SetSpotLight(sl);
-        SetPointLight(pl);
+
+        DrawShadowMaps();
+        SetShadowMaps();
 
         timer3.PrintTime();
 
         Timer timer4("DEFERRED_PASS");
-        DeferredPass(m_GBuffer, GetDeferredShader(), GetCamera(), m_DeferredMode);
+        DeferredPass(gbuffer, GetDeferredShader(), GetCamera());
         timer4.PrintTime();
 
-        DrawCube(pl.pos, glm::vec4(pl.color, 1.0f));
-        DrawCube(sl.pos, glm::vec4(sl.color, 1.0f));
+        std::unordered_map<uint32_t, PointLight>& pointLights = GetPointLights();
+        for(auto& [id, pointLight] : pointLights){
+            DrawCube(pointLight.pos, glm::vec4(pointLight.color, 1.0f));
+        }
+
+        std::unordered_map<uint32_t, SpotLight>& spotLights = GetSpotLights();
+        for(auto& [id, spotLight] : spotLights){
+            DrawCube(spotLight.pos, glm::vec4(spotLight.color, 1.0f));
+        }
 
         DrawSkydome(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix(), glm::translate(glm::mat4(1.0f), GetCamera().GetPosition()));
 
@@ -223,10 +213,10 @@ void Application::HandleInputs(double deltaTime)
     }
 
     // Check key inputs to switch between G-buffer textures
-    if(IsKeyPressed(KEY_1) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_POSITION;
-    if(IsKeyPressed(KEY_2) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_NORMAL;
-    if(IsKeyPressed(KEY_3) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_ALBEDO;
-    if(IsKeyPressed(KEY_4) && IsKeyDown(KEY_LEFT_CONTROL)) m_DeferredMode = DEFERRED_SHADING;
+    if(IsKeyPressed(KEY_1) && IsKeyDown(KEY_LEFT_CONTROL)) SetDeferredMode(DEFERRED_POSITION);
+    if(IsKeyPressed(KEY_2) && IsKeyDown(KEY_LEFT_CONTROL)) SetDeferredMode(DEFERRED_NORMAL);
+    if(IsKeyPressed(KEY_3) && IsKeyDown(KEY_LEFT_CONTROL)) SetDeferredMode(DEFERRED_ALBEDO);
+    if(IsKeyPressed(KEY_4) && IsKeyDown(KEY_LEFT_CONTROL)) SetDeferredMode(DEFERRED_SHADING);
 
     if(!ImGui::GetIO().WantCaptureKeyboard || !m_MapEditMode){
         if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   GetCamera().ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
@@ -253,6 +243,7 @@ void Application::HandleInputs(double deltaTime)
     if(IsKeyPressed(KEY_F8)) HotReloadShaders();
     if(IsKeyPressed(KEY_F9)) g_DrawBoundingBoxes = !g_DrawBoundingBoxes;
     if(IsKeyPressed(KEY_F10)) ToggleVSync();
+    if(IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if(IsKeyPressed(KEY_F12) && IsKeyDown(KEY_LEFT_CONTROL)) m_ShouldTakeScreenshot = true;
     if(IsKeyPressed(KEY_ESCAPE)) SetWindowShouldClose();
 

@@ -11,12 +11,30 @@ static GPUBuffer g_LineBuffer;
 static GPUBuffer g_CubeBuffer;
 static Framebuffer g_DeferredPassFramebuffer;
 
+static GBuffer g_GBuffer;
+static DeferredMode g_DeferredMode = DEFERRED_SHADING;
+
 static Shader g_SolidShapeShader;
 static Shader g_TextureShader;
 
 static glm::mat4 g_Proj = glm::mat4(1.0f);
 static glm::mat4 g_View = glm::mat4(1.0f);   
 static glm::mat4 g_Model = glm::mat4(1.0f); 
+
+GBuffer& GetGBuffer()
+{
+    return g_GBuffer;
+}
+
+DeferredMode GetDeferredMode()
+{
+    return g_DeferredMode;
+}
+
+void SetDeferredMode(DeferredMode mode)
+{
+    g_DeferredMode = mode;
+}
 
 void InitRenderer()
 {
@@ -111,6 +129,7 @@ void InitRenderer()
     g_CubeBuffer.AddAttribute(3, GL_FLOAT, 3 * sizeof(float));
 
     g_DeferredPassFramebuffer.Init(g_ScreenWidth, g_ScreenHeight);
+    g_GBuffer.Init(g_ScreenWidth, g_ScreenHeight);
 }
 
 void DeinitRenderer()
@@ -134,9 +153,9 @@ void UpdateView(glm::mat4 view)
     g_View = view;
 }
 
-void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera, DeferredMode deferredMode)
+void DeferredPass(GBuffer& gBuffer, Shader& deferredShader, Camera& camera)
 {
-    switch (deferredMode){
+    switch(g_DeferredMode){
         case DEFERRED_SHADING:
         {
             g_DeferredPassFramebuffer.Bind();

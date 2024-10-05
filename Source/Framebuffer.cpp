@@ -1,14 +1,22 @@
 #include <Framebuffer.hpp>
 #include <Log.hpp>
+#include <Window.hpp>
 
 #include <glad/glad.h>
+#include <cstdint>
 
-Framebuffer::Framebuffer(float width, float height)
+Framebuffer::Framebuffer(int width, int height)
 {
     Init(width, height);
+    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&Framebuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void Framebuffer::Init(float width, float height)
+Framebuffer::~Framebuffer()
+{
+    RemoveWindowResizeCallback(m_ResizeCallbackID);
+}
+
+void Framebuffer::Init(int width, int height)
 {
     glGenFramebuffers(1, &m_FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
@@ -55,7 +63,7 @@ void Framebuffer::Unbind() const
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::Resize(float width, float height)
+void Framebuffer::Resize(int width, int height)
 {
     Deinit();
     Init(width, height);

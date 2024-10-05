@@ -11,6 +11,7 @@
 #include <PostProcessing.hpp>
 #include <Timer.hpp>
 #include <MousePicking.hpp>
+#include <Random.hpp>
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -18,13 +19,15 @@
 #include <imgui_impl_opengl3.h>
 
 #include <cstdio>
+#include <functional>
 
 static bool g_VSync = false;
+static bool g_Fullscreen = false;
 static double g_ScrollYOffset = 0;
 
 static GLFWwindow* g_Window = nullptr;
-
 static Input g_Input;
+static std::vector<std::pair<uint32_t, std::function<void(int, int)>>> g_WindowResizeCallbacks;  // using vector instead of unordered_map since the callbacks should always be added/removed at the beginning/end of the application
 
 int InitWindow(unsigned int width, unsigned int height, const char* title)
 {
@@ -186,6 +189,79 @@ void ToggleCursor()
     }else{ 
         EnableCursor();
     }
+}
+
+bool IsFullscreen()
+{
+    return g_Fullscreen;
+}
+
+void ToggleFullscreen()
+{
+    if(g_Fullscreen){
+        DisableFullscreen();
+    }else{
+        EnableFullscreen();
+    }
+}
+
+uint32_t AddWindowResizeCallback(std::function<void(int, int)> callback)
+{
+    uint32_t id = RandUint32();
+    g_WindowResizeCallbacks.push_back({id, callback});
+
+    return id;
+}
+
+void RemoveWindowResizeCallback(uint32_t id)
+{
+    int index = 0;
+    for(auto &[callback_id, callback] : g_WindowResizeCallbacks){
+        if(callback_id == id){
+            g_WindowResizeCallbacks.erase(g_WindowResizeCallbacks.begin() + index);
+            break;
+        }
+
+        index++;
+    }
+}
+
+void SetWindowResolution(int width, int height)
+{
+    glfwSetWindowSize(g_Window, width, height);
+    glViewport(0, 0, width, height);
+    g_ScreenWidth = width;
+    g_ScreenHeight = height;
+
+    for(auto& [id, callback] : g_WindowResizeCallbacks){
+        callback(width, height);
+    }
+}
+
+std::vector<std::pair<int, int>> QueryAvailableResolutions()
+{
+    int count;
+    const GLFWvidmode* modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
+
+    std::vector<std::pair<int, int>> resolutions;
+    for(int i = 0; i < count; i++){
+        resolutions.push_back({ modes[i].width, modes[i].height });
+    }
+
+    return resolutions;
+}
+
+void EnableFullscreen()
+{
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    glfwSetWindowMonitor(g_Window, glfwGetPrimaryMonitor(), 0, 0, g_ScreenWidth, g_ScreenHeight, mode->refreshRate);
+    g_Fullscreen = true;
+}
+
+void DisableFullscreen()
+{
+    glfwSetWindowMonitor(g_Window, nullptr, 0, 0, g_ScreenWidth, g_ScreenHeight, 0);
+    g_Fullscreen = false;
 }
 
 double GetTime()
