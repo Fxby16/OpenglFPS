@@ -11,6 +11,6 @@
 - serialize the lights
 - day night cycle
 
-- settings menu
+- update the matrices when resizing the window
 
 - animated demo of the engine

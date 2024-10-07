@@ -7,7 +7,7 @@ class Framebuffer{
 public:
     Framebuffer() = default;
     Framebuffer(int width, int height);
-    ~Framebuffer();
+    ~Framebuffer() = default;
 
     void Init(int width, int height);
     void Deinit();

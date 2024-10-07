@@ -129,6 +129,7 @@ void CloseWindow()
     DeinitResourceManager();
     DeinitMousePicking();
     FreeRemainingTimers();
+    ClearLogs();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -160,6 +161,12 @@ void DisableVSync()
 {
     glfwSwapInterval(0);
     g_VSync = false;
+}
+
+void SetVSync(bool vsync)
+{
+    if(vsync) EnableVSync();
+    else DisableVSync();
 }
 
 bool IsVSyncEnabled()
@@ -205,37 +212,50 @@ void ToggleFullscreen()
     }
 }
 
+void SetFullscreen(bool fullscreen)
+{
+    if(fullscreen){
+        EnableFullscreen();
+    }else{
+        DisableFullscreen();
+    }
+}
+
 uint32_t AddWindowResizeCallback(std::function<void(int, int)> callback)
 {
     uint32_t id = RandUint32();
-    g_WindowResizeCallbacks.push_back({id, callback});
+    g_WindowResizeCallbacks.push_back(std::pair(id, callback));
 
     return id;
 }
 
 void RemoveWindowResizeCallback(uint32_t id)
 {
-    int index = 0;
-    for(auto &[callback_id, callback] : g_WindowResizeCallbacks){
-        if(callback_id == id){
-            g_WindowResizeCallbacks.erase(g_WindowResizeCallbacks.begin() + index);
+    for(int i = 0; i < g_WindowResizeCallbacks.size(); i++){
+        if(g_WindowResizeCallbacks[i].first == id){
+            g_WindowResizeCallbacks.erase(g_WindowResizeCallbacks.begin() + i);
             break;
         }
-
-        index++;
     }
 }
 
 void SetWindowResolution(int width, int height)
 {
     glfwSetWindowSize(g_Window, width, height);
-    glViewport(0, 0, width, height);
     g_ScreenWidth = width;
     g_ScreenHeight = height;
 
-    for(auto& [id, callback] : g_WindowResizeCallbacks){
+    auto callbacks = g_WindowResizeCallbacks; // copy the callbacks since they will be modified (yes that's bad)
+    for(auto& [id, callback] : callbacks){
         callback(width, height);
     }
+
+    if(IsFullscreen()){
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(g_Window, glfwGetPrimaryMonitor(), 0, 0, g_ScreenWidth, g_ScreenHeight, mode->refreshRate);
+    }
+
+    glViewport(0, 0, width, height);
 }
 
 std::vector<std::pair<int, int>> QueryAvailableResolutions()
@@ -256,12 +276,24 @@ void EnableFullscreen()
     const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     glfwSetWindowMonitor(g_Window, glfwGetPrimaryMonitor(), 0, 0, g_ScreenWidth, g_ScreenHeight, mode->refreshRate);
     g_Fullscreen = true;
+
+    for(auto& [id, callback] : g_WindowResizeCallbacks){
+        callback(g_ScreenWidth, g_ScreenHeight);
+    }
+
+    glViewport(0, 0, g_ScreenWidth, g_ScreenHeight);
 }
 
 void DisableFullscreen()
 {
     glfwSetWindowMonitor(g_Window, nullptr, 0, 0, g_ScreenWidth, g_ScreenHeight, 0);
     g_Fullscreen = false;
+
+    for(auto& [id, callback] : g_WindowResizeCallbacks){
+        callback(g_ScreenWidth, g_ScreenHeight);
+    }
+
+    glViewport(0, 0, g_ScreenWidth, g_ScreenHeight);
 }
 
 double GetTime()

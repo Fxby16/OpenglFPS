@@ -6,7 +6,8 @@ out vec4 FragColor;
 uniform sampler2D screenTexture;
 uniform sampler2D bloomBlurTexture;
 uniform sampler2D dirtTexture;
-uniform int useDirtTexture;
+uniform bool useDirtTexture;
+uniform bool useBloom;
 
 uniform float exposure;
 uniform int toneMappingType;
@@ -51,15 +52,18 @@ vec3 ReinhardTonemap(vec3 x)
 
 void main()
 {
-    vec3 hdrColor = texture(screenTexture, TexCoords).rgb;
-    vec3 bloomColor = texture(bloomBlurTexture, TexCoords).rgb;
-    vec3 dirtColor = vec3(0.0);
-    
-    if(useDirtTexture == 1){
-        dirtColor = texture(dirtTexture, TexCoords).rgb;
-    }
+    vec3 result = texture(screenTexture, TexCoords).rgb;
 
-    vec3 result = hdrColor + (bloomColor * bloomStrength) + (dirtColor * bloomColor * bloomStrength);
+    if(useBloom){
+        vec3 bloomColor = texture(bloomBlurTexture, TexCoords).rgb;
+        vec3 dirtColor = vec3(0.0);
+        
+        if(useDirtTexture){
+            dirtColor = texture(dirtTexture, TexCoords).rgb;
+        }
+
+        result += (bloomColor * bloomStrength) + (dirtColor * bloomColor * bloomStrength);
+    }
 
     result *= exposure;
 

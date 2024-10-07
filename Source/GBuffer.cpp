@@ -7,12 +7,6 @@
 GBuffer::GBuffer(int width, int height)
 {
     Init(width, height);
-    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&GBuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-GBuffer::~GBuffer()
-{
-    RemoveWindowResizeCallback(m_ResizeCallbackID);
 }
 
 void GBuffer::Init(int width, int height)
@@ -50,6 +44,8 @@ void GBuffer::Init(int width, int height)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     CheckStatus();
+
+    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&GBuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void GBuffer::Deinit()
@@ -59,6 +55,9 @@ void GBuffer::Deinit()
     glDeleteTextures(1, &m_NormalTexture);
     glDeleteTextures(1, &m_AlbedoTexture);
     glDeleteRenderbuffers(1, &m_RBO);
+
+    RemoveWindowResizeCallback(m_ResizeCallbackID);
+    m_ResizeCallbackID = std::numeric_limits<uint32_t>::max();
 }
 
 void GBuffer::CheckStatus()
