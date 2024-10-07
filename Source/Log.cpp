@@ -1,15 +1,17 @@
 #include <Log.hpp>
+
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
 #include <cstdlib>
 #include <queue>
+#include <cassert>
 
 static unsigned int g_LogBufferSize = 10;
 
-static std::vector<std::string> g_LogMessages;
-static std::vector<std::string> g_LogErrors;
-static std::vector<std::string> g_LogWarnings;
+static std::vector<const char*> g_LogMessages;
+static std::vector<const char*> g_LogErrors;
+static std::vector<const char*> g_LogWarnings;
 
 static bool g_LogMessagesToFile = false;
 static bool g_LogErrorsToFile = false;
@@ -19,17 +21,22 @@ static char g_LogMessagesFilename[256];
 static char g_LogErrorsFilename[256];
 static char g_LogWarningsFilename[256];
 
-char* FormatMessage(const char* type, const char* message, va_list args)
+static int ctr = 0;
+
+[[nodiscard]] char* FormatMessage(const char* type, const char* message, va_list args)
 {
     char buffer[256];
     vsnprintf(buffer + snprintf(buffer, sizeof(buffer), "[%s] ", type), sizeof(buffer), message, args);
+    ctr++;
     return strdup(buffer);
 }
 
-void InsertMessage(std::vector<std::string>& buffer, const char* message)
+void InsertMessage(std::vector<const char*>& buffer, const char* message)
 {
     if(buffer.size() >= g_LogBufferSize){
+        free((void*)buffer[0]);
         buffer.erase(buffer.begin());
+        ctr--;
     }
 
     buffer.push_back(message);
@@ -98,12 +105,12 @@ void LogWarning(const char* message, ...)
     #endif
 }
 
-const std::string* GetLogMessage(unsigned int index)
+const char* GetLogMessage(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_MESSAGES_ENABLED)
 
     if(index < g_LogMessages.size()){
-        return &g_LogMessages[g_LogMessages.size() - index - 1];
+        return g_LogMessages[g_LogMessages.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -113,12 +120,12 @@ const std::string* GetLogMessage(unsigned int index)
     #endif
 }
 
-const std::string* GetLogError(unsigned int index)
+const char* GetLogError(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_ERRORS_ENABLED)
 
     if(index < g_LogErrors.size()){
-        return &g_LogErrors[g_LogErrors.size() - index - 1];
+        return g_LogErrors[g_LogErrors.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -128,12 +135,12 @@ const std::string* GetLogError(unsigned int index)
     #endif
 }
 
-const std::string* GetLogWarning(unsigned int index)
+const char* GetLogWarning(unsigned int index)
 {
     #if defined(DEBUG) || defined(LOGS_ENABLED) || defined(LOG_WARNINGS_ENABLED)
 
     if(index < g_LogWarnings.size()){
-        return &g_LogWarnings[g_LogWarnings.size() - index - 1];
+        return g_LogWarnings[g_LogWarnings.size() - index - 1];
     }else{
         return nullptr;
     }
@@ -158,15 +165,39 @@ unsigned int GetLogWarningsCount()
 
 void ClearLogMessages()
 {
+    for(int i = 0; i < g_LogMessages.size(); i++){
+        free((void*)g_LogMessages[i]);
+        ctr--;
+    }
+
     g_LogMessages.clear();
 }
 void ClearLogErrors()
 {
+    for(int i = 0; i < g_LogErrors.size(); i++){
+        free((void*)g_LogErrors[i]);
+        ctr--;
+    }
+    
     g_LogErrors.clear();
 }
 void ClearLogWarnings()
 {
+    for(int i = 0; i < g_LogWarnings.size(); i++){
+        free((void*)g_LogWarnings[i]);
+        ctr--;
+    }
+
     g_LogWarnings.clear();
+}
+
+void ClearLogs()
+{
+    ClearLogMessages();
+    ClearLogErrors();
+    ClearLogWarnings();
+
+    assert(ctr == 0); //check if all logs were cleared to avoid memory leaks
 }
 
 void LogMessagesToFile(const char* filename)

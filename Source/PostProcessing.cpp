@@ -12,6 +12,8 @@ static int g_ToneMapping = REINHARD;
 static uint32_t g_DirtTexture = std::numeric_limits<uint32_t>::max();
 static uint32_t g_PostProcessingShader = std::numeric_limits<uint32_t>::max();
 
+static bool useBloom = false;
+
 void InitPostProcessing()
 {
     g_PostProcessingShader = LoadShader("Resources/Shaders/PostProcessing.vert", "Resources/Shaders/PostProcessing.frag");
@@ -23,6 +25,7 @@ void InitPostProcessing()
     GetShader(g_PostProcessingShader)->SetUniform1f("exposure", g_Exposure);
     GetShader(g_PostProcessingShader)->SetUniform1i("toneMappingType", g_ToneMapping);
     GetShader(g_PostProcessingShader)->SetUniform1f("bloomStrength", g_BloomStrength);
+    GetShader(g_PostProcessingShader)->SetUniform1i("useBloom", useBloom);
 }
 
 void PostProcessingPass()
@@ -55,6 +58,18 @@ void SetBloomStrength(float intensity)
 float GetBloomStrength()
 {
     return g_BloomStrength;
+}
+
+void UseBloom(bool use)
+{
+    useBloom = use;
+    GetShader(g_PostProcessingShader)->Bind();
+    GetShader(g_PostProcessingShader)->SetUniform1i("useBloom", useBloom);
+}
+
+bool GetUseBloom()
+{
+    return useBloom;
 }
 
 void SetToneMapping(int mapping)

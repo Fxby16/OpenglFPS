@@ -14,21 +14,21 @@ extern void LogWarning(const char* message, ...);
  * \param index The index of the message
  * \return A pointer to the message
  */
-extern const std::string* GetLogMessage(unsigned int index);
+extern const char* GetLogMessage(unsigned int index);
 
 /**
  * \brief Get the log error at the specified index (last error is at index 0)
  * \param index The index of the error
  * \return A pointer to the error message
  */
-extern const std::string* GetLogError(unsigned int index);
+extern const char* GetLogError(unsigned int index);
 
 /**
  * \brief Get the log warning at the specified index (last warning is at index 0)
  * \param index The index of the warning
  * \return A pointer to the warning message
  */
-extern const std::string* GetLogWarning(unsigned int index);
+extern const char* GetLogWarning(unsigned int index);
 
 extern unsigned int GetLogMessagesCount();
 extern unsigned int GetLogErrorsCount();
@@ -37,6 +37,7 @@ extern unsigned int GetLogWarningsCount();
 extern void ClearLogMessages();
 extern void ClearLogErrors();
 extern void ClearLogWarnings();
+extern void ClearLogs();
 
 extern void LogMessagesToFile(const char* filename);
 extern void LogErrorsToFile(const char* filename);

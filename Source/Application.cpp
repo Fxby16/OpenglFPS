@@ -26,6 +26,7 @@
 #include <Animator.hpp>
 #include <MousePicking.hpp>
 #include <Skydome.hpp>
+#include <SettingsMenu.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -61,11 +62,14 @@ void Application::Init()
 
     SetDirtTexture("Resources/DirtMasks/DirtMask.jpg");
     LoadSkydome("Resources/HDRI/kloppenheim_02_puresky_4k.hdr");
+
+    InitSettingsMenu();
 }
 
 void Application::Deinit()
 {
     UnloadSkydome();
+    DeinitSettingsMenu();
 
     CloseWindow();
 }
@@ -171,7 +175,11 @@ void Application::Run()
 
         Timer timer6("BLOOM_PASS");
 
-        BloomPass();
+        if(GetUseBloom()){
+            BloomPass();
+        }
+
+        UnbindFramebuffer();
 
         timer6.PrintTime();
 
@@ -187,7 +195,11 @@ void Application::Run()
         
         if(g_DrawBoundingBoxes) DrawBoundingBoxes();
 
-        if(m_MapEditMode){
+        if(GetShowSettingsMenu()){
+            SettingsMenu();
+        }
+
+        if(m_MapEditMode && !GetShowSettingsMenu()){
             EditMode();
         }
 
@@ -229,6 +241,14 @@ void Application::HandleInputs(double deltaTime)
 
     //GetCamera().ProcessMouseScroll(GetScrollYDelta());
 
+    if(IsKeyPressed(KEY_F5)){
+        SetShowSettingsMenu(!GetShowSettingsMenu());
+        if(GetShowSettingsMenu()){
+            EnableCursor();
+        }else{
+            DisableCursor();
+        }
+    }
     if(IsKeyPressed(KEY_F6)){
         m_MapEditMode = !m_MapEditMode;
         m_SelectedModel.model_id = std::numeric_limits<uint32_t>::max();

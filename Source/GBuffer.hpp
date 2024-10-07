@@ -7,7 +7,7 @@ class GBuffer{
 public:
     GBuffer() = default;
     GBuffer(int width, int height);
-    ~GBuffer();
+    ~GBuffer() = default;
 
     void Init(int width, int height);
     void Deinit();

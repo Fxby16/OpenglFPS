@@ -22,19 +22,19 @@ uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 
-uniform int hasTextures[5];
+uniform bool hasTextures[5];
 
 void main(){
     vec3 albedo, normal;
     float metallic, roughness, ao;
 
-    if(hasTextures[ROUGHNESS] == 1 && hasTextures[METALLIC] == 0){       //pbr material with attributes compressed in roughness texture
+    if(hasTextures[ROUGHNESS] && !hasTextures[METALLIC]){       //pbr material with attributes compressed in roughness texture
         albedo = texture(albedoMap, fragTexCoord).rgb;
         normal = texture(normalMap, fragTexCoord).rgb;
         metallic = texture(roughnessMap, fragTexCoord).b;
         roughness = texture(roughnessMap, fragTexCoord).g;
         ao = texture(roughnessMap, fragTexCoord).r;   
-    }else if(hasTextures[ROUGHNESS] == 1 && hasTextures[METALLIC] == 1){ //pbr material with a texture for every attribute
+    }else if(hasTextures[ROUGHNESS] && hasTextures[METALLIC]){ //pbr material with a texture for every attribute
         albedo = texture(albedoMap, fragTexCoord).rgb;
         normal = texture(normalMap, fragTexCoord).rgb;
         metallic = texture(metallicMap, fragTexCoord).r;

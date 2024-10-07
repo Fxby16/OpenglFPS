@@ -8,12 +8,6 @@
 Framebuffer::Framebuffer(int width, int height)
 {
     Init(width, height);
-    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&Framebuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-Framebuffer::~Framebuffer()
-{
-    RemoveWindowResizeCallback(m_ResizeCallbackID);
 }
 
 void Framebuffer::Init(int width, int height)
@@ -37,6 +31,8 @@ void Framebuffer::Init(int width, int height)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     CheckStatus();
+
+    m_ResizeCallbackID = AddWindowResizeCallback(std::bind(&Framebuffer::Resize, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void Framebuffer::Deinit()
@@ -44,6 +40,9 @@ void Framebuffer::Deinit()
     glDeleteFramebuffers(1, &m_FBO);
     glDeleteTextures(1, &m_ColorBufferTexture);
     glDeleteRenderbuffers(1, &m_RBO);
+
+    RemoveWindowResizeCallback(m_ResizeCallbackID);
+    m_ResizeCallbackID = std::numeric_limits<uint32_t>::max();
 }
 
 void Framebuffer::CheckStatus()

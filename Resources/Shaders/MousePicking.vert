@@ -14,7 +14,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 finalBonesMatrices[MAX_BONES];
-uniform int isPlaying;
+uniform bool isPlaying;
 
 void main()
 {
@@ -32,7 +32,7 @@ void main()
 
     vec4 totalPosition = vec4(0.0f);
 
-    if(isPlaying == 1){
+    if(isPlaying){
         for(int i = 0; i < MAX_BONE_INFLUENCE; i++){  
             if(boneIDs[i] == -1 && i == 0){                     //no bones for this vertex, just keep initial values
                 totalPosition = vec4(vertexPosition, 1.0f);

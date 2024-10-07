@@ -32,7 +32,8 @@ project "OpenglFPS"
 filter "configurations:Debug"
     optimize "Debug"
     symbols "On"
-    buildoptions { "-Wall" }
+    buildoptions { "-Wall", "-fsanitize=address" }
+    linkoptions { "-fsanitize=address" }
     defines { "DEBUG", "GLFW_INCLUDE_NONE" }
 
 filter "configurations:Release"

@@ -12,6 +12,7 @@ extern GLFWwindow* GetWindow();
 extern void ToggleVSync();
 extern void EnableVSync();
 extern void DisableVSync();
+extern void SetVSync(bool vsync);
 extern bool IsVSyncEnabled();
 extern void EnableCursor();
 extern void DisableCursor();
@@ -36,6 +37,7 @@ extern bool IsFullscreen();
 extern void ToggleFullscreen();
 extern void EnableFullscreen();
 extern void DisableFullscreen();
+extern void SetFullscreen(bool fullscreen);
 
 extern bool IsKeyPressed(int key);
 extern bool IsKeyReleased(int key);
