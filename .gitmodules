@@ -22,3 +22,6 @@
 [submodule "Vendor/nativefiledialog"]
 	path = Vendor/nativefiledialog
 	url = https://github.com/Fxby16/nativefiledialog.git
+[submodule "Vendor/joltphysics"]
+	path = Vendor/joltphysics
+	url = https://github.com/jrouwe/JoltPhysics.git

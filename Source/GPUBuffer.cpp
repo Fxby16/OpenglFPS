@@ -18,12 +18,12 @@ unsigned int GetGlTypeSize(unsigned int type)
     }
 }
 
-GPUBuffer::GPUBuffer(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices)
+GPUBuffer::GPUBuffer(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices, unsigned int vao)
 {
-    Init(num_vertices, vertex_size, num_indices);
+    Init(num_vertices, vertex_size, num_indices, vao);
 }
 
-void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices)
+void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsigned int num_indices, unsigned int vao, const std::source_location& location)
 {
     if(num_vertices > 0){
         glGenBuffers(1, &m_VBO);
@@ -31,7 +31,18 @@ void GPUBuffer::Init(unsigned int num_vertices, unsigned int vertex_size, unsign
         glBufferData(GL_ARRAY_BUFFER, num_vertices * vertex_size, nullptr, GL_DYNAMIC_DRAW); 
     }
 
-    glGenVertexArrays(1,&m_VAO);
+    if(vao == std::numeric_limits<unsigned int>::max()){
+        glGenVertexArrays(1,&m_VAO);
+        m_SharedVAO = false;
+
+        #ifdef DEBUG
+            printf("Created VAO: %d\n", m_VAO);
+            printf("Location: %s:%d\n", location.file_name(), location.line());
+        #endif
+    }else{
+        m_VAO = vao;
+        m_SharedVAO = true;
+    }
 
     if(num_indices > 0){
         glGenBuffers(1, &m_EBO);   
@@ -48,7 +59,9 @@ void GPUBuffer::Free()
 {
     glDeleteBuffers(1, &m_VBO);
     glDeleteBuffers(1, &m_EBO);
-    glDeleteVertexArrays(1, &m_VAO);
+    if(!m_SharedVAO){
+        glDeleteVertexArrays(1, &m_VAO);
+    }
 }
 
 void GPUBuffer::SetData(unsigned int start_index, const void* data, unsigned int num_vertices, unsigned int vertex_size) const

@@ -8,3 +8,5 @@ bool g_DrawBoundingBoxes = false;
 int g_ScreenWidth = 1280;
 int g_ScreenHeight = 720;
 float g_AspectRatio = (float)g_ScreenWidth / (float)g_ScreenHeight;
+float g_Alpha = 0.0f;
+float g_Accumulator = 0.0f;

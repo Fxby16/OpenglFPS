@@ -1,6 +1,8 @@
 #include <Serializer.hpp>
 #include <ResourceManager.hpp>
 #include <PredefinedMeshes.hpp>
+#include <Physics.hpp>
+#include <Model.hpp>
 
 #include <glm.hpp>
 
@@ -10,20 +12,17 @@ void SerializeMap(const std::string& path)
 {
     nlohmann::json j;
 
-    auto& Models = GetResourceManager().GetModels();
+    auto& Models = GetResourceManager().GetGameObjects();
     for(auto& model : Models)
     {
         nlohmann::json model_json;
-        Serialize(model_json, model.second, model.first);
-        j["models"].push_back(model_json);
-    }
+        Serialize(model_json, model.second);
 
-    auto& skinnedModels = GetResourceManager().GetSkinnedModels();
-    for(auto& skinnedModel : skinnedModels)
-    {
-        nlohmann::json model_json;
-        Serialize(model_json, skinnedModel.second, skinnedModel.first);
-        j["skinnedModels"].push_back(model_json);
+        if(!model.second.IsAnimated()){
+            j["models"].push_back(model_json);
+        }else{
+            j["skinnedModels"].push_back(model_json);
+        }
     }
 
     std::ofstream file(path);
@@ -52,49 +51,48 @@ void from_json(const nlohmann::json& j, glm::mat4& mat)
     }
 }
 
-void Serialize(nlohmann::json& j, Model& model, uint32_t id)
+void Serialize(nlohmann::json& j, GameObject& model)
 {
-    j["path"] = std::filesystem::relative(model.GetPath(), std::filesystem::current_path()).string();
-    j["id"] = id;
-    j["name"] = model.GetName();
-    j["gamma_correction"] = model.GetGammaCorrection();
+    if(model.IsAnimated()){
+        j["path"] = std::filesystem::relative(GetSkinnedModel(model.GetModelID())->model.GetPath(), std::filesystem::current_path()).string();
+        j["id"] = model.GetModelID();
+        j["name"] = GetSkinnedModel(model.GetModelID())->model.GetName();
+        j["gamma_correction"] = GetSkinnedModel(model.GetModelID())->model.GetGammaCorrection();
 
-    nlohmann::json transforms = nlohmann::json::array();  // Create an empty JSON array
-    for (const auto& transform : model.GetTransforms())
-    {
-        nlohmann::json transform_json;
-        to_json(transform_json, transform);
-        transforms.push_back(transform_json);
+        nlohmann::json animationsPaths = nlohmann::json::array();
+        nlohmann::json animationsTicksPerSecond = nlohmann::json::array();
+
+        for (const auto& animation : GetSkinnedModel(model.GetModelID())->animator.GetAnimationsInfo())
+        {
+            animationsPaths.push_back(animation.path);
+            animationsTicksPerSecond.push_back(animation.ticksPerSecond);
+        }
+        j["animationsPaths"] = animationsPaths;
+        j["animationsTicksPerSecond"] = animationsTicksPerSecond;
+
+        nlohmann::json transforms = nlohmann::json::array();
+        for (const auto& transform : model.GetTransforms())
+        {
+            nlohmann::json transform_json;
+            to_json(transform_json, transform.second.mat);
+            transforms.push_back(transform_json);
+        }
+        j["transforms"] = transforms;
+    }else{
+        j["path"] = std::filesystem::relative(GetModel(model.GetModelID())->GetName(), std::filesystem::current_path()).string();
+        j["id"] = model.GetModelID();
+        j["name"] = GetModel(model.GetModelID())->GetName();
+        j["gamma_correction"] = GetModel(model.GetModelID())->GetGammaCorrection();
+
+        nlohmann::json transforms = nlohmann::json::array();  // Create an empty JSON array
+        for (const auto& transform : model.GetTransforms())
+        {
+            nlohmann::json transform_json;
+            to_json(transform_json, transform.second.mat);
+            transforms.push_back(transform_json);
+        }
+        j["transforms"] = transforms;
     }
-    j["transforms"] = transforms;
-}
-
-void Serialize(nlohmann::json& j, SkinnedModel& model, uint32_t id)
-{
-    j["path"] = std::filesystem::relative(model.model.GetPath(), std::filesystem::current_path()).string();
-    j["id"] = id;
-    j["name"] = model.model.GetName();
-    j["gamma_correction"] = model.model.GetGammaCorrection();
-
-    nlohmann::json animationsPaths = nlohmann::json::array();
-    nlohmann::json animationsTicksPerSecond = nlohmann::json::array();
-
-    for (const auto& animation : model.animator.GetAnimationsInfo())
-    {
-        animationsPaths.push_back(animation.path);
-        animationsTicksPerSecond.push_back(animation.ticksPerSecond);
-    }
-    j["animationsPaths"] = animationsPaths;
-    j["animationsTicksPerSecond"] = animationsTicksPerSecond;
-
-    nlohmann::json transforms = nlohmann::json::array();
-    for (const auto& transform : model.model.GetTransforms())
-    {
-        nlohmann::json transform_json;
-        to_json(transform_json, transform);
-        transforms.push_back(transform_json);
-    }
-    j["transforms"] = transforms;
 }
 
 void DeserializeMap(const std::string& path)
@@ -115,9 +113,9 @@ void DeserializeMap(const std::string& path)
     for(auto& model_json : j["models"]){
         if(model_json["name"].get<std::string>().size() > 0){
             if(model_json["name"] == "CUBE"){
-                model_id = g_Cube;
+                model_id = GetGameObject(g_Cube)->GetModelID();
             }else if(model_json["name"] == "SPHERE"){
-                model_id = g_Sphere;
+                model_id = GetGameObject(g_Sphere)->GetModelID();
             }
         }else{
             if(model_json.find("id") != model_json.end()){
@@ -129,11 +127,29 @@ void DeserializeMap(const std::string& path)
         }
 
         auto& model = *GetModel(model_id);
+        uint32_t go = LoadGameObject(model_id, false);
+        std::vector<Mesh>& meshes = model.GetMeshes();
+        OBB model_obb;
+
+        for(auto& mesh : meshes){
+            model_obb.extents.x = std::max(model_obb.extents.x, mesh.GetAABB().max.x - mesh.GetAABB().min.x);
+            model_obb.extents.y = std::max(model_obb.extents.y, mesh.GetAABB().max.y - mesh.GetAABB().min.y);
+            model_obb.extents.z = std::max(model_obb.extents.z, mesh.GetAABB().max.z - mesh.GetAABB().min.z);
+        }
 
         for(auto& transform_json : model_json["transforms"]){
             glm::mat4 transform;
             from_json(transform_json, transform);
-            model.AddTransform(transform);
+
+            glm::vec3 scale;
+            glm::quat rotation;
+            glm::vec3 translation;
+            glm::vec4 perspective;
+            glm::vec3 skew;
+            glm::decompose(transform, scale, rotation, translation, skew, perspective); 
+
+            JPH::BodyID body = CreateBoxShape(model_obb.extents * scale, translation, rotation, Layers::NON_MOVING);
+            GetGameObject(go)->AddInstance(GameObjectTransform(transform), body);
         }
     }
 
@@ -149,10 +165,30 @@ void DeserializeMap(const std::string& path)
             GetSkinnedModel(model_id)->AddAnimation(j["animationsPaths"][i], j["animationsTicksPerSecond"][i]);
         }
 
+        auto& model = *GetSkinnedModel(model_id);
+        uint32_t go = LoadGameObject(model_id, true);
+        std::vector<Mesh>& meshes = model.model.GetMeshes();
+        OBB model_obb;
+
+        for(auto& mesh : meshes){
+            model_obb.extents.x = std::max(model_obb.extents.x, mesh.GetAABB().max.x - mesh.GetAABB().min.x);
+            model_obb.extents.y = std::max(model_obb.extents.y, mesh.GetAABB().max.y - mesh.GetAABB().min.y);
+            model_obb.extents.z = std::max(model_obb.extents.z, mesh.GetAABB().max.z - mesh.GetAABB().min.z);
+        }
+
         for(auto& transform_json : skinnedModel_json["transforms"]){
             glm::mat4 transform;
             from_json(transform_json, transform);
-            GetSkinnedModel(model_id)->model.AddTransform(transform);
+
+            glm::vec3 scale;
+            glm::quat rotation;
+            glm::vec3 translation;
+            glm::vec4 perspective;
+            glm::vec3 skew;
+            glm::decompose(transform, scale, rotation, translation, skew, perspective); 
+
+            JPH::BodyID body = CreateBoxShape(model_obb.extents * scale, translation, rotation, Layers::NON_MOVING);
+            GetGameObject(go)->AddInstance(GameObjectTransform(transform), body);
         }
     }
 }

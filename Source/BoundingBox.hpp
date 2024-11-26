@@ -12,9 +12,9 @@ struct AABB{
 };
 
 struct OBB{
-    glm::vec3 center;
-    glm::vec3 extents;
-    glm::mat3 rotation;
+    glm::vec3 center = glm::vec3(0.0f);
+    glm::vec3 extents = glm::vec3(0.0f);
+    glm::mat3 rotation = glm::mat3(1.0f);
 
     OBB() = default;
     OBB(const glm::vec3& center, const glm::vec3& extents, const glm::mat3& rotation)

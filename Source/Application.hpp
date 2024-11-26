@@ -41,4 +41,5 @@ private:
 
     bool m_ShouldTakeScreenshot = false;
     bool m_MapEditMode = false;
+    bool m_SelectedModelChanged = true;
 };

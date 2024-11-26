@@ -1,0 +1,11 @@
+Model Information:
+* title:	Polish soldier
+* source:	https://sketchfab.com/3d-models/polish-soldier-fb96a663fc4a4246a57ca85de3228c00
+* author:	buh (https://sketchfab.com/inobi_ll)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Polish soldier" (https://sketchfab.com/3d-models/polish-soldier-fb96a663fc4a4246a57ca85de3228c00) by buh (https://sketchfab.com/inobi_ll) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

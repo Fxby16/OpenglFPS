@@ -53,28 +53,23 @@ void UpdateMousePicking()
 
     GetShader(g_MousePickingShader)->Bind();
 
-    auto& models = GetModels();
+    auto& gameObjects = GetGameObjects();
 
-    for(auto& [id, model] : models){
+    for(auto& [id, gameObject] : gameObjects){
         GetShader(g_MousePickingShader)->SetUniform1ui("id", id);
 
-        auto& transforms = model.GetTransforms();
+        auto& transforms = gameObject.GetTransforms();
         for(unsigned int i = 0; i < transforms.size(); i++){
             GetShader(g_MousePickingShader)->SetUniform1ui("transform_index", i);
-            model.DrawDepth(*GetShader(g_MousePickingShader), GetCamera().GetViewMatrix(), transforms[i]);
-        }
-    }
 
-    auto& skinned_models = GetSkinnedModels();
-
-    for(auto& [id, skinned_model] : skinned_models){
-        GetShader(g_MousePickingShader)->SetUniform1ui("id", id);
-
-        auto& transforms = skinned_model.model.GetTransforms();
-        for(unsigned int i = 0; i < transforms.size(); i++){
-            GetShader(g_MousePickingShader)->SetUniform1ui("transform_index", i);
-            skinned_model.animator.UploadFinalBoneMatrices(*GetShader(g_MousePickingShader));
-            skinned_model.model.DrawDepth(*GetShader(g_MousePickingShader), GetCamera().GetViewMatrix(), transforms[i]);
+            Model* model = GetModel(gameObject.GetModelID());
+            SkinnedModel* skinned_model = GetSkinnedModel(gameObject.GetModelID());
+            if(model){
+                model->DrawDepth(*GetShader(g_MousePickingShader), GetCamera().GetViewMatrix(), GameObjectTransform::Interpolate(transforms[i].first, transforms[i].second, g_Alpha).GetMatrix());
+            }else{
+                skinned_model->animator.UploadFinalBoneMatrices(*GetShader(g_MousePickingShader));
+                skinned_model->model.DrawDepth(*GetShader(g_MousePickingShader), GetCamera().GetViewMatrix(), GameObjectTransform::Interpolate(transforms[i].first, transforms[i].second, g_Alpha).GetMatrix());
+            }
         }
     }
 

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wz 96 Beryl
+* source:	https://sketchfab.com/3d-models/wz-96-beryl-5f92b3f1b8674c3ab7c3abeba9f1660e
+* author:	buh (https://sketchfab.com/buh-late)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wz 96 Beryl" (https://sketchfab.com/3d-models/wz-96-beryl-5f92b3f1b8674c3ab7c3abeba9f1660e) by buh (https://sketchfab.com/buh-late) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

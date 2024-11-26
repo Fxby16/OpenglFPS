@@ -3,6 +3,7 @@
 #include <Material.hpp>
 #include <Globals.hpp>
 #include <ShadowMap.hpp>
+#include <Physics.hpp>
 
 #include <stb_image.h>
 #include <glad/glad.h>
@@ -92,6 +93,18 @@ uint32_t ResourceManager::LoadSpotLight(const glm::vec3& position, const glm::ve
     return id;
 }
 
+uint32_t ResourceManager::LoadGameObject(uint32_t model_id, bool animated)
+{
+    uint32_t id = RandUint32();
+    m_GameObjects[id] = GameObject(model_id, animated);
+    return id;
+}
+
+void ResourceManager::LoadGameObject(uint32_t id, uint32_t model_id, bool animated)
+{
+    m_GameObjects[id] = GameObject(model_id, animated);
+}
+
 void ResourceManager::UnloadModel(uint32_t id)
 {
     m_Models[id].Unload();
@@ -134,22 +147,30 @@ void ResourceManager::UnloadSpotLight(uint32_t id)
     m_SpotLights.erase(id);
 }
 
+void ResourceManager::UnloadGameObject(uint32_t id)
+{
+    m_GameObjects.erase(id);
+}
+
 void ResourceManager::Init()
 {
     g_Cube = 0;
-    LoadModel(g_Cube, {CUBE_MESH}, "CUBE", false);
     g_Sphere = 1;
-    LoadModel(g_Sphere, {SPHERE_MESH}, "SPHERE", false);
+    uint32_t cube_model = LoadModel({CUBE_MESH}, "CUBE", false);
+    uint32_t sphere_model = LoadModel({SPHERE_MESH}, "SPHERE", false);
+
+    LoadGameObject(g_Cube, cube_model);
+    LoadGameObject(g_Sphere, sphere_model);
 
     Material mat;
     mat.Load("Resources/Materials/lined_cement/lined_cement.mat");
 
-    auto& cube_meshes = GetModel(g_Cube)->GetMeshes();
+    auto& cube_meshes = GetModel(cube_model)->GetMeshes();
     for(auto& mesh : cube_meshes){
         mesh.SetMaterial(mat);
     }
 
-    auto& sphere_meshes = GetModel(g_Sphere)->GetMeshes();
+    auto& sphere_meshes = GetModel(sphere_model)->GetMeshes();
     for(auto& mesh : sphere_meshes){
         mesh.SetMaterial(mat);
     }
@@ -201,7 +222,16 @@ void ResourceManager::Deinit()
         spot_light.DeinitShadowMap();
     }
 
+    for(auto& [id, game_object] : m_GameObjects){
+        auto ids = game_object.GetBodyIDs();
+        for(auto& body_id : ids){
+            GetPhysicsSystem().GetBodyInterface().RemoveBody(body_id);
+            GetPhysicsSystem().GetBodyInterface().DestroyBody(body_id);
+        }
+    }
+
     m_Models.clear();
+    m_GameObjects.clear();
     m_SkinnedModels.clear();
     m_Textures.clear();
     m_Shaders.clear();
@@ -247,7 +277,7 @@ void ResourceManager::HotReloadShaders()
 
 void ResourceManager::DrawModels(Shader& shader, glm::mat4 view)
 {
-    for(auto& [id, model] : GetModels()){
+    /*for(auto& [id, model] : GetModels()){
         auto& transforms = model.GetTransforms();
 
         for(uint32_t i = 0; i < transforms.size(); i++){
@@ -262,12 +292,16 @@ void ResourceManager::DrawModels(Shader& shader, glm::mat4 view)
             skinned_model.animator.UploadFinalBoneMatrices(shader);
             skinned_model.model.Draw(shader, view, transforms[i]);
         }
+    }*/
+
+    for(auto& [id, game_object] : m_GameObjects){
+        game_object.Draw(shader);
     }
 }
 
 void ResourceManager::DrawModelsShadows(Shader& shader, glm::mat4 light_space_matrix)
 {
-    for(auto& [id, model] : GetModels()){
+    /*for(auto& [id, model] : GetModels()){
         auto& transforms = model.GetTransforms();
 
         for(uint32_t i = 0; i < transforms.size(); i++){
@@ -282,6 +316,10 @@ void ResourceManager::DrawModelsShadows(Shader& shader, glm::mat4 light_space_ma
             skinned_model.animator.UploadFinalBoneMatrices(shader);
             skinned_model.model.DrawShadows(shader, light_space_matrix, transforms[i]);
         }
+    }*/
+
+    for(auto& [id, game_object] : m_GameObjects){
+        game_object.DrawShadow(shader, light_space_matrix);
     }
 }
 
@@ -320,40 +358,43 @@ void ResourceManager::SetShadowMaps()
 
 void ResourceManager::UnloadModelsWithoutTransforms()
 {
-    for(auto it = m_Models.begin(); it != m_Models.end();){
-        if(it->second.GetTransforms().empty() && it->first != g_Cube && it->first != g_Sphere){
-            it->second.Unload();
-            it = m_Models.erase(it);
+    for(auto it = m_GameObjects.begin(); it != m_GameObjects.end();){
+        if(!it->second.IsAnimated()){
+            if(it->second.GetTransforms().empty() && it->second.GetModelID() != g_Cube && it->second.GetModelID() != g_Sphere){
+                UnloadModel(it->second.GetModelID());
+                it = m_GameObjects.erase(it);
+            }else{
+                ++it;
+            }
         }else{
-            ++it;
-        }
-    }
-
-    for(auto it = m_SkinnedModels.begin(); it != m_SkinnedModels.end();){
-        if(it->second.model.GetTransforms().empty()){
-            it->second.model.Unload();
-            it = m_SkinnedModels.erase(it);
-        }else{
-            ++it;
+            if(it->second.GetTransforms().empty() && it->second.GetModelID() != g_Cube && it->second.GetModelID() != g_Sphere){
+                UnloadSkinnedModel(it->second.GetModelID());
+                it = m_GameObjects.erase(it);
+            }else{
+                ++it;
+            }
         }
     }
 }
 
 void ClearModels()
 {
-    for(auto it = g_ResourceManager.GetModels().begin(); it != g_ResourceManager.GetModels().end();){
-        if(it->first != g_Cube && it->first != g_Sphere){
-            it->second.Unload();
-            it = g_ResourceManager.GetModels().erase(it);
+    for(auto it = GetGameObjects().begin(); it != GetGameObjects().end();){
+        if(!it->second.IsAnimated()){
+            if(it->second.GetModelID() != g_Cube && it->second.GetModelID() != g_Sphere){
+                UnloadModel(it->second.GetModelID());
+                it = GetGameObjects().erase(it);
+            }else{
+                ++it;
+            }
         }else{
-            it->second.ClearTransforms();
-            ++it;
+            if(it->second.GetModelID() != g_Cube && it->second.GetModelID() != g_Sphere){
+                UnloadSkinnedModel(it->second.GetModelID());
+                it = GetGameObjects().erase(it);
+            }else{
+                ++it;
+            }
         }
-    }
-
-    for(auto it = g_ResourceManager.GetSkinnedModels().begin(); it != g_ResourceManager.GetSkinnedModels().end();){
-        it->second.model.Unload();
-        it = g_ResourceManager.GetSkinnedModels().erase(it);
     }
 }
 
@@ -393,5 +434,12 @@ void ResourceManager::UpdateAnimations(float deltaTime)
 {
     for(auto& [id, skinned_model] : m_SkinnedModels){
         skinned_model.animator.Update(deltaTime);
+    }
+}
+
+void ResourceManager::UpdateGameObjects()
+{
+    for(auto& [id, game_object] : m_GameObjects){
+        game_object.Update();
     }
 }

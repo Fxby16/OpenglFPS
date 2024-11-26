@@ -29,20 +29,12 @@ public:
     void Unload();
 
     void SetMeshes(const std::vector<Mesh>& meshes);
-    void SetTransforms(const std::vector<glm::mat4>& transforms);
-    void SetTransform(uint32_t index, const glm::mat4& transform);
-
-    void AddTransform(const glm::mat4& transform);
-    void RemoveTransform(uint32_t index);
 
     void Draw(Shader& shader, glm::mat4 view, glm::mat4 model);
     void DrawShadows(Shader& shader, glm::mat4 light_space_matrix, glm::mat4 model);
     void DrawDepth(Shader& shader, glm::mat4 view, glm::mat4 model);
 
     inline std::vector<Mesh>& GetMeshes() { return m_Meshes; }
-    inline std::vector<glm::mat4>& GetTransforms() { return m_Transforms; }
-    inline glm::mat4& GetTransform(uint32_t index) { return (index < m_Transforms.size()) ? m_Transforms[index] : g_DummyTransform; }
-    inline void ClearTransforms() { m_Transforms.clear(); }
     inline const std::string& GetDirectory() const { return m_Directory; }
     inline bool GetGammaCorrection() { return m_GammaCorrection; }
     inline const std::string& GetPath() const { return m_Path; }
@@ -63,7 +55,6 @@ private:
     std::vector<uint32_t> LoadMaterialTextures(aiMaterial* mat, const aiScene* scene, aiTextureType type, const std::string& typeName);
 
     std::vector<Mesh> m_Meshes;
-    std::vector<glm::mat4> m_Transforms;
     std::unordered_map<std::string, uint32_t> m_LoadedTextures;
     std::string m_Directory;
 

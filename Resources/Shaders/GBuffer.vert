@@ -16,10 +16,10 @@ out vec3 fragNormal;
 out vec3 fragTangent;
 out vec3 fragBinormal;
 
+uniform mat4 finalBonesMatrices[MAX_BONES];
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 finalBonesMatrices[MAX_BONES];
 uniform bool isPlaying;
 
 void main()

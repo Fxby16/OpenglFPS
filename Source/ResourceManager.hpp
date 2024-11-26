@@ -9,6 +9,7 @@
 #include <Shader.hpp>
 #include <Animator.hpp>
 #include <Lights.hpp>
+#include <GameObject.hpp>
 
 extern uint32_t g_Cube;
 extern uint32_t g_Sphere;
@@ -43,6 +44,7 @@ public:
     inline DirectionalLight* GetDirectionalLight(uint32_t id) { return m_DirectionalLights.find(id) != m_DirectionalLights.end() ? &m_DirectionalLights[id] : nullptr; }
     inline PointLight* GetPointLight(uint32_t id) { return m_PointLights.find(id) != m_PointLights.end() ? &m_PointLights[id] : nullptr; }
     inline SpotLight* GetSpotLight(uint32_t id) { return m_SpotLights.find(id) != m_SpotLights.end() ? &m_SpotLights[id] : nullptr; }
+    inline GameObject* GetGameObject(uint32_t id) { return m_GameObjects.find(id) != m_GameObjects.end() ? &m_GameObjects[id] : nullptr; }
 
     uint32_t LoadModel(const std::string& path, bool gamma = false);
     uint32_t LoadModel(const std::vector<Mesh>& meshes, const std::string& model_name, bool gamma = false);
@@ -56,6 +58,8 @@ public:
     uint32_t LoadDirectionalLight(const glm::vec3& direction, const glm::vec3& color);
     uint32_t LoadPointLight(const glm::vec3& position, const glm::vec3& color);
     uint32_t LoadSpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& color, float cutOff, float outerCutOff);
+    uint32_t LoadGameObject(uint32_t model_id, bool animated = false);
+    void LoadGameObject(uint32_t id, uint32_t model_id, bool animated = false);
 
     void UnloadModel(uint32_t id);
     void UnloadSkinnedModel(uint32_t id);
@@ -64,6 +68,7 @@ public:
     void UnloadDirectionalLight(uint32_t id);
     void UnloadPointLight(uint32_t id);
     void UnloadSpotLight(uint32_t id);
+    void UnloadGameObject(uint32_t id);
 
     void UnloadModelsWithoutTransforms();
 
@@ -74,6 +79,7 @@ public:
     inline std::unordered_map<uint32_t, DirectionalLight>& GetDirectionalLights() { return m_DirectionalLights; }
     inline std::unordered_map<uint32_t, PointLight>& GetPointLights() { return m_PointLights; }
     inline std::unordered_map<uint32_t, SpotLight>& GetSpotLights() { return m_SpotLights; }
+    inline std::unordered_map<uint32_t, GameObject>& GetGameObjects() { return m_GameObjects; }
     inline unsigned int GetShadowMapArray() const { return m_ShadowMapArray; }
     inline unsigned int GetCubeShadowMapArray() const { return m_CubeShadowMapArray; }
 
@@ -89,6 +95,7 @@ public:
     void FreeCubeShadowMapArrayIndex(int index);
 
     void UpdateAnimations(float deltaTime);
+    void UpdateGameObjects();
 
 private:
 
@@ -99,6 +106,7 @@ private:
     std::unordered_map<uint32_t, DirectionalLight> m_DirectionalLights;
     std::unordered_map<uint32_t, PointLight> m_PointLights;
     std::unordered_map<uint32_t, SpotLight> m_SpotLights;
+    std::unordered_map<uint32_t, GameObject> m_GameObjects;
 
     unsigned int m_ShadowMapArray, m_CubeShadowMapArray;
     std::unordered_set<int> m_ShadowMapArrayIndices, m_CubeShadowMapArrayIndices;
@@ -115,6 +123,7 @@ inline Shader* GetShader(uint32_t id) { return GetResourceManager().GetShader(id
 inline DirectionalLight* GetDirectionalLight(uint32_t id) { return GetResourceManager().GetDirectionalLight(id); }
 inline PointLight* GetPointLight(uint32_t id) { return GetResourceManager().GetPointLight(id); }
 inline SpotLight* GetSpotLight(uint32_t id) { return GetResourceManager().GetSpotLight(id); }
+inline GameObject* GetGameObject(uint32_t id) { return GetResourceManager().GetGameObject(id); }
 
 extern uint32_t g_GBufferShader, g_DeferredShader, g_ShadowMapShader, g_PointLightShadowMapShader;
 inline Shader& GetGBufferShader() { return *GetShader(g_GBufferShader); }
@@ -134,6 +143,8 @@ inline uint32_t LoadShader(const std::string& vertex_path, const std::string& fr
 inline uint32_t LoadDirectionalLight(const glm::vec3& direction, const glm::vec3& color){ return GetResourceManager().LoadDirectionalLight(direction, color); }
 inline uint32_t LoadPointLight(const glm::vec3& position, const glm::vec3& color){ return GetResourceManager().LoadPointLight(position, color); }
 inline uint32_t LoadSpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& color, float cutOff, float outerCutOff){ return GetResourceManager().LoadSpotLight(position, direction, color, cutOff, outerCutOff); }
+inline uint32_t LoadGameObject(uint32_t model_id, bool animated = false){ return GetResourceManager().LoadGameObject(model_id, animated); }
+inline void LoadGameObject(uint32_t id, uint32_t model_id, bool animated = false){ GetResourceManager().LoadGameObject(id, model_id, animated); }
 
 inline void UnloadModel(uint32_t id){ GetResourceManager().UnloadModel(id); }
 inline void UnloadSkinnedModel(uint32_t id){ GetResourceManager().UnloadSkinnedModel(id); }
@@ -142,6 +153,7 @@ inline void UnloadShader(uint32_t id){ GetResourceManager().UnloadShader(id); }
 inline void UnloadDirectionalLight(uint32_t id){ GetResourceManager().UnloadDirectionalLight(id); }
 inline void UnloadPointLight(uint32_t id){ GetResourceManager().UnloadPointLight(id); }
 inline void UnloadSpotLight(uint32_t id){ GetResourceManager().UnloadSpotLight(id); }
+inline void UnloadGameObject(uint32_t id){ GetResourceManager().UnloadGameObject(id); }
 
 inline void UnloadModelsWithoutTransforms(){ GetResourceManager().UnloadModelsWithoutTransforms(); }
 
@@ -152,6 +164,7 @@ inline std::unordered_map<uint32_t, Shader>& GetShaders() { return GetResourceMa
 inline std::unordered_map<uint32_t, DirectionalLight>& GetDirectionalLights() { return GetResourceManager().GetDirectionalLights(); }
 inline std::unordered_map<uint32_t, PointLight>& GetPointLights() { return GetResourceManager().GetPointLights(); }
 inline std::unordered_map<uint32_t, SpotLight>& GetSpotLights() { return GetResourceManager().GetSpotLights(); }
+inline std::unordered_map<uint32_t, GameObject>& GetGameObjects() { return GetResourceManager().GetGameObjects(); }
 inline unsigned int GetShadowMapArray() { return GetResourceManager().GetShadowMapArray(); }
 inline unsigned int GetCubeShadowMapArray() { return GetResourceManager().GetCubeShadowMapArray(); }
 
@@ -168,3 +181,4 @@ inline void FreeShadowMapArrayIndex(int index) { GetResourceManager().FreeShadow
 inline void FreeCubeShadowMapArrayIndex(int index) { GetResourceManager().FreeCubeShadowMapArrayIndex(index); }
 
 inline void UpdateAnimations(float deltaTime) { GetResourceManager().UpdateAnimations(deltaTime); }
+inline void UpdateGameObjects() { GetResourceManager().UpdateGameObjects(); }

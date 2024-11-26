@@ -1,0 +1,11 @@
+Model Information:
+* title:	G19 Pistol, Game Ready, Free version
+* source:	https://sketchfab.com/3d-models/g19-pistol-game-ready-free-version-e3412d9803f04bdaa97ad9b68ed665d7
+* author:	Rotuma (https://sketchfab.com/Rotuma)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "G19 Pistol, Game Ready, Free version" (https://sketchfab.com/3d-models/g19-pistol-game-ready-free-version-e3412d9803f04bdaa97ad9b68ed665d7) by Rotuma (https://sketchfab.com/Rotuma) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

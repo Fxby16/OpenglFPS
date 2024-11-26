@@ -12,15 +12,22 @@ project "OpenglFPS"
     files { "Source/**", "Vendor/glad/src/glad.c" }
 
     includedirs { "Source", "Vendor", "Vendor/assimp/include", "Vendor/assimp/build/include", "Vendor/glfw/include", "Vendor/stb",
-                  "Vendor/glad/include", "Vendor/glm/glm", "Vendor/freetype/include",
+                  "Vendor/glad/include", "Vendor/glm/glm", "Vendor/freetype/include", "Vendor/joltphysics/Jolt", "Vendor/joltphysics",
                   "Vendor/json/single_include/nlohmann", "Vendor/imgui", "Vendor/imgui/backends",
                   "Vendor/imguizmo", "Vendor/nativefiledialog/src", "Vendor/nativefiledialog/src/include" }
 
 	filter "system:linux"
-		libdirs { "Vendor/assimp/build/lib", "Vendor/glfw/build/src", "Vendor/freetype/objs/x64/Release Static",
-                  "Vendor/imgui/build/Release", "Vendor/nativefiledialog/build/lib/Release/x64" }
+        filter "configurations:Debug"
+            libdirs { "Vendor/assimp/build/lib", "Vendor/glfw/build/src", "Vendor/freetype/objs/x64/Release Static",
+                    "Vendor/imgui/build/Release", "Vendor/nativefiledialog/build/lib/Release/x64", "Vendor/joltphysics/Build/Linux_Debug" }
 
-		links { "glfw3", "assimp", "z", "minizip", "freetype", "ImGui", "nfd", "gtk-3", "glib-2.0" }
+            links { "glfw3", "assimp", "z", "minizip", "freetype", "ImGui", "nfd", "gtk-3", "glib-2.0", "Jolt" }
+
+        filter "configurations:Release"
+            libdirs { "Vendor/assimp/build/lib", "Vendor/glfw/build/src", "Vendor/freetype/objs/x64/Release Static",
+                    "Vendor/imgui/build/Release", "Vendor/nativefiledialog/build/lib/Release/x64", "Vendor/joltphysics/Build/Linux_Release" }
+
+            links { "glfw3", "assimp", "z", "minizip", "freetype", "ImGui", "nfd", "gtk-3", "glib-2.0", "Jolt" }
 
 	filter "system:windows"
 		libdirs { "Vendor/assimp/build/lib/Release", "Vendor/glfw/build/src/Release", "Vendor/freetype/objs",
@@ -34,10 +41,11 @@ filter "configurations:Debug"
     symbols "On"
     buildoptions { "-Wall", "-fsanitize=address" }
     linkoptions { "-fsanitize=address" }
-    defines { "DEBUG", "GLFW_INCLUDE_NONE" }
+    buildoptions { "-Wall" }
+    defines { "DEBUG", "GLFW_INCLUDE_NONE", "JPH_ENABLE_ASSERTS", "GLM_ENABLE_EXPERIMENTAL" }
 
 filter "configurations:Release"
     optimize "Full"
     symbols "Off"
     buildoptions { "-Wall" }
-    defines { "NDEBUG", "GLFW_INCLUDE_NONE" }
+    defines { "NDEBUG", "GLFW_INCLUDE_NONE", "GLM_ENABLE_EXPERIMENTAL", "LOGS_ENABLED" }

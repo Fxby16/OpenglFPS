@@ -27,6 +27,7 @@
 #include <MousePicking.hpp>
 #include <Skydome.hpp>
 #include <SettingsMenu.hpp>
+#include <Physics.hpp>
 
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -80,20 +81,40 @@ void Application::Run()
     double deltaTime = 0.0;
     double lastTime = GetTime();
 
+    JPH::BodyID body = CreateSphereShape(glm::vec3(3.0f), 1.0f, Layers::MOVING); 
+    GetGameObject(g_Sphere)->AddInstance(GameObjectTransform(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f))), body);
+    ApplyForce(body, glm::vec3(0.0f, -1.0f, 0.0f));
+
     ShouldDisplayTimers(true);
+    GetPhysicsSystem().OptimizeBroadPhase();
 
     while(!WindowShouldClose()){
         double currentFrameTime = GetTime();
         deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
+        printf("Last frame time: %lf\n", deltaTime);
+
+        PollEvents();
+        HandleInputs(deltaTime);
+
+        if(deltaTime > 0.25) deltaTime = 0.25;
+
+        g_Accumulator += deltaTime;
+        while(g_Accumulator >= PHYSICS_TIMESTEP){
+            printf("Accumulator: %lf\n", g_Accumulator);
+            GetPhysicsSystem().Update(PHYSICS_TIMESTEP, 1, &GetTempAllocator(), &GetJobSystem());
+            printf("Physics updated\n");
+            UpdateGameObjects();
+            g_Accumulator -= PHYSICS_TIMESTEP;
+        }
+
+        g_Alpha = g_Accumulator / PHYSICS_TIMESTEP;
+
         if(GetTime() - lastTime >= 1.0){
             lastTime = GetTime();
             ShouldDisplayTimers(true);
         }
-
-        PollEvents();
-        HandleInputs(deltaTime);
 
         constexpr uint32_t saiga_id = 2398989031;
         SkinnedModel* saiga = GetSkinnedModel(saiga_id);
@@ -147,8 +168,6 @@ void Application::Run()
         timer2.PrintTime();
 
         Timer timer3("SHADOW_MAPPING");
-
-        GetDeferredShader().Bind();
 
         DrawShadowMaps();
         SetShadowMaps();
@@ -275,18 +294,21 @@ void Application::DrawBoundingBoxes()
 {
     DisableDepthTest();
 
-    auto& Models = GetModels();
+    auto& gameObjects = GetGameObjects();
 
-    for(auto& [id, model] : Models){
-        auto& transforms = model.GetTransforms();
+    for(auto& [id, GameObject] : gameObjects){
+        auto& transforms = GameObject.GetTransforms();
+
+        Model* model = GetModel(id);
+        SkinnedModel* skinnedModel = GetSkinnedModel(id);
 
         for(uint32_t i = 0; i < transforms.size(); i++){
-            auto& meshes = model.GetMeshes();
+            auto& meshes = model ? model->GetMeshes() : skinnedModel->model.GetMeshes();
             auto& transform = transforms[i];
 
             for(auto &mesh : meshes){
                 AABB bb = mesh.GetAABB();
-                OBB obb = OBBFromAABB(bb, transform); //use the OBB so you can rotate the model
+                OBB obb = OBBFromAABB(bb, GameObjectTransform::Interpolate(transform.first, transform.second, g_Alpha).GetMatrix()); //use the OBB so you can rotate the model
 
                 glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -342,7 +364,13 @@ void Application::EditMode()
     ImGuizmo::BeginFrame();
 
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ImGui::GetIO().WantCaptureMouse){
-        m_SelectedModel = GetSelectedModel(GetMousePosition());
+        std::pair<uint32_t, unsigned int> new_val = GetSelectedModel(GetMousePosition());
+
+        if((new_val.first != m_SelectedModel.model_id) || (new_val.second != m_SelectedModel.transform_index)){
+            m_SelectedModelChanged = true;
+        }
+
+        m_SelectedModel = new_val;
     }
 
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
@@ -358,27 +386,21 @@ void Application::EditMode()
     ImGui::Begin("Menu");
     ImGui::SetWindowSize(ImVec2(0, 0));
 
-    Model* selected_model = nullptr;
-    selected_model = GetModel(m_SelectedModel.model_id);
-    if(!selected_model){
-        SkinnedModel* skinned_model = GetSkinnedModel(m_SelectedModel.model_id);
-        if(skinned_model){
-            selected_model = &skinned_model->model;
-        }
-    }
+    GameObject* selected_model = nullptr;
+    selected_model = GetGameObject(m_SelectedModel.model_id);
 
     if(ImGui::Button("Delete Selected") && m_SelectedModel.model_id != std::numeric_limits<uint32_t>::max()){
-        selected_model->RemoveTransform(m_SelectedModel.transform_index);
+        selected_model->RemoveInstance(m_SelectedModel.transform_index);
         UnloadModelsWithoutTransforms();
         m_SelectedModel.model_id = std::numeric_limits<uint32_t>::max();
     }
 
     if(ImGui::Button("Add Cube")){
-        GetModel(g_Cube)->AddTransform(glm::mat4(1.0f));
+        GetGameObject(g_Cube)->AddInstance(GameObjectTransform(), CreateBoxShape(glm::vec3(0.5f), glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), Layers::NON_MOVING));
     }
 
     if(ImGui::Button("Add Sphere")){
-        GetModel(g_Sphere)->AddTransform(glm::mat4(1.0f));
+        GetGameObject(g_Sphere)->AddInstance(GameObjectTransform(), CreateSphereShape(glm::vec3(0.0f), 0.5f, Layers::NON_MOVING));
     }
 
     if(ImGui::Button("Load Model")){
@@ -389,7 +411,7 @@ void Application::EditMode()
         ImGui::OpenPopup("Load Animated Model");
     }
 
-    if(ImGui::Button("Add Animation") && GetSkinnedModel(m_SelectedModel.model_id) != nullptr){
+    if(ImGui::Button("Add Animation") && selected_model != nullptr){
         ImGui::OpenPopup("Add Animation");
     }
 
@@ -407,8 +429,8 @@ void Application::EditMode()
         }
 
         if(ImGui::Button("Load")){
-            uint32_t id = LoadModel(model_path);
-            GetModel(id)->AddTransform(glm::mat4(1.0f));
+            uint32_t id = LoadGameObject(LoadModel(model_path));
+            GetGameObject(id)->AddInstance(GameObjectTransform(), CreateBoxShape(glm::vec3(0.5f), glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), Layers::NON_MOVING));
         }
 
         ImGui::EndPopup();
@@ -443,7 +465,8 @@ void Application::EditMode()
 
         if(ImGui::Button("Load")){
             uint32_t id = LoadSkinnedModel(model_path, animation_path, ticks_per_second);
-            GetSkinnedModel(id)->model.AddTransform(glm::mat4(1.0f));
+            uint32_t go_id = LoadGameObject(id, true);
+            GetGameObject(go_id)->AddInstance(GameObjectTransform(), CreateBoxShape(glm::vec3(0.5f), glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), Layers::NON_MOVING));
         }
 
         ImGui::EndPopup();
@@ -466,7 +489,7 @@ void Application::EditMode()
         ImGui::InputFloat("Ticks Per Second", &ticks_per_second);
 
         if(ImGui::Button("Add")){
-            GetSkinnedModel(m_SelectedModel.model_id)->AddAnimation(animation_path, ticks_per_second);
+            GetSkinnedModel(selected_model->GetModelID())->AddAnimation(animation_path, ticks_per_second);
         }
 
         ImGui::EndPopup();
@@ -518,11 +541,19 @@ void Application::EditMode()
     }
 
     float translation[3], rotation[3], scale[3];
+
     if(m_SelectedModel.model_id != std::numeric_limits<uint32_t>::max()){
+        static glm::mat4 to_manipulate = glm::mat4(1.0f);
+
+        if(m_SelectedModelChanged){
+            m_SelectedModelChanged = false;
+            to_manipulate = selected_model->GetTransform(m_SelectedModel.transform_index);
+        }
+
         ImGuizmo::SetRect(0, 0, g_ScreenWidth, g_ScreenHeight);
-        ImGuizmo::Manipulate(glm::value_ptr(GetCamera().GetViewMatrix()), glm::value_ptr(GetCamera().GetProjectionMatrix()), m_GizmoMode, ImGuizmo::MODE::WORLD, glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)));
+        ImGuizmo::Manipulate(glm::value_ptr(GetCamera().GetViewMatrix()), glm::value_ptr(GetCamera().GetProjectionMatrix()), m_GizmoMode, ImGuizmo::MODE::WORLD, &(to_manipulate[0].x));
         
-        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)), translation, rotation, scale);
+        ImGuizmo::DecomposeMatrixToComponents(&(to_manipulate[0].x), translation, rotation, scale);
 
         ImGui::Text("Translation");
         ImGui::SameLine();
@@ -536,7 +567,12 @@ void Application::EditMode()
         ImGui::SameLine();
         ImGui::InputFloat3("##scale", scale);
 
-        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, glm::value_ptr(selected_model->GetTransform(m_SelectedModel.transform_index)));
+        //ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, &(selected_model->GetTransform(m_SelectedModel.transform_index)[0].x));
+        selected_model->SetPosition(glm::vec3(translation[0], translation[1], translation[2]), m_SelectedModel.transform_index);
+        selected_model->SetRotation(glm::vec3(glm::radians(rotation[0]), glm::radians(rotation[1]), glm::radians(rotation[2])), m_SelectedModel.transform_index);
+        selected_model->SetScale(glm::vec3(scale[0], scale[1], scale[2]), m_SelectedModel.transform_index);
+    }else{
+        m_SelectedModelChanged = true;
     }
 
     ImGui::End();

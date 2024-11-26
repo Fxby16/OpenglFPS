@@ -15,8 +15,6 @@
 static std::deque<std::string>* g_Logs = nullptr;
 static std::mutex* g_LogsMutex = nullptr;
 
-glm::mat4 g_DummyTransform = glm::mat4(1.0f);
-
 void Model::Load(const std::string& path, bool gamma)
 {
     m_Path = path;
@@ -65,39 +63,12 @@ void Model::Unload()
     }
 
     m_Meshes.clear();
-    m_Transforms.clear();
     m_LoadedTextures.clear();
 }
 
 void Model::SetMeshes(const std::vector<Mesh>& meshes)
 {
     m_Meshes = meshes;
-}
-
-void Model::SetTransforms(const std::vector<glm::mat4>& transforms)
-{
-    m_Transforms = transforms;
-}
-
-void Model::SetTransform(uint32_t index, const glm::mat4& transform)
-{
-    while(m_Transforms.size() <= index){
-        m_Transforms.push_back(glm::mat4(1.0f));
-    }
-
-    m_Transforms[index] = transform;
-}
-
-void Model::AddTransform(const glm::mat4& transform)
-{
-    m_Transforms.push_back(transform);
-}
-
-void Model::RemoveTransform(uint32_t index)
-{
-    if(index < m_Transforms.size()){
-        m_Transforms.erase(m_Transforms.begin() + index);
-    }
 }
 
 void Model::Draw(Shader& shader, glm::mat4 view, glm::mat4 model)

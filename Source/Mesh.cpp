@@ -24,8 +24,8 @@ void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsig
 
     m_GPUBuffer.Init(vertices.size(), sizeof(Vertex), indices.size());
 
-    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
     m_GPUBuffer.SetIndices(indices.data(), indices.size());
+    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
 
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
@@ -43,8 +43,8 @@ void Mesh::InitMesh(const std::vector<Vertex>& vertices, const std::vector<unsig
 
     m_GPUBuffer.Init(vertices.size(), sizeof(Vertex), indices.size());
 
-    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
     m_GPUBuffer.SetIndices(indices.data(), indices.size());
+    m_GPUBuffer.SetData(0, (void*)vertices.data(), vertices.size(), sizeof(Vertex));
 
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));
     m_GPUBuffer.AddAttribute(3, GL_FLOAT, sizeof(Vertex));

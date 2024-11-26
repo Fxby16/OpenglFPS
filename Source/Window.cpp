@@ -12,6 +12,7 @@
 #include <Timer.hpp>
 #include <MousePicking.hpp>
 #include <Random.hpp>
+#include <Physics.hpp>
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -83,6 +84,7 @@ int InitWindow(unsigned int width, unsigned int height, const char* title)
     InitBloom();
     InitPostProcessing();
     InitMousePicking();
+    InitPhysics();
 
     g_GBufferShader = LoadShader("Resources/Shaders/GBuffer.vert",
                                  "Resources/Shaders/GBuffer.frag");
@@ -130,6 +132,7 @@ void CloseWindow()
     DeinitMousePicking();
     FreeRemainingTimers();
     ClearLogs();
+    DeinitPhysics();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
